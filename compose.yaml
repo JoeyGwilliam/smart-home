@@ -1,0 +1,25 @@
+# The home server setup. From the repo root:
+#   Start:  docker compose up -d --build
+#   Stop:   docker compose down
+#   Status: docker compose ps
+#   Logs:   docker compose logs -f
+#
+# For development, see compose.dev.yaml.
+
+name: smart-home
+
+services:
+  reminders-api:
+    build: ./apps/api/reminders_api
+    restart: unless-stopped
+    environment:
+      REMINDERS_DATABASE_PATH: /data/reminders.db
+    ports:
+      # The API has no login, so it is only reachable from this machine by default. To let other devices reach it, set
+      # REMINDERS_API_BIND_ADDRESS to this machine's LAN address in a git-ignored .env file next to this one.
+      - "${REMINDERS_API_BIND_ADDRESS:-127.0.0.1}:8000:8000"
+    volumes:
+      - reminders-data:/data
+
+volumes:
+  reminders-data:

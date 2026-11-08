@@ -1,0 +1,17 @@
+# Development settings, layered on top of compose.yaml. From the repo root:
+#   Start: docker compose -f compose.yaml -f compose.dev.yaml up --build
+#   Stop:  Ctrl+C, then docker compose -f compose.yaml -f compose.dev.yaml down
+#
+# This is a separate file, rather than an automatically loaded compose.override.yaml, so that the home server can never
+# pick up these settings by accident.
+
+services:
+  reminders-api:
+    restart: "no"
+    # Windows file changes don't reach containers as events, so the reloader has to poll for them.
+    command: uvicorn reminders_api.api.create_app:create_app_from_environment --factory --host 0.0.0.0 --port 8000 --reload --reload-dir /app/src
+    environment:
+      WATCHFILES_FORCE_POLLING: "true"
+    volumes:
+      - ./apps/api/reminders_api/src:/app/src
+      - ./.eggs/reminders_api:/data

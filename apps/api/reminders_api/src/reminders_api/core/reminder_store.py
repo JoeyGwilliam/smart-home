@@ -12,22 +12,22 @@ from .reminder import Reminder
 
 
 class ReminderStore:
-    """ A store of reminders. """
+    """ A store of reminders in a SQLite database. """
 
     def __init__(self, database_path: Path) -> None:
-        """ Opens the reminder database, creating it and any missing parent directories if needed.
+        """ Connects to a reminder database, creating the file and its table if they don't exist.
 
         Args:
             database_path:
-                Location of the SQLite database file.
+                Location of the SQLite database file. Its directory must exist.
+
+        Raises:
+            sqlalchemy.exc.OperationalError: If the database file cannot be opened.
         """
-        database_path.parent.mkdir(parents=True, exist_ok=True)
+        # Create a model of the SQL database, with the SQLAlchemy tables
         url = URL.create("sqlite", database=str(database_path))
         engine = create_engine(url, poolclass=NullPool)
-
-        # TACTICAL HACK: create_all() adds missing tables but never alters existing ones, so changing a column
-        # would leave existing databases out of date. The proper solution is Alembic migrations.
-        _Base.metadata.create_all(engine)
+        _ReminderDBBase.metadata.create_all(engine)
 
         self._begin_session = sessionmaker(engine).begin
 
@@ -78,7 +78,6 @@ class ReminderStore:
 
 class _UtcDateTime(TypeDecorator[datetime]):
     """ A timezone-aware datetime, stored as naive UTC because SQLite cannot store time zones."""
-
     impl = DateTime
     cache_ok = True
 
@@ -89,13 +88,12 @@ class _UtcDateTime(TypeDecorator[datetime]):
         return value.replace(tzinfo=UTC) if value else None
 
 
-class _Base(DeclarativeBase):
+class _ReminderDBBase(DeclarativeBase):
     pass
 
 
-class _ReminderRow(_Base):
+class _ReminderRow(_ReminderDBBase):
     """The database representation of a Reminder."""
-
     __tablename__ = "reminders"
 
     id: Mapped[UUID] = mapped_column(primary_key=True)
