@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+
+{% block title %}Edit reminder{% endblock %}
+
+{% block content %}
+  <section class="notice notice--form">
+    <h1>Edit reminder</h1>
+    <form class="edit-form" method="post" action="/reminders/{{ reminder_id }}/edit">
+      {% if has_invalid_reminder %}
+        <p class="add-form__error" role="alert">Those changes couldn't be saved. Check the title and the due time.</p>
+      {% endif %}
+      <label class="edit-form__label">
+        Title
+        <input class="field" type="text" name="title" value="{{ title }}" required>
+      </label>
+      <label class="edit-form__label">
+        Notes
+        <input class="field" type="text" name="notes" value="{{ notes }}" placeholder="Optional">
+      </label>
+      <label class="edit-form__label">
+        Due time
+        <input class="field" type="datetime-local" name="due_at" value="{{ due_at }}">
+      </label>
+      <div class="notice__actions">
+        <a class="button" href="/">Cancel</a>
+        <button class="button button--primary" type="submit">Save</button>
+      </div>
+    </form>
+  </section>
+{% endblock %}

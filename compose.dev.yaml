@@ -15,3 +15,11 @@ services:
     volumes:
       - ./apps/api/reminders_api/src:/app/src
       - ./.eggs/reminders_api:/data
+
+  kiosk-viewer:
+    restart: "no"
+    command: uvicorn kiosk_viewer_python.create_app:create_app_from_environment --factory --host 0.0.0.0 --port 8080 --reload --reload-dir /app/src
+    environment:
+      WATCHFILES_FORCE_POLLING: "true"
+    volumes:
+      - ./apps/kiosk_viewer_python/src:/app/src

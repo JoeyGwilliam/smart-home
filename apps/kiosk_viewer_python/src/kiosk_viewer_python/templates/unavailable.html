@@ -1,0 +1,13 @@
+{% extends "base.html" %}
+
+{% block title %}Reminders unavailable{% endblock %}
+
+{% block content %}
+  <section class="notice">
+    <h1>Can't reach your reminders</h1>
+    <p class="notice__text">The reminders service isn't responding. Your reminders are safe, so try again in a moment.</p>
+    <div class="notice__actions">
+      <a class="button button--primary" href="/">Try again</a>
+    </div>
+  </section>
+{% endblock %}
