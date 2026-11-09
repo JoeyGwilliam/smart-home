@@ -33,6 +33,9 @@
     --color-mint: var(--mint);
     --color-sky: var(--sky);
     --color-lavender: var(--lavender);
+    --color-primary-text: var(--primary-text);
+    --color-field: var(--field);
+    --color-glass-edge: var(--glass-edge);
     --radius-sm: calc(var(--radius) * 0.6);
     --radius-md: calc(var(--radius) * 0.8);
     --radius-lg: var(--radius);
@@ -64,12 +67,57 @@
     --ring: oklch(0.78 0.11 355);
     --radius: 0.875rem;
 
-    /* Highlights for how pressing a reminder is. */
+    /* The primary pink, adjusted to be readable as text on the background. */
+    --primary-text: oklch(0.58 0.12 355);
+    /* Behind text fields and other inset surfaces. */
+    --field: oklch(1 0 0 / 70%);
+    /* The bright rim that makes a frosted card catch the light. */
+    --glass-edge: oklch(1 0 0 / 80%);
+    /* How strongly the drifting colour shows through behind the page. */
+    --backdrop-opacity: 1;
+
+    /* Highlights for how pressing a reminder is. They stay light in both schemes, so dark text always sits on them. */
     --peach: oklch(0.88 0.075 45);
     --butter: oklch(0.94 0.08 95);
     --mint: oklch(0.92 0.06 165);
     --sky: oklch(0.91 0.05 235);
     --lavender: oklch(0.9 0.055 300);
+}
+
+/*
+ * Night mode: the same pastel pink on a deep plum, like the sky just after sunset. The pink stays the brightest colour on
+ * the screen, and the highlights are dimmed a little so that they glow rather than glare.
+ */
+.dark {
+    --background: oklch(0.19 0.035 335);
+    --foreground: oklch(0.93 0.025 350);
+    --card: oklch(0.26 0.045 335 / 65%);
+    --card-foreground: var(--foreground);
+    --popover: oklch(0.24 0.045 335);
+    --popover-foreground: var(--foreground);
+    --primary: oklch(0.8 0.11 355);
+    --primary-foreground: oklch(0.25 0.07 345);
+    --secondary: oklch(0.33 0.06 305);
+    --secondary-foreground: oklch(0.9 0.05 305);
+    --muted: oklch(0.27 0.035 335);
+    --muted-foreground: oklch(0.74 0.045 345);
+    --accent: oklch(0.32 0.055 350);
+    --accent-foreground: var(--foreground);
+    --destructive: oklch(0.7 0.15 15);
+    --border: oklch(0.36 0.05 340);
+    --input: oklch(0.4 0.055 340);
+    --ring: oklch(0.75 0.12 355);
+
+    --primary-text: oklch(0.82 0.1 355);
+    --field: oklch(0.17 0.03 335 / 55%);
+    --glass-edge: oklch(1 0 0 / 9%);
+    --backdrop-opacity: 0.4;
+
+    --peach: oklch(0.8 0.08 45);
+    --butter: oklch(0.86 0.08 95);
+    --mint: oklch(0.82 0.07 165);
+    --sky: oklch(0.82 0.06 235);
+    --lavender: oklch(0.72 0.07 300);
 }
 
 @layer base {
@@ -115,4 +163,24 @@
     .animate-drift {
         animation: none;
     }
+}
+
+/*
+ * Switching colour scheme reveals the new one as a circle growing from the settings button in the top right corner.
+ * SettingsMenu starts the view transition; these rules replace the browser's default crossfade. The centre is the middle
+ * of the button as App places it: 1rem from the corner, plus half of its 2.25rem size.
+ */
+::view-transition-old(root),
+::view-transition-new(root) {
+    animation: none;
+    mix-blend-mode: normal;
+}
+
+::view-transition-new(root) {
+    animation: reveal-from-settings 0.7s ease-in-out;
+}
+
+@keyframes reveal-from-settings {
+    from { clip-path: circle(0 at calc(100% - 2.125rem) 2.125rem); }
+    to { clip-path: circle(150vmax at calc(100% - 2.125rem) 2.125rem); }
 }

@@ -21,7 +21,7 @@ interface DeleteReminderDialogProps {
 export function DeleteReminderDialog({ reminderTitle, isOpen, onOpenChange, onConfirm }: DeleteReminderDialogProps) {
   return (
     <AlertDialog open={isOpen} onOpenChange={onOpenChange}>
-      <AlertDialogContent className="rounded-4xl border border-white/80 bg-popover/95 p-6 shadow-2xl shadow-primary/25 backdrop-blur-xl">
+      <AlertDialogContent className="rounded-4xl border border-glass-edge bg-popover/95 p-6 shadow-2xl shadow-primary/25 backdrop-blur-xl">
         <AlertDialogHeader>
           <AlertDialogTitle className="text-2xl font-semibold">Delete this reminder?</AlertDialogTitle>
           <AlertDialogDescription className="text-base">

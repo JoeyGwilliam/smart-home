@@ -53,9 +53,9 @@ export function DueTimePicker({ value, onChange }: DueTimePickerProps) {
           <Button
             type="button"
             variant="outline"
-            className="h-10 rounded-full border-input bg-white/70 px-4 text-sm font-semibold text-foreground hover:bg-accent"
+            className="h-10 rounded-full border-input bg-field px-4 text-sm font-semibold text-foreground hover:bg-accent"
           >
-            <CalendarHeart className="text-primary-foreground/70" />
+            <CalendarHeart className="text-primary-text" />
             {value ? format(value, 'EEE d MMM, HH:mm') : 'Add a due time'}
           </Button>
         </PopoverTrigger>
@@ -85,7 +85,7 @@ export function DueTimePicker({ value, onChange }: DueTimePickerProps) {
               type="time"
               value={value ? format(value, 'HH:mm') : ''}
               onChange={(event) => chooseTime(event.target.value)}
-              className="h-9 w-32 rounded-full bg-white/80 text-center"
+              className="h-9 w-32 rounded-full bg-field text-center"
             />
           </label>
         </PopoverContent>

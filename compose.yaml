@@ -21,7 +21,6 @@ services:
     volumes:
       - reminders-data:/data
 
-  # Runs beside kiosk-viewer until it can replace it, so it uses the next port up.
   kiosk-viewer-web:
     build: ./apps/kiosk_viewer_web
     restart: unless-stopped
@@ -29,7 +28,8 @@ services:
       reminders-api:
         condition: service_healthy
     ports:
-      # Shares KIOSK_VIEWER_BIND_ADDRESS with the old viewer, since both serve the same people.
+      # Like the API, the viewer has no login, so the same advice applies. Set KIOSK_VIEWER_BIND_ADDRESS to let other
+      # devices reach it.
       - "${KIOSK_VIEWER_BIND_ADDRESS:-127.0.0.1}:8080:8080"
 
 volumes:

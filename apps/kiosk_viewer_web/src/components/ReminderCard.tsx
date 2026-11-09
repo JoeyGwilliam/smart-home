@@ -49,7 +49,7 @@ export function ReminderCard({ reminder, now }: ReminderCardProps) {
   return (
     <article
       className={cn(
-        'group flex items-center gap-4 rounded-3xl border border-white/80 bg-card p-4 shadow-md shadow-primary/10 backdrop-blur-xl transition-[box-shadow,opacity] hover:shadow-lg hover:shadow-primary/20',
+        'group flex items-center gap-4 rounded-3xl border border-glass-edge bg-card p-4 shadow-md shadow-primary/10 backdrop-blur-xl transition-[box-shadow,opacity] hover:shadow-lg hover:shadow-primary/20',
         urgency === 'overdue' && 'ring-2 ring-peach',
         isCompleted && 'opacity-70',
       )}

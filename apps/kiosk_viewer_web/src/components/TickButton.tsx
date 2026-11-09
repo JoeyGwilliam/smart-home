@@ -52,7 +52,7 @@ export function TickButton({ isCompleted, onToggle, reminderTitle }: TickButtonP
       <motion.span
         className="absolute inset-0 rounded-full border-[2.5px]"
         animate={{
-          backgroundColor: isTicked ? 'var(--mint)' : 'rgba(255, 255, 255, 0.6)',
+          backgroundColor: isTicked ? 'var(--mint)' : 'var(--field)',
           borderColor: isTicked ? 'oklch(0.75 0.09 165)' : 'var(--primary)',
           scale: isCelebrating ? [1, 1.25, 1] : 1,
         }}

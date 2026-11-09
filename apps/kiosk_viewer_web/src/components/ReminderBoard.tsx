@@ -48,7 +48,7 @@ function Header({ now, reminders, isOffline }: HeaderProps) {
 
   return (
     <motion.header initial={{ opacity: 0, y: -12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}>
-      <p className="text-sm font-extrabold tracking-[0.2em] text-primary-foreground/60 uppercase">{greet(now)}</p>
+      <p className="text-sm font-extrabold tracking-[0.2em] text-primary-text uppercase">{greet(now)}</p>
       <h1 className="mt-1 text-5xl leading-[1.05] font-semibold tracking-tight sm:text-6xl">{format(now, 'EEEE d MMMM')}</h1>
       <div className="mt-3 flex min-h-7 flex-wrap items-center gap-2">
         {reminders && (
@@ -60,7 +60,7 @@ function Header({ now, reminders, isOffline }: HeaderProps) {
         <AnimatePresence>
           {isOffline && reminders && (
             <motion.span initial={{ opacity: 0, scale: 0.8 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.8 }}>
-              <Pill className="bg-white/70 text-muted-foreground">
+              <Pill className="bg-field text-muted-foreground">
                 <CloudOff className="size-3.5" />
                 Reconnecting…
               </Pill>
@@ -138,7 +138,7 @@ function AnimatedItem({ children, ref }: { children: ReactNode; ref?: Ref<HTMLDi
 
 function EmptyState() {
   return (
-    <div className="grid place-items-center gap-3 rounded-3xl border border-dashed border-primary/50 bg-white/40 px-6 py-12 text-center">
+    <div className="grid place-items-center gap-3 rounded-3xl border border-dashed border-primary/50 bg-field/50 px-6 py-12 text-center">
       <motion.span
         className="grid size-16 place-items-center rounded-full bg-primary/60 text-primary-foreground"
         animate={{ y: [0, -6, 0], rotate: [0, 8, 0] }}
@@ -157,7 +157,7 @@ function UnavailableNotice({ onRetry }: { onRetry: () => void }) {
     <motion.div
       initial={{ opacity: 0, y: 16 }}
       animate={{ opacity: 1, y: 0 }}
-      className="grid place-items-center gap-3 rounded-3xl border border-white/80 bg-card px-6 py-12 text-center shadow-md shadow-primary/10 backdrop-blur-xl"
+      className="grid place-items-center gap-3 rounded-3xl border border-glass-edge bg-card px-6 py-12 text-center shadow-md shadow-primary/10 backdrop-blur-xl"
     >
       <motion.span
         className="grid size-16 place-items-center rounded-full bg-lavender text-secondary-foreground"
@@ -181,7 +181,7 @@ function LoadingCards() {
       {[0, 1, 2].map((index) => (
         <motion.div
           key={index}
-          className="h-22 rounded-3xl bg-white/60"
+          className="h-22 rounded-3xl bg-field"
           animate={{ opacity: [0.5, 1, 0.5] }}
           transition={{ duration: 1.6, repeat: Infinity, delay: index * 0.15 }}
         />

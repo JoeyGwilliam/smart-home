@@ -18,7 +18,7 @@ interface EditReminderDialogProps {
 export function EditReminderDialog({ reminder, isOpen, onOpenChange }: EditReminderDialogProps) {
   return (
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
-      <DialogContent className="rounded-4xl border border-white/80 bg-popover/95 p-6 shadow-2xl shadow-primary/25 backdrop-blur-xl sm:max-w-md">
+      <DialogContent className="rounded-4xl border border-glass-edge bg-popover/95 p-6 shadow-2xl shadow-primary/25 backdrop-blur-xl sm:max-w-md">
         {/* The form only exists while the dialog is open, so each opening starts from the reminder as it is now. */}
         <EditReminderForm reminder={reminder} onSaved={() => onOpenChange(false)} />
       </DialogContent>
@@ -61,7 +61,7 @@ function EditReminderForm({ reminder, onSaved }: EditReminderFormProps) {
           value={draft.title}
           onChange={(event) => setDraft({ ...draft, title: event.target.value })}
           aria-label="Title"
-          className="h-12 rounded-2xl border-input bg-white/70 px-4 text-lg font-semibold"
+          className="h-12 rounded-2xl border-input bg-field px-4 text-lg font-semibold"
         />
         <ReminderDetailsFields draft={draft} onChange={setDraft} />
       </div>

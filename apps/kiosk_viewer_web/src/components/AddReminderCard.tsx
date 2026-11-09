@@ -38,7 +38,7 @@ export function AddReminderCard() {
     <motion.form
       layout
       onSubmit={addReminder}
-      className="rounded-4xl border border-white/80 bg-card p-2.5 shadow-lg shadow-primary/15 backdrop-blur-xl transition-shadow focus-within:shadow-xl focus-within:shadow-primary/30"
+      className="rounded-4xl border border-glass-edge bg-card p-2.5 shadow-lg shadow-primary/15 backdrop-blur-xl transition-shadow focus-within:shadow-xl focus-within:shadow-primary/30"
     >
       <div className="flex items-center gap-3">
         <motion.span

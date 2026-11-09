@@ -17,7 +17,7 @@ export function ReminderDetailsFields({ draft, onChange }: ReminderDetailsFields
         placeholder="Notes (optional)"
         aria-label="Notes"
         rows={2}
-        className="min-h-0 resize-none rounded-2xl border-input bg-white/70 px-4 py-2.5 text-base"
+        className="min-h-0 resize-none rounded-2xl border-input bg-field px-4 py-2.5 text-base"
       />
       <DueTimePicker value={draft.dueAt} onChange={(dueAt) => onChange({ ...draft, dueAt })} />
     </div>
