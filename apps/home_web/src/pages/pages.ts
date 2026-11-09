@@ -1,0 +1,25 @@
+import { LayoutDashboard, ListTodo, type LucideIcon } from 'lucide-react'
+import type { JSX } from 'react'
+
+import { DashboardPage } from '@/pages/dashboard/DashboardPage'
+import { RemindersPage } from '@/pages/reminders/RemindersPage'
+
+/** A screen that can be shown, and how to find it. */
+export interface Page {
+  /** Where the page lives, such as "/reminders". */
+  path: string
+  /** The page's name, for the pages menu and the browser tab. */
+  title: string
+  /** Shown beside the title in the pages menu. */
+  icon: LucideIcon
+  component: () => JSX.Element
+}
+
+/**
+ * Every page, in the order the pages menu lists them. Adding a page here is all it takes to route to it and offer it
+ * in the menu. The first page is the one shown at the site's root.
+ */
+export const PAGES: Page[] = [
+  { path: '/', title: 'Dashboard', icon: LayoutDashboard, component: DashboardPage },
+  { path: '/reminders', title: 'Reminders', icon: ListTodo, component: RemindersPage },
+]

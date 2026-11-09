@@ -21,15 +21,16 @@ services:
     volumes:
       - reminders-data:/data
 
-  kiosk-viewer-web:
-    build: ./apps/kiosk_viewer_web
+  # Every page for the home's screens: the reminders viewer, dashboards, and so on.
+  home-web:
+    build: ./apps/home_web
     restart: unless-stopped
     depends_on:
       reminders-api:
         condition: service_healthy
     ports:
-      # Like the API, the viewer has no login, so the same advice applies. Set KIOSK_VIEWER_BIND_ADDRESS to let other
-      # devices reach it.
+      # Like the API, the pages have no login, so the same advice applies. Set KIOSK_VIEWER_BIND_ADDRESS to let other
+      # devices reach them.
       - "${KIOSK_VIEWER_BIND_ADDRESS:-127.0.0.1}:8080:8080"
 
 volumes:
