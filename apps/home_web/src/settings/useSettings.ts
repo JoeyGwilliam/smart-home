@@ -1,12 +1,16 @@
 import { useSyncExternalStore } from 'react'
 
+import type { SceneWeather, TimeOfDay } from '@/scene/scene'
+
 /** Choices about how this screen looks. They belong to the device showing the page, not to the reminders. */
 export interface Settings {
-  /** Whether to use the dark colour scheme. */
-  isNightMode: boolean
+  /** The time of day that the backdrop shows. "live" follows the real sunrise and sunset. */
+  sceneTime: TimeOfDay | 'live'
+  /** The weather that the backdrop shows. "live" follows the forecast. */
+  sceneWeather: SceneWeather | 'live'
 }
 
-const DEFAULT_SETTINGS: Settings = { isNightMode: true }
+const DEFAULT_SETTINGS: Settings = { sceneTime: 'live', sceneWeather: 'live' }
 
 const STORAGE_KEY = 'kiosk-viewer-settings'
 
