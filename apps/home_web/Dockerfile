@@ -4,7 +4,9 @@ WORKDIR /app
 
 # Installing dependencies before copying the source means that a source change doesn't reinstall them on every build.
 COPY package.json package-lock.json ./
-RUN npm ci
+# The cache mount keeps npm's download cache between builds, so a lockfile change only downloads the packages that
+# changed. Audit and funding checks are skipped because they are extra network calls that don't affect the build.
+RUN --mount=type=cache,target=/root/.npm npm ci --no-audit --no-fund
 
 COPY . .
 RUN npm run build
