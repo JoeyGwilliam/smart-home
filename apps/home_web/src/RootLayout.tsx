@@ -25,7 +25,9 @@ export function RootLayout() {
         <PageMenu />
         <SettingsMenu />
       </div>
-      <div className="page-content">
+      {/* The top padding clears the menus, leaving the same 1rem gap beneath them as there is above: 1rem to the
+          menus, 2.25rem for the menus themselves, then 1rem more. */}
+      <div className="page-content pt-[4.25rem]">
         <Outlet />
       </div>
     </>

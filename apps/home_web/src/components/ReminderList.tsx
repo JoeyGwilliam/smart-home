@@ -29,17 +29,36 @@ interface ReminderListProps {
   emptyMessage: EmptyMessage
   /** Whether reminders can be deleted from this list. Defaults to true. */
   canDelete?: boolean
+  /**
+   * Whether each reminder's notes and due time are showing before it is first tapped. Defaults to false, which suits
+   * a screen read at a glance.
+   */
+  areDetailsShownAtFirst?: boolean
 }
 
 /**
  * Shows reminders that can be ticked off, edited and deleted: those still to do, soonest due first, then those that
  * are done. Fetches the reminders itself, and shows loading and unavailable states while it can't show them.
  */
-export function ReminderList({ now, select = (reminders) => reminders, emptyMessage, canDelete = true }: ReminderListProps) {
+export function ReminderList({
+  now,
+  select = (reminders) => reminders,
+  emptyMessage,
+  canDelete = true,
+  areDetailsShownAtFirst = false,
+}: ReminderListProps) {
   const remindersQuery = useReminders()
 
   if (remindersQuery.data) {
-    return <OrganisedReminderList reminders={select(remindersQuery.data, now)} now={now} emptyMessage={emptyMessage} canDelete={canDelete} />
+    return (
+      <OrganisedReminderList
+        reminders={select(remindersQuery.data, now)}
+        now={now}
+        emptyMessage={emptyMessage}
+        canDelete={canDelete}
+        areDetailsShownAtFirst={areDetailsShownAtFirst}
+      />
+    )
   }
   if (remindersQuery.isError) {
     return <UnavailableNotice onRetry={() => void remindersQuery.refetch()} />
@@ -52,9 +71,10 @@ interface OrganisedReminderListProps {
   now: Date
   emptyMessage: EmptyMessage
   canDelete: boolean
+  areDetailsShownAtFirst: boolean
 }
 
-function OrganisedReminderList({ reminders, now, emptyMessage, canDelete }: OrganisedReminderListProps) {
+function OrganisedReminderList({ reminders, now, emptyMessage, canDelete, areDetailsShownAtFirst }: OrganisedReminderListProps) {
   const { active, completed } = organiseReminders(reminders)
 
   // Everything is a sibling in one animated list, including the "Done" heading, so that a reminder that is ticked off
@@ -69,7 +89,7 @@ function OrganisedReminderList({ reminders, now, emptyMessage, canDelete }: Orga
         )}
         {active.map((reminder) => (
           <AnimatedItem key={reminder.id}>
-            <ReminderCard reminder={reminder} now={now} canDelete={canDelete} />
+            <ReminderCard reminder={reminder} now={now} canDelete={canDelete} areDetailsShownAtFirst={areDetailsShownAtFirst} />
           </AnimatedItem>
         ))}
         {completed.length > 0 && (
@@ -79,7 +99,7 @@ function OrganisedReminderList({ reminders, now, emptyMessage, canDelete }: Orga
         )}
         {completed.map((reminder) => (
           <AnimatedItem key={reminder.id}>
-            <ReminderCard reminder={reminder} now={now} canDelete={canDelete} />
+            <ReminderCard reminder={reminder} now={now} canDelete={canDelete} areDetailsShownAtFirst={areDetailsShownAtFirst} />
           </AnimatedItem>
         ))}
       </AnimatePresence>

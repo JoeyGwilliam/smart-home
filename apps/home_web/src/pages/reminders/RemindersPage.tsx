@@ -15,10 +15,10 @@ export function RemindersPage() {
   const now = useNow()
 
   return (
-    <main className="mx-auto grid w-full max-w-2xl gap-6 px-4 py-10 sm:py-14">
+    <main className="mx-auto grid w-full max-w-2xl gap-6 px-4 pb-10 sm:pb-14">
       <Header now={now} />
       <AddReminderCard />
-      <ReminderList now={now} emptyMessage={{ title: 'Nothing to do', detail: 'Enjoy it.' }} />
+      <ReminderList now={now} emptyMessage={{ title: 'Nothing to do', detail: 'Enjoy it.' }} areDetailsShownAtFirst />
     </main>
   )
 }

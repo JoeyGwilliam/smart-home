@@ -11,7 +11,7 @@ export function DashboardPage() {
   const now = useNow()
 
   return (
-    <main className="mx-auto grid w-full max-w-6xl items-start gap-6 px-4 py-10 sm:py-14 lg:grid-cols-[minmax(0,5fr)_minmax(0,6fr)]">
+    <main className="mx-auto grid w-full max-w-6xl items-start gap-6 px-4 pb-10 sm:pb-14 lg:grid-cols-[minmax(0,5fr)_minmax(0,6fr)]">
       <motion.div className="grid gap-6" initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}>
         <ClockCard />
         <WeatherCard />

@@ -32,16 +32,21 @@ interface ReminderCardProps {
   now: Date
   /** Whether to offer deleting the reminder. */
   canDelete: boolean
+  /** Whether the notes and due time are showing before the reminder is first tapped. */
+  areDetailsShownAtFirst: boolean
 }
 
-/** Shows a reminder, with controls to tick it off, edit it and, optionally, delete it. Tapping it shows its notes and due time. */
-export function ReminderCard({ reminder, now, canDelete }: ReminderCardProps) {
+/**
+ * Shows a reminder, with controls to tick it off, edit it and, optionally, delete it. Tapping it shows or hides its
+ * notes and due time.
+ */
+export function ReminderCard({ reminder, now, canDelete, areDetailsShownAtFirst }: ReminderCardProps) {
   const { saveReminder, deleteReminder } = useReminderActions()
   const [isEditing, setIsEditing] = useState(false)
   const [isConfirmingDelete, setIsConfirmingDelete] = useState(false)
-  // The notes and the due time stay hidden until the reminder is tapped, which leaves room for a title that can be
-  // read from across the room. The countdown already says how pressing the reminder is.
-  const [isShowingDetails, setIsShowingDetails] = useState(false)
+  // Hiding the notes and the due time leaves room for a title that can be read from across the room. The countdown
+  // still says how pressing the reminder is.
+  const [isShowingDetails, setIsShowingDetails] = useState(areDetailsShownAtFirst)
 
   const { urgency, dueLabel, countdown } = describeReminder(reminder, now)
   const style = URGENCY_STYLES[urgency]

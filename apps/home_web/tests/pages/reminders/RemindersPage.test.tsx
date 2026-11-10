@@ -30,6 +30,16 @@ test('shows active and completed reminders when the API has both', async () => {
   expect(screen.getByRole('heading', { name: 'Done' })).toBeInTheDocument()
 })
 
+test('shows the notes of a reminder when it has not been tapped', async () => {
+  vi.stubGlobal('fetch', vi.fn().mockResolvedValue(Response.json([
+    { id: '1', title: 'Water the plants', notes: 'Not the cactus', due_at: null, completed_at: null },
+  ])))
+
+  renderPage()
+
+  expect(await screen.findByText('Not the cactus')).toBeInTheDocument()
+})
+
 test('shows the empty state when there is nothing to do', async () => {
   vi.stubGlobal('fetch', vi.fn().mockResolvedValue(Response.json([])))
 

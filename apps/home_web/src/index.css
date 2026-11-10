@@ -44,49 +44,49 @@
  * Text is a warm plum-brown rather than black, so that it sits softly on the cream.
  */
 :root {
-    --background: oklch(0.89 0.045 225);
-    --foreground: oklch(0.34 0.06 15);
-    --card: oklch(0.97 0.025 70);
+    --background: oklch(0.84 0.075 228);
+    --foreground: oklch(0.28 0.06 15);
+    --card: oklch(0.975 0.03 75);
     --card-foreground: var(--foreground);
-    --popover: oklch(0.97 0.025 70);
+    --popover: oklch(0.975 0.03 75);
     --popover-foreground: var(--foreground);
-    --primary: oklch(0.83 0.095 355);
-    --primary-foreground: oklch(0.3 0.08 350);
-    --secondary: oklch(0.93 0.04 315);
+    --primary: oklch(0.76 0.14 355);
+    --primary-foreground: oklch(0.27 0.08 350);
+    --secondary: oklch(0.89 0.065 315);
     --secondary-foreground: oklch(0.36 0.07 315);
-    --muted: oklch(0.94 0.03 50);
-    --muted-foreground: oklch(0.5 0.05 15);
-    --accent: oklch(0.93 0.045 355);
+    --muted: oklch(0.93 0.04 50);
+    --muted-foreground: oklch(0.44 0.06 15);
+    --accent: oklch(0.91 0.065 355);
     --accent-foreground: var(--foreground);
     --destructive: oklch(0.55 0.19 28);
-    --border: oklch(0.88 0.045 10);
-    --input: oklch(0.82 0.06 5);
-    --ring: oklch(0.76 0.11 355);
+    --border: oklch(0.82 0.07 5);
+    --input: oklch(0.75 0.09 0);
+    --ring: oklch(0.68 0.15 355);
 
     /* The primary pink, darkened to be readable as text on both the cream panels and the sky. */
-    --primary-text: oklch(0.5 0.14 355);
+    --primary-text: oklch(0.48 0.17 355);
     /* Behind text fields and other inset surfaces. */
     --field: oklch(0.99 0.012 60);
     /* The frame around a panel: a pink close enough to the cream that the edge stays soft. */
-    --panel-edge: oklch(0.87 0.065 355);
+    --panel-edge: oklch(0.78 0.11 355);
     /* The colour of the shadows beneath panels. */
-    --shade: oklch(0.5 0.1 355 / 22%);
+    --shade: oklch(0.45 0.12 355 / 30%);
 
     /* The backdrop (see PixelBackdrop). The sky is drawn in bands that lighten towards the horizon. */
-    --sky-high: oklch(0.82 0.065 235);
-    --sky-mid: oklch(0.855 0.055 230);
+    --sky-high: oklch(0.74 0.105 238);
+    --sky-mid: oklch(0.79 0.09 233);
     --sky-stars: none;
     --cloud: oklch(0.99 0.01 230);
     --cloud-shade: oklch(0.9 0.035 235);
-    --grass: oklch(0.84 0.1 145);
-    --grass-shade: oklch(0.77 0.1 148);
+    --grass: oklch(0.78 0.15 142);
+    --grass-shade: oklch(0.69 0.15 145);
 
     /* Highlights for how pressing a reminder is. They stay light in both schemes, so dark text always sits on them. */
-    --peach: oklch(0.88 0.075 45);
-    --butter: oklch(0.94 0.08 95);
-    --mint: oklch(0.92 0.06 165);
-    --sky: oklch(0.91 0.05 235);
-    --lavender: oklch(0.9 0.055 300);
+    --peach: oklch(0.84 0.11 45);
+    --butter: oklch(0.92 0.12 95);
+    --mint: oklch(0.88 0.1 160);
+    --sky: oklch(0.87 0.08 235);
+    --lavender: oklch(0.86 0.085 300);
 }
 
 /*
