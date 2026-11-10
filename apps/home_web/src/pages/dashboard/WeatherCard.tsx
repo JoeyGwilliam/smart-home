@@ -82,6 +82,13 @@ function ForecastCard({ forecast }: { forecast: Forecast }) {
                   <span className="text-xs font-bold text-muted-foreground">{index === 0 ? 'Now' : format(hour.time, 'HH:mm')}</span>
                   <WeatherIcon condition={hour.condition} isDaytime={hour.isDaytime} className="size-7" />
                   <span className="font-bold">{formatTemperature(hour.temperature)}</span>
+                  <span
+                    className="flex items-center gap-0.5 text-xs font-bold text-muted-foreground"
+                    aria-label={`${hour.rainChance}% chance of rain`}
+                  >
+                    <Droplets className="size-3" />
+                    {hour.rainChance}%
+                  </span>
                 </div>
               ))}
             </motion.div>
