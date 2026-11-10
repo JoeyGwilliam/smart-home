@@ -80,6 +80,15 @@ test('shows the current weather when the forecast loads', async () => {
   expect(within(weather).getByText('Overcast')).toBeInTheDocument()
 })
 
+test('shows the chance of rain for each hour at a glance when the forecast loads', async () => {
+  stubFetch([])
+
+  renderPage()
+
+  const weather = await screen.findByRole('region', { name: 'Weather in Bristol' })
+  expect(within(weather).getAllByLabelText('30% chance of rain')).toHaveLength(6)
+})
+
 test('opens the hour-by-hour forecast when the weather is tapped', async () => {
   stubFetch([])
   renderPage()
@@ -88,5 +97,5 @@ test('opens the hour-by-hour forecast when the weather is tapped', async () => {
   await userEvent.click(within(weather).getByRole('button', { expanded: false }))
 
   expect(within(weather).getByRole('button', { expanded: true })).toBeInTheDocument()
-  expect(within(weather).getAllByLabelText('30% chance of rain')).toHaveLength(12)
+  expect(within(within(weather).getByRole('list')).getAllByLabelText('30% chance of rain')).toHaveLength(12)
 })
