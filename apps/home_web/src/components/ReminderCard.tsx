@@ -11,19 +11,13 @@ import type { Reminder } from '@/reminders/reminder'
 import { useReminderActions } from '@/reminders/useReminders'
 import { cn } from 'cn'
 
-interface UrgencyStyle {
-  /** Words in front of the due time, such as "Overdue". */
-  prefix: string | null
-  /** Classes for the countdown bubble. */
-  countdownClassName: string
-}
-
-const URGENCY_STYLES: Record<Urgency, UrgencyStyle> = {
-  overdue: { prefix: 'Overdue', countdownClassName: 'bg-peach text-[oklch(0.42_0.1_40)]' },
-  dueToday: { prefix: 'Due today', countdownClassName: 'bg-butter text-[oklch(0.42_0.08_80)]' },
-  upcoming: { prefix: null, countdownClassName: 'bg-sky text-[oklch(0.4_0.07_240)]' },
-  unscheduled: { prefix: null, countdownClassName: '' },
-  completed: { prefix: null, countdownClassName: '' },
+/** The colours of the countdown bubble, which say at a glance how pressing a reminder is. */
+const COUNTDOWN_CLASS_NAMES: Record<Urgency, string> = {
+  overdue: 'bg-peach text-[oklch(0.42_0.1_40)]',
+  dueToday: 'bg-butter text-[oklch(0.42_0.08_80)]',
+  upcoming: 'bg-sky text-[oklch(0.4_0.07_240)]',
+  unscheduled: '',
+  completed: '',
 }
 
 interface ReminderCardProps {
@@ -49,7 +43,6 @@ export function ReminderCard({ reminder, now, canDelete, areDetailsShownAtFirst 
   const [isShowingDetails, setIsShowingDetails] = useState(areDetailsShownAtFirst)
 
   const { urgency, dueLabel, countdown } = describeReminder(reminder, now)
-  const style = URGENCY_STYLES[urgency]
   const isCompleted = urgency === 'completed'
   const hasDetails = Boolean(reminder.notes || dueLabel)
 
@@ -83,22 +76,19 @@ export function ReminderCard({ reminder, now, canDelete, areDetailsShownAtFirst 
           {reminder.title}
         </p>
         {isShowingDetails && reminder.notes && <p className="mt-1 break-words text-muted-foreground">{reminder.notes}</p>}
-        {/* The card leaves little width for text on a phone, so the urgency and the due time get a line each, and the
-            due time can only wrap between its date and its time. */}
+        {/* The card leaves little width for text on a phone, so the due time can only wrap between its date and its time.
+            How pressing it is needs no words here, as the countdown already shows it. */}
         {isShowingDetails && dueLabel && (
-          <div className="mt-1.5 font-semibold text-muted-foreground">
-            {style.prefix && <p className="text-foreground">{style.prefix}</p>}
-            <p className="flex items-start gap-1.5">
-              <Clock className="mt-[0.2em] size-4 shrink-0" />
-              <span>
-                <span className="whitespace-nowrap">{dueLabel.date},</span> <span className="whitespace-nowrap">{dueLabel.time}</span>
-              </span>
-            </p>
-          </div>
+          <p className="mt-1.5 flex items-start gap-1.5 font-semibold text-muted-foreground">
+            <Clock className="mt-[0.2em] size-4 shrink-0" />
+            <span>
+              <span className="whitespace-nowrap">{dueLabel.date},</span> <span className="whitespace-nowrap">{dueLabel.time}</span>
+            </span>
+          </p>
         )}
       </button>
 
-      {countdown && !isCompleted && <CountdownBubble countdown={countdown} className={style.countdownClassName} isPulsing={urgency === 'overdue'} />}
+      {countdown && !isCompleted && <CountdownBubble countdown={countdown} className={COUNTDOWN_CLASS_NAMES[urgency]} isPulsing={urgency === 'overdue'} />}
 
       <div className="flex flex-col gap-1 opacity-60 transition-opacity group-hover:opacity-100 focus-within:opacity-100">
         <Button variant="ghost" size="icon" className="rounded-full hover:bg-secondary" onClick={() => setIsEditing(true)} aria-label={`Edit ${reminder.title}`}>

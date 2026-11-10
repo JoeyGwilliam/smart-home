@@ -100,11 +100,13 @@ function ForecastCard({ forecast }: { forecast: Forecast }) {
                   initial={{ opacity: 0, x: -12 }}
                   animate={{ opacity: 1, x: 0 }}
                   transition={{ delay: index * 0.03 }}
-                  className="grid grid-cols-[3.5rem_2rem_minmax(0,1fr)_3rem_6.5rem] items-center gap-2 rounded-2xl px-3 py-1.5 even:bg-field/50"
+                  // On a phone, the fixed columns would leave the description almost no room, so they narrow and the
+                  // rain chance drops its bar, leaving the description room to wrap onto a second line.
+                  className="grid grid-cols-[3rem_1.5rem_minmax(0,1fr)_2.5rem_auto] items-center gap-2 rounded-2xl px-3 py-1.5 even:bg-field/50 sm:grid-cols-[3.5rem_2rem_minmax(0,1fr)_3rem_6.5rem]"
                 >
                   <span className="font-bold text-muted-foreground">{index === 0 ? 'Now' : format(hour.time, 'HH:mm')}</span>
                   <WeatherIcon condition={hour.condition} isDaytime={hour.isDaytime} className="size-6" />
-                  <span className="truncate text-sm font-semibold">{hour.condition.label}</span>
+                  <span className="text-sm leading-tight font-semibold break-words">{hour.condition.label}</span>
                   <span className="text-right font-heading text-lg font-semibold">{formatTemperature(hour.temperature)}</span>
                   <RainChance percentage={hour.rainChance} />
                 </motion.li>
@@ -122,7 +124,7 @@ function RainChance({ percentage }: { percentage: number }) {
   return (
     <span className="flex items-center gap-1.5" aria-label={`${percentage}% chance of rain`}>
       <CloudRain className="size-3.5 shrink-0 text-muted-foreground" />
-      <span className="h-1.5 flex-1 overflow-hidden rounded-full bg-field">
+      <span className="hidden h-1.5 flex-1 overflow-hidden rounded-full bg-field sm:block">
         <motion.span
           className="block h-full rounded-full bg-sky"
           initial={{ width: 0 }}

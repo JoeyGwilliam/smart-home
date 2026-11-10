@@ -35,8 +35,11 @@ const CLOUDS: Cloud[] = [
 /** How many of the clouds each kind of weather has in the sky. */
 const CLOUD_COUNTS: Record<SceneWeather, number> = { clear: 2, fog: 3, snow: 8, drizzle: 9, rain: 11, thunder: 11, cloudy: 14 }
 
-/** The weather that falls as water. It closes the top of the sky with unbroken cloud, and leaves puddles on the grass. */
+/** The weather that falls as water, which leaves puddles on the grass. */
 const WET_WEATHER: SceneWeather[] = ['drizzle', 'rain', 'thunder']
+
+/** The weather that closes the top of the sky with unbroken cloud: anything wet, and an overcast sky. */
+const WEATHER_WITH_CLOUD_BANK: SceneWeather[] = ['cloudy', ...WET_WEATHER]
 
 /** The weather that leaves the sun or moon visible. In anything heavier, the cloud hides it. */
 const WEATHER_SHOWING_SKY: SceneWeather[] = ['clear', 'cloudy']
@@ -188,7 +191,7 @@ export function PixelBackdrop({ scene }: { scene: Scene }) {
       {CLOUDS.slice(0, CLOUD_COUNTS[weather]).map((cloud) => (
         <PixelCloud key={cloud.className} cloud={cloud} />
       ))}
-      {isWet && <CloudBank />}
+      {WEATHER_WITH_CLOUD_BANK.includes(weather) && <CloudBank />}
       <PixelGrass />
       {isWet &&
         PUDDLE_CLASS_NAMES.map((className) => (
