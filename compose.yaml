@@ -33,5 +33,21 @@ services:
       # devices reach them.
       - "${KIOSK_VIEWER_BIND_ADDRESS:-127.0.0.1}:8080:8080"
 
+  # Makes the pages reachable from outside the home, through a Cloudflare Tunnel. It connects out to Cloudflare, so no
+  # router ports need opening, and it reaches home-web over this file's network, so the port above can stay private.
+  # Anyone can reach the tunnel's public hostname, so it relies on Cloudflare Access, set up in the Zero Trust
+  # dashboard, to ask visitors to log in; nothing here enforces that.
+  # The tunnel and its hostnames are set up in the dashboard too. Put its token in the git-ignored .env file as
+  # CLOUDFLARE_TUNNEL_TOKEN.
+  cloudflared:
+    image: cloudflare/cloudflared:latest
+    restart: unless-stopped
+    command: tunnel --no-autoupdate run
+    environment:
+      TUNNEL_TOKEN: ${CLOUDFLARE_TUNNEL_TOKEN}
+    depends_on:
+      home-web:
+        condition: service_healthy
+
 volumes:
   reminders-data:

@@ -6,6 +6,10 @@
 # pick up these settings by accident.
 
 services:
+  # Development stays on this machine, so the tunnel never starts. Its profile is never activated.
+  cloudflared:
+    profiles: ["home-server-only"]
+
   reminders-api:
     restart: "no"
     # Windows file changes don't reach containers as events, so the reloader has to poll for them.
