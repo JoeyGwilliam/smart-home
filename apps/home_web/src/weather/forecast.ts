@@ -10,14 +10,13 @@ export interface WeatherCondition {
   label: string
 }
 
-/** The weather at one moment. Temperatures are in °C and wind speeds in mph. */
+/** The weather at one moment. Temperatures are in °C. */
 export interface WeatherMoment {
   time: Date
   temperature: number
   condition: WeatherCondition
   /** Whether the sun is up, which decides between sun and moon icons. */
   isDaytime: boolean
-  windSpeed: number
 }
 
 /** The weather now and over the coming hours. */

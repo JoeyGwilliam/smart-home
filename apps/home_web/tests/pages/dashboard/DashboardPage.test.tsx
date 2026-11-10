@@ -8,14 +8,13 @@ const MIDNIGHT = 1794182400
 const HOUR = 3600
 
 const FORECAST = {
-  current: { time: MIDNIGHT + 10 * HOUR, temperature_2m: 7.2, weather_code: 3, is_day: 1, wind_speed_10m: 7.8 },
+  current: { time: MIDNIGHT + 10 * HOUR, temperature_2m: 7.2, weather_code: 3, is_day: 1 },
   hourly: {
     time: Array.from({ length: 24 }, (_, hour) => MIDNIGHT + hour * HOUR),
     temperature_2m: Array.from({ length: 24 }, () => 8),
     precipitation_probability: Array.from({ length: 24 }, () => 30),
     weather_code: Array.from({ length: 24 }, () => 61),
     is_day: Array.from({ length: 24 }, () => 1),
-    wind_speed_10m: Array.from({ length: 24 }, () => 6),
   },
   daily: {
     temperature_2m_max: [8.4],

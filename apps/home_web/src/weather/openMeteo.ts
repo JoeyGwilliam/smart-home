@@ -9,10 +9,9 @@ const FORECAST_URL =
   new URLSearchParams({
     latitude: String(LOCATION.latitude),
     longitude: String(LOCATION.longitude),
-    current: 'temperature_2m,weather_code,is_day,wind_speed_10m',
-    hourly: 'temperature_2m,precipitation_probability,weather_code,is_day,wind_speed_10m',
+    current: 'temperature_2m,weather_code,is_day',
+    hourly: 'temperature_2m,precipitation_probability,weather_code,is_day',
     daily: 'temperature_2m_max,temperature_2m_min,sunrise,sunset',
-    wind_speed_unit: 'mph',
     // Unix times are unambiguous, whatever time zone the viewer is in.
     timeformat: 'unixtime',
     timezone: 'auto',
@@ -29,14 +28,13 @@ export class WeatherUnavailableError extends Error {}
 
 /** The parts of Open-Meteo's response that are used. Times are in seconds since the Unix epoch. */
 interface OpenMeteoResponse {
-  current: { time: number; temperature_2m: number; weather_code: number; is_day: number; wind_speed_10m: number }
+  current: { time: number; temperature_2m: number; weather_code: number; is_day: number }
   hourly: {
     time: number[]
     temperature_2m: number[]
     precipitation_probability: number[]
     weather_code: number[]
     is_day: number[]
-    wind_speed_10m: number[]
   }
   daily: {
     temperature_2m_max: number[]
@@ -79,7 +77,6 @@ function parseForecast({ current, hourly, daily }: OpenMeteoResponse): Forecast 
       temperature: current.temperature_2m,
       condition: describeWeatherCode(current.weather_code),
       isDaytime: current.is_day === 1,
-      windSpeed: current.wind_speed_10m,
     },
     // The daily forecast starts with today in the location's time zone.
     today: {
@@ -94,7 +91,6 @@ function parseForecast({ current, hourly, daily }: OpenMeteoResponse): Forecast 
       rainChance: hourly.precipitation_probability[index],
       condition: describeWeatherCode(hourly.weather_code[index]),
       isDaytime: hourly.is_day[index] === 1,
-      windSpeed: hourly.wind_speed_10m[index],
     })),
   }
 }

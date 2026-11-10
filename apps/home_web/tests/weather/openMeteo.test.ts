@@ -11,14 +11,13 @@ const HOUR = 3600
 function createOpenMeteoResponse(currentTime: number, hourCount: number) {
   const hours = Array.from({ length: hourCount }, (_, hour) => hour)
   return {
-    current: { time: currentTime, temperature_2m: 7.2, weather_code: 3, is_day: 0, wind_speed_10m: 7.8 },
+    current: { time: currentTime, temperature_2m: 7.2, weather_code: 3, is_day: 0 },
     hourly: {
       time: hours.map((hour) => MIDNIGHT + hour * HOUR),
       temperature_2m: hours.map((hour) => hour),
       precipitation_probability: hours.map(() => 20),
       weather_code: hours.map(() => 61),
       is_day: hours.map(() => 1),
-      wind_speed_10m: hours.map(() => 5),
     },
     daily: {
       temperature_2m_max: [8.4],
@@ -39,7 +38,6 @@ test('describes the current weather when Open-Meteo answers', async () => {
     temperature: 7.2,
     condition: { kind: 'cloudy', label: 'Overcast' },
     isDaytime: false,
-    windSpeed: 7.8,
   })
 })
 
@@ -76,7 +74,6 @@ test('describes each hour when the hourly forecast is given', async () => {
     rainChance: 20,
     condition: { kind: 'rain', label: 'Light rain' },
     isDaytime: true,
-    windSpeed: 5,
   })
 })
 

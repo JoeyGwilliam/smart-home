@@ -1,5 +1,5 @@
 import { format } from 'date-fns'
-import { ChevronDown, CloudOff, CloudRain, Sunrise, Sunset, Wind } from 'lucide-react'
+import { ChevronDown, CloudOff, CloudRain, Sunrise, Sunset } from 'lucide-react'
 import { AnimatePresence, motion } from 'motion/react'
 import { useState } from 'react'
 
@@ -15,7 +15,7 @@ const HOURS_AT_A_GLANCE = 6
 
 /**
  * The weather now, with the next few hours beneath. Tapping it opens today's high and low, the sunrise and sunset
- * times, and an hour-by-hour forecast with the chance of rain and the wind.
+ * times, and an hour-by-hour forecast with the chance of rain.
  */
 export function WeatherCard() {
   const forecastQuery = useForecast()
@@ -100,17 +100,13 @@ function ForecastCard({ forecast }: { forecast: Forecast }) {
                   initial={{ opacity: 0, x: -12 }}
                   animate={{ opacity: 1, x: 0 }}
                   transition={{ delay: index * 0.03 }}
-                  className="grid grid-cols-[3.5rem_2rem_minmax(0,1fr)_3rem_6.5rem_4.5rem] items-center gap-2 rounded-2xl px-3 py-1.5 even:bg-field/50"
+                  className="grid grid-cols-[3.5rem_2rem_minmax(0,1fr)_3rem_6.5rem] items-center gap-2 rounded-2xl px-3 py-1.5 even:bg-field/50"
                 >
                   <span className="font-bold text-muted-foreground">{index === 0 ? 'Now' : format(hour.time, 'HH:mm')}</span>
                   <WeatherIcon condition={hour.condition} isDaytime={hour.isDaytime} className="size-6" />
                   <span className="truncate text-sm font-semibold">{hour.condition.label}</span>
                   <span className="text-right font-heading text-lg font-semibold">{formatTemperature(hour.temperature)}</span>
                   <RainChance percentage={hour.rainChance} />
-                  <span className="flex items-center justify-end gap-1 text-sm font-semibold text-muted-foreground">
-                    <Wind className="size-3.5" />
-                    {Math.round(hour.windSpeed)} mph
-                  </span>
                 </motion.li>
               ))}
             </ol>
