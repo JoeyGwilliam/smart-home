@@ -1,14 +1,15 @@
 @import "tailwindcss";
 @import "tw-animate-css";
 @import "shadcn/tailwind.css";
-/* DotGothic16 also covers Japanese, in over a hundred font files. Only the Latin ones are needed here. */
-@import "@fontsource/dotgothic16/latin.css";
+/* The scenery is pixel art, but the text is not: rounded, friendly fonts keep the cosy feel and are far easier to read. */
+@import "@fontsource-variable/nunito";
+@import "@fontsource-variable/fredoka";
 
 @custom-variant dark (&:is(.dark *));
 
 @theme inline {
-    --font-sans: 'DotGothic16', ui-monospace, monospace;
-    --font-heading: var(--font-sans);
+    --font-sans: 'Nunito Variable', ui-rounded, system-ui, sans-serif;
+    --font-heading: 'Fredoka Variable', var(--font-sans);
     --color-ring: var(--ring);
     --color-input: var(--input);
     --color-border: var(--border);
@@ -157,6 +158,13 @@
 
     html {
         @apply font-sans;
+        /* The pages are read from across a room, so all text is a size up from the browser's default. Sizes and spacing
+           are in rem, so the whole layout grows with it. */
+        font-size: 112.5%;
+    }
+
+    h1, h2, h3 {
+        font-family: var(--font-heading);
     }
 
     body {
@@ -190,8 +198,18 @@
     animation: drift var(--drift-duration, 160s) steps(400) var(--drift-delay, 0s) infinite;
 }
 
+/* A farm animal's little hop: it stands still for most of the interval, then jumps up one step and lands again. */
+@keyframes hop {
+    0%, 88%, 100% { transform: translateY(0); }
+    94% { transform: translateY(-6px); }
+}
+
+@utility animate-hop {
+    animation: hop var(--hop-interval, 4s) steps(1) infinite;
+}
+
 @media (prefers-reduced-motion: reduce) {
-    .animate-drift {
+    .animate-drift, .animate-hop {
         animation-play-state: paused;
     }
 }
