@@ -34,15 +34,19 @@ interface ReminderCardProps {
   canDelete: boolean
 }
 
-/** Shows a reminder, with controls to tick it off, edit it and, optionally, delete it. */
+/** Shows a reminder, with controls to tick it off, edit it and, optionally, delete it. Tapping it shows its notes and due time. */
 export function ReminderCard({ reminder, now, canDelete }: ReminderCardProps) {
   const { saveReminder, deleteReminder } = useReminderActions()
   const [isEditing, setIsEditing] = useState(false)
   const [isConfirmingDelete, setIsConfirmingDelete] = useState(false)
+  // The notes and the due time stay hidden until the reminder is tapped, which leaves room for a title that can be
+  // read from across the room. The countdown already says how pressing the reminder is.
+  const [isShowingDetails, setIsShowingDetails] = useState(false)
 
   const { urgency, dueLabel, countdown } = describeReminder(reminder, now)
   const style = URGENCY_STYLES[urgency]
   const isCompleted = urgency === 'completed'
+  const hasDetails = Boolean(reminder.notes || dueLabel)
 
   // A failed change is undone on screen, and the header shows that the reminders can't be reached, so the outcome
   // needs no further handling here.
@@ -52,30 +56,36 @@ export function ReminderCard({ reminder, now, canDelete }: ReminderCardProps) {
     <article
       className={cn(
         'group flex items-center gap-4 panel rounded-3xl p-4 shadow-md shadow-shade transition-[box-shadow,opacity] hover:shadow-lg hover:shadow-shade',
-        urgency === 'overdue' && 'ring-6 ring-peach',
+        urgency === 'overdue' && 'ring-2 ring-peach',
         isCompleted && 'opacity-70',
       )}
     >
       <TickButton isCompleted={isCompleted} onToggle={toggleCompleted} reminderTitle={reminder.title} />
 
-      <div className="min-w-0 flex-1">
+      <button
+        type="button"
+        onClick={() => setIsShowingDetails(!isShowingDetails)}
+        aria-expanded={isShowingDetails}
+        disabled={!hasDetails}
+        className="min-w-0 flex-1 text-left"
+      >
         <p
           className={cn(
-            'text-lg leading-snug font-bold break-words transition-colors',
+            'text-2xl leading-snug font-bold break-words transition-colors',
             isCompleted && 'text-muted-foreground line-through decoration-primary decoration-2',
           )}
         >
           {reminder.title}
         </p>
-        {reminder.notes && <p className="mt-0.5 line-clamp-2 text-sm text-muted-foreground">{reminder.notes}</p>}
-        {dueLabel && (
-          <p className="mt-1.5 flex items-center gap-1.5 text-sm font-semibold text-muted-foreground">
-            <Clock className="size-3.5" />
+        {isShowingDetails && reminder.notes && <p className="mt-1 break-words text-muted-foreground">{reminder.notes}</p>}
+        {isShowingDetails && dueLabel && (
+          <p className="mt-1.5 flex items-center gap-1.5 font-semibold text-muted-foreground">
+            <Clock className="size-4" />
             {style.prefix && <span className="text-foreground">{style.prefix} ·</span>}
             {dueLabel}
           </p>
         )}
-      </div>
+      </button>
 
       {countdown && !isCompleted && <CountdownBubble countdown={countdown} className={style.countdownClassName} isPulsing={urgency === 'overdue'} />}
 

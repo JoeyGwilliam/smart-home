@@ -64,8 +64,8 @@ export function TickButton({ isCompleted, onToggle, reminderTitle }: TickButtonP
           fill="none"
           stroke="oklch(0.42 0.09 165)"
           strokeWidth={3}
-          strokeLinecap="square"
-          strokeLinejoin="miter"
+          strokeLinecap="round"
+          strokeLinejoin="round"
           initial={false}
           animate={{ pathLength: isTicked ? 1 : 0, opacity: isTicked ? 1 : 0 }}
           transition={{ duration: 0.3, ease: 'easeOut' }}

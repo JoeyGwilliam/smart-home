@@ -18,7 +18,7 @@ interface EditReminderDialogProps {
 export function EditReminderDialog({ reminder, isOpen, onOpenChange }: EditReminderDialogProps) {
   return (
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
-      <DialogContent className="rounded-4xl border-4 border-panel-edge bg-popover/95 p-6 shadow-2xl shadow-shade sm:max-w-md">
+      <DialogContent className="rounded-4xl border-[3px] border-panel-edge bg-popover/95 p-6 shadow-2xl shadow-shade sm:max-w-md">
         {/* The form only exists while the dialog is open, so each opening starts from the reminder as it is now. */}
         <EditReminderForm reminder={reminder} onSaved={() => onOpenChange(false)} />
       </DialogContent>

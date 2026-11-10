@@ -9,9 +9,9 @@ const FORECAST_URL =
   new URLSearchParams({
     latitude: String(LOCATION.latitude),
     longitude: String(LOCATION.longitude),
-    current: 'temperature_2m,apparent_temperature,weather_code,is_day,wind_speed_10m',
+    current: 'temperature_2m,weather_code,is_day,wind_speed_10m',
     hourly: 'temperature_2m,precipitation_probability,weather_code,is_day,wind_speed_10m',
-    daily: 'temperature_2m_max,temperature_2m_min,sunrise,sunset,precipitation_probability_max',
+    daily: 'temperature_2m_max,temperature_2m_min,sunrise,sunset',
     wind_speed_unit: 'mph',
     // Unix times are unambiguous, whatever time zone the viewer is in.
     timeformat: 'unixtime',
@@ -29,7 +29,7 @@ export class WeatherUnavailableError extends Error {}
 
 /** The parts of Open-Meteo's response that are used. Times are in seconds since the Unix epoch. */
 interface OpenMeteoResponse {
-  current: { time: number; temperature_2m: number; apparent_temperature: number; weather_code: number; is_day: number; wind_speed_10m: number }
+  current: { time: number; temperature_2m: number; weather_code: number; is_day: number; wind_speed_10m: number }
   hourly: {
     time: number[]
     temperature_2m: number[]
@@ -43,7 +43,6 @@ interface OpenMeteoResponse {
     temperature_2m_min: number[]
     sunrise: number[]
     sunset: number[]
-    precipitation_probability_max: number[]
   }
 }
 
@@ -78,7 +77,6 @@ function parseForecast({ current, hourly, daily }: OpenMeteoResponse): Forecast 
     current: {
       time: fromUnixTime(current.time),
       temperature: current.temperature_2m,
-      feelsLike: current.apparent_temperature,
       condition: describeWeatherCode(current.weather_code),
       isDaytime: current.is_day === 1,
       windSpeed: current.wind_speed_10m,
@@ -89,7 +87,6 @@ function parseForecast({ current, hourly, daily }: OpenMeteoResponse): Forecast 
       low: daily.temperature_2m_min[0],
       sunrise: fromUnixTime(daily.sunrise[0]),
       sunset: fromUnixTime(daily.sunset[0]),
-      rainChance: daily.precipitation_probability_max[0],
     },
     hours: hourIndexes.map((index) => ({
       time: fromUnixTime(hourly.time[index]),

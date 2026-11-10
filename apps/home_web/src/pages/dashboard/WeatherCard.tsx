@@ -1,5 +1,5 @@
 import { format } from 'date-fns'
-import { ChevronDown, CloudOff, Droplets, Sunrise, Sunset, Wind } from 'lucide-react'
+import { ChevronDown, CloudOff, CloudRain, Sunrise, Sunset, Wind } from 'lucide-react'
 import { AnimatePresence, motion } from 'motion/react'
 import { useState } from 'react'
 
@@ -14,8 +14,8 @@ import { useForecast } from '@/weather/useForecast'
 const HOURS_AT_A_GLANCE = 6
 
 /**
- * Today's weather, with the next few hours beneath. Tapping it opens an hour-by-hour forecast with the chance of rain
- * and the wind.
+ * The weather now, with the next few hours beneath. Tapping it opens today's high and low, the sunrise and sunset
+ * times, and an hour-by-hour forecast with the chance of rain and the wind.
  */
 export function WeatherCard() {
   const forecastQuery = useForecast()
@@ -42,30 +42,13 @@ function ForecastCard({ forecast }: { forecast: Forecast }) {
             <WeatherIcon condition={current.condition} isDaytime={current.isDaytime} className="size-20 drop-shadow-lg" />
           </motion.span>
           <div className="min-w-0 flex-1">
-            <p className="text-sm font-extrabold tracking-[0.2em] text-primary-text uppercase">{FORECAST_LOCATION_NAME} now</p>
+            <p className="text-sm font-extrabold tracking-[0.2em] text-primary-text uppercase">{FORECAST_LOCATION_NAME}</p>
             <p className="font-heading text-6xl leading-none font-semibold">{formatTemperature(current.temperature)}</p>
-            <p className="mt-1 font-semibold">
-              {current.condition.label} <span className="text-muted-foreground">· feels like {formatTemperature(current.feelsLike)}</span>
-            </p>
+            <p className="mt-1 font-semibold">{current.condition.label}</p>
           </div>
           <motion.span animate={{ rotate: isExpanded ? 180 : 0 }} className="grid size-9 shrink-0 place-items-center rounded-full bg-field text-muted-foreground">
             <ChevronDown className="size-5" />
           </motion.span>
-        </motion.div>
-
-        <motion.div layout="position" className="mt-4 flex flex-wrap gap-2">
-          <Pill className="bg-peach text-[oklch(0.42_0.1_40)]">H {formatTemperature(today.high)}</Pill>
-          <Pill className="bg-sky text-[oklch(0.4_0.07_240)]">L {formatTemperature(today.low)}</Pill>
-          <Pill className="bg-secondary text-secondary-foreground">
-            <Droplets className="size-3.5" />
-            {today.rainChance}% rain
-          </Pill>
-          <Pill className="bg-butter text-[oklch(0.42_0.08_80)]">
-            <Sunrise className="size-3.5" />
-            {format(today.sunrise, 'HH:mm')}
-            <Sunset className="ml-1 size-3.5" />
-            {format(today.sunset, 'HH:mm')}
-          </Pill>
         </motion.div>
 
         <AnimatePresence initial={false} mode="popLayout">
@@ -82,13 +65,6 @@ function ForecastCard({ forecast }: { forecast: Forecast }) {
                   <span className="text-xs font-bold text-muted-foreground">{index === 0 ? 'Now' : format(hour.time, 'HH:mm')}</span>
                   <WeatherIcon condition={hour.condition} isDaytime={hour.isDaytime} className="size-7" />
                   <span className="font-bold">{formatTemperature(hour.temperature)}</span>
-                  <span
-                    className="flex items-center gap-0.5 text-xs font-bold text-muted-foreground"
-                    aria-label={`${hour.rainChance}% chance of rain`}
-                  >
-                    <Droplets className="size-3" />
-                    {hour.rainChance}%
-                  </span>
                 </div>
               ))}
             </motion.div>
@@ -105,14 +81,26 @@ function ForecastCard({ forecast }: { forecast: Forecast }) {
             exit={{ height: 0, opacity: 0 }}
             transition={{ type: 'spring', bounce: 0.15, duration: 0.5 }}
           >
-            <ol className="grid gap-1 border-t border-border/60 px-4 pt-2 pb-4">
+            <div className="flex flex-wrap gap-2 border-t border-border/60 px-7 pt-4">
+              <Pill className="bg-peach text-[oklch(0.42_0.1_40)]">H {formatTemperature(today.high)}</Pill>
+              <Pill className="bg-sky text-[oklch(0.4_0.07_240)]">L {formatTemperature(today.low)}</Pill>
+              <Pill className="bg-butter text-[oklch(0.42_0.08_80)]">
+                <Sunrise className="size-3.5" />
+                <span aria-label={`Sunrise at ${format(today.sunrise, 'HH:mm')}`}>{format(today.sunrise, 'HH:mm')}</span>
+              </Pill>
+              <Pill className="bg-lavender text-[oklch(0.38_0.08_300)]">
+                <Sunset className="size-3.5" />
+                <span aria-label={`Sunset at ${format(today.sunset, 'HH:mm')}`}>{format(today.sunset, 'HH:mm')}</span>
+              </Pill>
+            </div>
+            <ol className="grid gap-1 px-4 pt-2 pb-4">
               {hours.map((hour, index) => (
                 <motion.li
                   key={hour.time.getTime()}
                   initial={{ opacity: 0, x: -12 }}
                   animate={{ opacity: 1, x: 0 }}
                   transition={{ delay: index * 0.03 }}
-                  className="grid grid-cols-[3.5rem_2rem_minmax(0,1fr)_3rem_5.5rem_4.5rem] items-center gap-2 rounded-2xl px-3 py-1.5 even:bg-field/50"
+                  className="grid grid-cols-[3.5rem_2rem_minmax(0,1fr)_3rem_6.5rem_4.5rem] items-center gap-2 rounded-2xl px-3 py-1.5 even:bg-field/50"
                 >
                   <span className="font-bold text-muted-foreground">{index === 0 ? 'Now' : format(hour.time, 'HH:mm')}</span>
                   <WeatherIcon condition={hour.condition} isDaytime={hour.isDaytime} className="size-6" />
@@ -133,10 +121,11 @@ function ForecastCard({ forecast }: { forecast: Forecast }) {
   )
 }
 
-/** A small bar that fills with the chance of rain. */
+/** A small bar that fills with the chance of rain. The rain cloud marks it as rain, rather than humidity. */
 function RainChance({ percentage }: { percentage: number }) {
   return (
     <span className="flex items-center gap-1.5" aria-label={`${percentage}% chance of rain`}>
+      <CloudRain className="size-3.5 shrink-0 text-muted-foreground" />
       <span className="h-1.5 flex-1 overflow-hidden rounded-full bg-field">
         <motion.span
           className="block h-full rounded-full bg-sky"

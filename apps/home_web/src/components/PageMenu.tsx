@@ -22,7 +22,7 @@ export function PageMenu() {
           </motion.span>
         </Button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent align="end" className="w-56 rounded-2xl border-4 border-panel-edge p-1.5 shadow-xl shadow-shade">
+      <DropdownMenuContent align="end" className="w-56 rounded-2xl border-[3px] border-panel-edge p-1.5 shadow-xl shadow-shade">
         <DropdownMenuLabel className="font-heading text-base font-semibold">Pages</DropdownMenuLabel>
         <DropdownMenuSeparator />
         {PAGES.map((page) => {

@@ -22,17 +22,12 @@ export interface WeatherMoment {
 
 /** The weather now and over the coming hours. */
 export interface Forecast {
-  current: WeatherMoment & {
-    /** How warm it feels, allowing for wind and humidity, in °C. */
-    feelsLike: number
-  }
+  current: WeatherMoment
   today: {
     high: number
     low: number
     sunrise: Date
     sunset: Date
-    /** The highest chance of rain at any point today, as a percentage. */
-    rainChance: number
   }
   /** One forecast per hour, starting with the current hour. */
   hours: (WeatherMoment & {
