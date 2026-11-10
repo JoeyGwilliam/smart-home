@@ -38,7 +38,7 @@ export function AddReminderCard() {
     <motion.form
       layout
       onSubmit={addReminder}
-      className="glass rounded-4xl p-2.5 shadow-lg shadow-primary/15 transition-shadow focus-within:shadow-xl focus-within:shadow-primary/30"
+      className="panel rounded-4xl p-2.5 shadow-lg shadow-shade transition-shadow focus-within:shadow-xl focus-within:shadow-shade"
     >
       <div className="flex items-center gap-3">
         <motion.span
@@ -65,7 +65,7 @@ export function AddReminderCard() {
               <Button
                 type="submit"
                 disabled={!isDraftComplete(draft) || isSaving}
-                className="h-11 rounded-full px-5 text-base font-bold shadow-md shadow-primary/30"
+                className="h-11 rounded-full px-5 text-base font-bold shadow-md shadow-shade"
               >
                 <Sparkles />
                 Add

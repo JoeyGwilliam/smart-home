@@ -18,7 +18,7 @@ interface EditReminderDialogProps {
 export function EditReminderDialog({ reminder, isOpen, onOpenChange }: EditReminderDialogProps) {
   return (
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
-      <DialogContent className="rounded-4xl border border-glass-edge bg-popover/95 p-6 shadow-2xl shadow-primary/25 backdrop-blur-xl sm:max-w-md">
+      <DialogContent className="rounded-4xl border-4 border-panel-edge bg-popover/95 p-6 shadow-2xl shadow-shade sm:max-w-md">
         {/* The form only exists while the dialog is open, so each opening starts from the reminder as it is now. */}
         <EditReminderForm reminder={reminder} onSaved={() => onOpenChange(false)} />
       </DialogContent>
@@ -76,7 +76,7 @@ function EditReminderForm({ reminder, onSaved }: EditReminderFormProps) {
             Cancel
           </Button>
         </DialogClose>
-        <Button type="submit" disabled={!isDraftComplete(draft) || isSaving} className="h-10 rounded-full px-6 font-bold shadow-md shadow-primary/30">
+        <Button type="submit" disabled={!isDraftComplete(draft) || isSaving} className="h-10 rounded-full px-6 font-bold shadow-md shadow-shade">
           Save
         </Button>
       </DialogFooter>

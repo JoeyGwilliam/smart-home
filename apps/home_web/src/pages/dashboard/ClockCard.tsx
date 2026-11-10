@@ -10,7 +10,7 @@ export function ClockCard() {
   const now = useNow(1000)
 
   return (
-    <section className="glass rounded-4xl px-7 py-6 shadow-lg shadow-primary/15" aria-label="Clock">
+    <section className="panel rounded-4xl px-7 py-6 shadow-lg shadow-shade" aria-label="Clock">
       <p className="text-sm font-extrabold tracking-[0.2em] text-primary-text uppercase">{greet(now)}</p>
       <p className="mt-1 flex items-baseline font-heading text-8xl leading-none font-semibold tracking-tight tabular-nums sm:text-9xl">
         <RollingText text={format(now, 'HH')} />

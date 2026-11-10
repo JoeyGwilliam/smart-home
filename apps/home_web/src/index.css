@@ -1,15 +1,13 @@
 @import "tailwindcss";
 @import "tw-animate-css";
 @import "shadcn/tailwind.css";
-@import "@fontsource-variable/nunito";
-/* This build includes Fraunces' "soft" axis, which rounds its serifs to suit the pastel look. */
-@import "@fontsource-variable/fraunces/soft.css";
+@import "@fontsource-variable/pixelify-sans";
 
 @custom-variant dark (&:is(.dark *));
 
 @theme inline {
-    --font-sans: 'Nunito Variable', ui-rounded, system-ui, sans-serif;
-    --font-heading: 'Fraunces Variable', Georgia, serif;
+    --font-sans: 'Pixelify Sans Variable', ui-monospace, monospace;
+    --font-heading: var(--font-sans);
     --color-ring: var(--ring);
     --color-input: var(--input);
     --color-border: var(--border);
@@ -35,89 +33,112 @@
     --color-lavender: var(--lavender);
     --color-primary-text: var(--primary-text);
     --color-field: var(--field);
-    --color-glass-edge: var(--glass-edge);
-    --radius-sm: calc(var(--radius) * 0.6);
-    --radius-md: calc(var(--radius) * 0.8);
-    --radius-lg: var(--radius);
-    --radius-xl: calc(var(--radius) * 1.4);
-    --radius-2xl: calc(var(--radius) * 1.8);
-    --radius-3xl: calc(var(--radius) * 2.2);
-    --radius-4xl: calc(var(--radius) * 2.6);
-}
+    --color-panel-edge: var(--panel-edge);
+    --color-shade: var(--shade);
 
-/* A light, pastel palette. Text is a deep plum rather than black, so that it sits softly on the pastels. */
-:root {
-    --background: oklch(0.985 0.012 350);
-    --foreground: oklch(0.33 0.06 340);
-    --card: oklch(1 0 0 / 72%);
-    --card-foreground: var(--foreground);
-    --popover: oklch(0.995 0.005 350);
-    --popover-foreground: var(--foreground);
-    --primary: oklch(0.82 0.1 355);
-    --primary-foreground: oklch(0.3 0.08 350);
-    --secondary: oklch(0.94 0.035 300);
-    --secondary-foreground: oklch(0.36 0.07 300);
-    --muted: oklch(0.96 0.015 350);
-    --muted-foreground: oklch(0.55 0.04 340);
-    --accent: oklch(0.95 0.03 355);
-    --accent-foreground: var(--foreground);
-    --destructive: oklch(0.6 0.17 15);
-    --border: oklch(0.91 0.03 350);
-    --input: oklch(0.9 0.035 350);
-    --ring: oklch(0.78 0.11 355);
-    --radius: 0.875rem;
-
-    /* The primary pink, adjusted to be readable as text on the background. */
-    --primary-text: oklch(0.58 0.12 355);
-    /* Behind text fields and other inset surfaces. */
-    --field: oklch(1 0 0 / 70%);
-    /* The bright rim that makes a frosted card catch the light. */
-    --glass-edge: oklch(1 0 0 / 80%);
-    /* How strongly the drifting colour shows through behind the page. */
-    --backdrop-opacity: 1;
-
-    /* Highlights for how pressing a reminder is. They stay light in both schemes, so dark text always sits on them. */
-    --peach: oklch(0.88 0.075 45);
-    --butter: oklch(0.94 0.08 95);
-    --mint: oklch(0.92 0.06 165);
-    --sky: oklch(0.91 0.05 235);
-    --lavender: oklch(0.9 0.055 300);
+    /* Pixel art has no soft edges, so every shadow is a solid block offset down and to the right. */
+    --shadow-sm: 2px 2px 0 0 var(--shade);
+    --shadow-md: 4px 4px 0 0 var(--shade);
+    --shadow-lg: 4px 4px 0 0 var(--shade);
+    --shadow-xl: 6px 6px 0 0 var(--shade);
+    --shadow-2xl: 8px 8px 0 0 var(--shade);
 }
 
 /*
- * Night mode: the same pastel pink on a deep plum, like the sky just after sunset. The pink stays the brightest colour on
- * the screen, and the highlights are dimmed a little so that they glow rather than glare.
+ * Daytime on the farm: parchment panels framed in wood, under a blue sky. Text is a dark bark brown rather than black,
+ * so that it sits warmly on the parchment.
+ */
+:root {
+    --background: oklch(0.84 0.07 225);
+    --foreground: oklch(0.3 0.06 50);
+    --card: oklch(0.92 0.07 85);
+    --card-foreground: var(--foreground);
+    --popover: oklch(0.92 0.07 85);
+    --popover-foreground: var(--foreground);
+    --primary: oklch(0.7 0.16 140);
+    --primary-foreground: oklch(0.24 0.06 140);
+    --secondary: oklch(0.84 0.09 75);
+    --secondary-foreground: oklch(0.32 0.07 50);
+    --muted: oklch(0.87 0.07 82);
+    --muted-foreground: oklch(0.47 0.07 55);
+    --accent: oklch(0.86 0.09 80);
+    --accent-foreground: var(--foreground);
+    --destructive: oklch(0.55 0.19 28);
+    --border: oklch(0.66 0.1 65);
+    --input: oklch(0.6 0.1 60);
+    --ring: oklch(0.6 0.15 140);
+
+    /* The primary green, adjusted to be readable as text on both the parchment and the sky. */
+    --primary-text: oklch(0.4 0.12 145);
+    /* Behind text fields and other inset surfaces. */
+    --field: oklch(0.97 0.035 90);
+    /* The wooden frame around a panel, and the dark line that outlines the frame. */
+    --panel-edge: oklch(0.56 0.12 55);
+    --panel-outline: oklch(0.3 0.07 45);
+    /* The colour of the blocky shadows. */
+    --shade: oklch(0.3 0.07 45 / 35%);
+
+    /* The backdrop (see PixelBackdrop). The sky is drawn in bands that lighten towards the horizon. */
+    --sky-high: oklch(0.72 0.1 235);
+    --sky-mid: oklch(0.78 0.085 230);
+    --sky-stars: none;
+    --cloud: oklch(0.99 0.01 230);
+    --cloud-shade: oklch(0.9 0.035 235);
+    --grass: oklch(0.72 0.17 138);
+    --grass-shade: oklch(0.6 0.15 142);
+
+    /* Highlights for how pressing a reminder is. They stay light in both schemes, so dark text always sits on them. */
+    --peach: oklch(0.8 0.12 45);
+    --butter: oklch(0.9 0.12 95);
+    --mint: oklch(0.88 0.1 160);
+    --sky: oklch(0.85 0.08 235);
+    --lavender: oklch(0.84 0.08 300);
+}
+
+/*
+ * Night mode: the same farm after dark. The panels become dark wood with candle-lit cream text, and stars come out in
+ * a navy sky.
  */
 .dark {
-    --background: oklch(0.19 0.035 335);
-    --foreground: oklch(0.93 0.025 350);
-    --card: oklch(0.26 0.045 335 / 65%);
+    --background: oklch(0.3 0.07 270);
+    --foreground: oklch(0.93 0.05 90);
+    --card: oklch(0.3 0.045 55);
     --card-foreground: var(--foreground);
-    --popover: oklch(0.24 0.045 335);
+    --popover: oklch(0.3 0.045 55);
     --popover-foreground: var(--foreground);
-    --primary: oklch(0.8 0.11 355);
-    --primary-foreground: oklch(0.25 0.07 345);
-    --secondary: oklch(0.33 0.06 305);
-    --secondary-foreground: oklch(0.9 0.05 305);
-    --muted: oklch(0.27 0.035 335);
-    --muted-foreground: oklch(0.74 0.045 345);
-    --accent: oklch(0.32 0.055 350);
+    --primary: oklch(0.74 0.16 138);
+    --primary-foreground: oklch(0.22 0.06 140);
+    --secondary: oklch(0.38 0.06 60);
+    --secondary-foreground: oklch(0.92 0.05 90);
+    --muted: oklch(0.35 0.05 55);
+    --muted-foreground: oklch(0.78 0.06 80);
+    --accent: oklch(0.38 0.06 60);
     --accent-foreground: var(--foreground);
-    --destructive: oklch(0.7 0.15 15);
-    --border: oklch(0.36 0.05 340);
-    --input: oklch(0.4 0.055 340);
-    --ring: oklch(0.75 0.12 355);
+    --destructive: oklch(0.68 0.18 28);
+    --border: oklch(0.45 0.07 58);
+    --input: oklch(0.5 0.08 58);
+    --ring: oklch(0.7 0.15 138);
 
-    --primary-text: oklch(0.82 0.1 355);
-    --field: oklch(0.17 0.03 335 / 55%);
-    --glass-edge: oklch(1 0 0 / 9%);
-    --backdrop-opacity: 0.4;
+    --primary-text: oklch(0.82 0.15 135);
+    --field: oklch(0.23 0.035 55);
+    --panel-edge: oklch(0.48 0.1 55);
+    --panel-outline: oklch(0.15 0.03 50);
+    --shade: oklch(0.1 0.03 270 / 55%);
 
-    --peach: oklch(0.8 0.08 45);
-    --butter: oklch(0.86 0.08 95);
-    --mint: oklch(0.82 0.07 165);
-    --sky: oklch(0.82 0.06 235);
-    --lavender: oklch(0.72 0.07 300);
+    --sky-high: oklch(0.2 0.06 275);
+    --sky-mid: oklch(0.25 0.065 272);
+    /* A tile of scattered stars, each a few pixels square. */
+    --sky-stars: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='240' height='240' fill='%23fff6d5'%3E%3Crect x='20' y='30' width='3' height='3'/%3E%3Crect x='130' y='12' width='2' height='2'/%3E%3Crect x='200' y='70' width='3' height='3'/%3E%3Crect x='80' y='110' width='2' height='2'/%3E%3Crect x='160' y='160' width='4' height='4'/%3E%3Crect x='40' y='190' width='2' height='2'/%3E%3Crect x='110' y='220' width='3' height='3'/%3E%3C/svg%3E");
+    --cloud: oklch(0.42 0.06 270);
+    --cloud-shade: oklch(0.35 0.06 270);
+    --grass: oklch(0.42 0.1 145);
+    --grass-shade: oklch(0.34 0.08 150);
+
+    --peach: oklch(0.78 0.12 45);
+    --butter: oklch(0.86 0.11 95);
+    --mint: oklch(0.82 0.1 160);
+    --sky: oklch(0.8 0.08 235);
+    --lavender: oklch(0.74 0.08 300);
 }
 
 @layer base {
@@ -125,18 +146,21 @@
         @apply border-border outline-ring/50;
     }
 
+    /*
+     * Pixel art has no curves, so nothing on the site is rounded. This overrides every `rounded-*` class, including
+     * those inside the ui components, which is why it must be !important.
+     */
+    *, ::before, ::after {
+        border-radius: 0 !important;
+    }
+
     html {
         @apply font-sans;
     }
 
     body {
-        @apply bg-background text-foreground antialiased;
+        @apply bg-background text-foreground;
         min-height: 100dvh;
-    }
-
-    h1, h2, h3 {
-        font-family: var(--font-heading);
-        font-variation-settings: "SOFT" 100;
     }
 
     button:not(:disabled), [role="button"]:not(:disabled) {
@@ -148,20 +172,26 @@
     }
 }
 
-/* Slow drifting for the blurred colour blobs behind the page. */
+/* The sky behind the page: two darker bands above the background colour, with any stars scattered on top. */
+@utility pixel-sky {
+    background-image:
+        var(--sky-stars),
+        linear-gradient(to bottom, var(--sky-high) 0 18%, var(--sky-mid) 18% 40%, transparent 40%);
+}
+
+/* Carries a cloud from off the left edge of the screen to off the right. It moves in jumps, like a sprite. */
 @keyframes drift {
-    0%, 100% { transform: translate(0, 0) scale(1); }
-    33% { transform: translate(4vw, -3vh) scale(1.08); }
-    66% { transform: translate(-3vw, 4vh) scale(0.95); }
+    from { transform: translateX(-20vw); }
+    to { transform: translateX(110vw); }
 }
 
 @utility animate-drift {
-    animation: drift var(--drift-duration, 28s) ease-in-out infinite;
+    animation: drift var(--drift-duration, 160s) steps(400) var(--drift-delay, 0s) infinite;
 }
 
 @media (prefers-reduced-motion: reduce) {
     .animate-drift {
-        animation: none;
+        animation-play-state: paused;
     }
 }
 
@@ -187,7 +217,7 @@ html:active-view-transition-type(theme)::view-transition-new(root) {
 }
 
 /*
- * "page" (started by the router): the old page drifts up and softly out of focus, then the new one rises into place.
+ * "page" (started by the router): the old page drifts up and fades, then the new one rises into place.
  * Only the page's content takes part, so the background and the menus stay still.
  */
 html:active-view-transition-type(page) .page-content {
@@ -208,16 +238,19 @@ html:active-view-transition-type(page)::view-transition-new(page) {
 }
 
 @keyframes page-leave {
-    to { opacity: 0; transform: translateY(-16px) scale(0.98); filter: blur(8px); }
+    to { opacity: 0; transform: translateY(-16px) scale(0.98); }
 }
 
 @keyframes page-enter {
-    from { opacity: 0; transform: translateY(28px) scale(0.98); filter: blur(8px); }
+    from { opacity: 0; transform: translateY(28px) scale(0.98); }
 }
 
-/* The frosted surface that every panel is made of. Shadows are left to Tailwind's classes, so that they can change on hover. */
-@utility glass {
-    border: 1px solid var(--glass-edge);
+/*
+ * The surface that every panel is made of: a wooden frame with a dark outline, like a menu in a farming game. Shadows are
+ * left to Tailwind's classes, so that they can change on hover.
+ */
+@utility panel {
+    border: 4px solid var(--panel-edge);
+    outline: 2px solid var(--panel-outline);
     background-color: var(--card);
-    backdrop-filter: blur(24px);
 }

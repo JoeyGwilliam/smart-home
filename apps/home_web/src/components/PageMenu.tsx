@@ -16,13 +16,13 @@ export function PageMenu() {
   return (
     <DropdownMenu open={isOpen} onOpenChange={setIsOpen}>
       <DropdownMenuTrigger asChild>
-        <Button variant="ghost" size="icon-lg" className="glass rounded-full text-muted-foreground shadow-md shadow-primary/10 hover:bg-accent hover:text-foreground" aria-label="Pages">
+        <Button variant="ghost" size="icon-lg" className="panel rounded-full text-muted-foreground shadow-md shadow-shade hover:bg-accent hover:text-foreground" aria-label="Pages">
           <motion.span animate={{ scale: isOpen ? 0.85 : 1 }} transition={{ type: 'spring', bounce: 0.5 }} className="grid place-items-center">
             <LayoutGrid className="size-5" />
           </motion.span>
         </Button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent align="end" className="w-56 rounded-2xl border border-glass-edge p-1.5 shadow-xl shadow-primary/20">
+      <DropdownMenuContent align="end" className="w-56 rounded-2xl border-4 border-panel-edge p-1.5 shadow-xl shadow-shade">
         <DropdownMenuLabel className="font-heading text-base font-semibold">Pages</DropdownMenuLabel>
         <DropdownMenuSeparator />
         {PAGES.map((page) => {

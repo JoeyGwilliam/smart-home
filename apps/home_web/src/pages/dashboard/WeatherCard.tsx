@@ -30,7 +30,7 @@ function ForecastCard({ forecast }: { forecast: Forecast }) {
   const { current, today, hours } = forecast
 
   return (
-    <motion.section layout className="glass overflow-hidden rounded-4xl shadow-lg shadow-primary/15" aria-label={`Weather in ${FORECAST_LOCATION_NAME}`}>
+    <motion.section layout className="panel overflow-hidden rounded-4xl shadow-lg shadow-shade" aria-label={`Weather in ${FORECAST_LOCATION_NAME}`}>
       <button
         type="button"
         onClick={() => setIsExpanded(!isExpanded)}
@@ -152,13 +152,13 @@ function RainChance({ percentage }: { percentage: number }) {
 
 function WeatherUnavailableCard({ onRetry }: { onRetry: () => void }) {
   return (
-    <section className="glass grid place-items-center gap-2 rounded-4xl px-7 py-10 text-center shadow-lg shadow-primary/15">
+    <section className="panel grid place-items-center gap-2 rounded-4xl px-7 py-10 text-center shadow-lg shadow-shade">
       <span className="grid size-14 place-items-center rounded-full bg-lavender text-secondary-foreground">
         <CloudOff className="size-7" />
       </span>
       <h2 className="text-xl font-semibold">The weather's hiding</h2>
       <p className="text-muted-foreground">The forecast couldn't be fetched just now.</p>
-      <Button onClick={onRetry} className="mt-2 h-9 rounded-full px-5 font-bold shadow-md shadow-primary/30">
+      <Button onClick={onRetry} className="mt-2 h-9 rounded-full px-5 font-bold shadow-md shadow-shade">
         Try again
       </Button>
     </section>

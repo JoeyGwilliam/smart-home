@@ -59,7 +59,7 @@ export function DueTimePicker({ value, onChange }: DueTimePickerProps) {
             {value ? format(value, 'EEE d MMM, HH:mm') : 'Add a due time'}
           </Button>
         </PopoverTrigger>
-        <PopoverContent align="start" className="w-auto rounded-3xl border-border p-3 shadow-xl shadow-primary/20">
+        <PopoverContent align="start" className="w-auto rounded-3xl border-border p-3 shadow-xl shadow-shade">
           <div className="flex flex-wrap gap-1.5 pb-2">
             {presets.map((preset) => (
               <button

@@ -51,8 +51,8 @@ export function ReminderCard({ reminder, now, canDelete }: ReminderCardProps) {
   return (
     <article
       className={cn(
-        'group flex items-center gap-4 glass rounded-3xl p-4 shadow-md shadow-primary/10 transition-[box-shadow,opacity] hover:shadow-lg hover:shadow-primary/20',
-        urgency === 'overdue' && 'ring-2 ring-peach',
+        'group flex items-center gap-4 panel rounded-3xl p-4 shadow-md shadow-shade transition-[box-shadow,opacity] hover:shadow-lg hover:shadow-shade',
+        urgency === 'overdue' && 'ring-6 ring-peach',
         isCompleted && 'opacity-70',
       )}
     >

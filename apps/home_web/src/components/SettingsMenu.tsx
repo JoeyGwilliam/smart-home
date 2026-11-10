@@ -26,7 +26,7 @@ export function SettingsMenu() {
         <Button
           variant="ghost"
           size="icon-lg"
-          className="glass rounded-full text-muted-foreground shadow-md shadow-primary/10 hover:bg-accent hover:text-foreground"
+          className="panel rounded-full text-muted-foreground shadow-md shadow-shade hover:bg-accent hover:text-foreground"
           aria-label="Settings"
         >
           <motion.span animate={{ rotate: isOpen ? 90 : 0 }} transition={{ type: 'spring', bounce: 0.3 }} className="grid place-items-center">
@@ -34,7 +34,7 @@ export function SettingsMenu() {
           </motion.span>
         </Button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent align="end" className="w-56 rounded-2xl border border-glass-edge p-1.5 shadow-xl shadow-primary/20">
+      <DropdownMenuContent align="end" className="w-56 rounded-2xl border-4 border-panel-edge p-1.5 shadow-xl shadow-shade">
         <DropdownMenuLabel className="font-heading text-base font-semibold">Settings</DropdownMenuLabel>
         <DropdownMenuSeparator />
         <DropdownMenuItem

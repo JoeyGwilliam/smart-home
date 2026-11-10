@@ -120,7 +120,7 @@ function EmptyState({ message }: { message: EmptyMessage }) {
 
 function UnavailableNotice({ onRetry }: { onRetry: () => void }) {
   return (
-    <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} className="glass grid place-items-center gap-3 rounded-3xl px-6 py-12 text-center shadow-md shadow-primary/10">
+    <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} className="panel grid place-items-center gap-3 rounded-3xl px-6 py-12 text-center shadow-md shadow-shade">
       <motion.span
         className="grid size-16 place-items-center rounded-full bg-lavender text-secondary-foreground"
         animate={{ y: [0, -6, 0] }}
@@ -130,7 +130,7 @@ function UnavailableNotice({ onRetry }: { onRetry: () => void }) {
       </motion.span>
       <h2 className="text-2xl font-semibold">Can't reach your reminders</h2>
       <p className="max-w-sm text-muted-foreground">The reminders service isn't responding. Your reminders are safe, so try again in a moment.</p>
-      <Button onClick={onRetry} className="mt-2 h-10 rounded-full px-6 font-bold shadow-md shadow-primary/30">
+      <Button onClick={onRetry} className="mt-2 h-10 rounded-full px-6 font-bold shadow-md shadow-shade">
         Try again
       </Button>
     </motion.div>

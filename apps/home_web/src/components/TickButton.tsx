@@ -17,7 +17,7 @@ interface TickButtonProps {
   reminderTitle: string
 }
 
-/** A round checkbox that celebrates ticking a reminder off with a chime and a burst of sparkles. */
+/** A checkbox that celebrates ticking a reminder off with a chime and a burst of sparkles. */
 export function TickButton({ isCompleted, onToggle, reminderTitle }: TickButtonProps) {
   const [isCelebrating, setIsCelebrating] = useState(false)
   const celebrationTimeout = useRef<ReturnType<typeof setTimeout>>(undefined)
@@ -64,8 +64,8 @@ export function TickButton({ isCompleted, onToggle, reminderTitle }: TickButtonP
           fill="none"
           stroke="oklch(0.42 0.09 165)"
           strokeWidth={3}
-          strokeLinecap="round"
-          strokeLinejoin="round"
+          strokeLinecap="square"
+          strokeLinejoin="miter"
           initial={false}
           animate={{ pathLength: isTicked ? 1 : 0, opacity: isTicked ? 1 : 0 }}
           transition={{ duration: 0.3, ease: 'easeOut' }}
