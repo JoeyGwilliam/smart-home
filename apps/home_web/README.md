@@ -4,6 +4,7 @@ The pages for the home's screens, as one React + TypeScript app:
 
 - `/`: the dashboard, with the time, the weather in Bristol, and the reminders due today.
 - `/reminders`: the reminders viewer, for adding, editing, ticking off and deleting reminders.
+- `/word-of-the-day`: an English idiom, a Spanish word and a Mandarin word, which change each day.
 
 Moving between pages is animated with view transitions (see `src/index.css`).
 
@@ -17,6 +18,7 @@ Moving between pages is animated with view transitions (see `src/index.css`).
 - `src/reminders/`: the reminders API client, and the rules for ordering and describing reminders.
 - `src/weather/`: the forecast, fetched by the browser straight from [Open-Meteo](https://open-meteo.com), which needs
   no key.
+- `src/words/`: the idioms and words that take turns as the word of the day, and the rule for whose turn it is.
 - `src/scene/`: what the backdrop behind every page shows: the time of day and the weather, either live or as chosen in
   the settings.
 - `src/settings/`: per-device settings, such as the backdrop's weather, remembered by the browser.

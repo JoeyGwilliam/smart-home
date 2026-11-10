@@ -1,0 +1,50 @@
+/** An English saying whose meaning can't be worked out from its words. */
+export interface Idiom {
+  phrase: string
+  meaning: string
+}
+
+/** The English idioms that take turns as the idiom of the day, in the order they are shown. */
+export const IDIOMS: Idiom[] = [
+  { phrase: 'A blessing in disguise', meaning: 'Something that seems bad at first but turns out well.' },
+  { phrase: 'Once in a blue moon', meaning: 'Very rarely.' },
+  { phrase: 'Bite the bullet', meaning: 'To face something unpleasant that can’t be put off any longer.' },
+  { phrase: 'Break the ice', meaning: 'To get people who have just met talking comfortably.' },
+  { phrase: 'Under the weather', meaning: 'Feeling slightly ill.' },
+  { phrase: 'The best of both worlds', meaning: 'The advantages of two different things at once.' },
+  { phrase: 'Hit the nail on the head', meaning: 'To describe something exactly right.' },
+  { phrase: 'Let the cat out of the bag', meaning: 'To reveal a secret by accident.' },
+  { phrase: 'A piece of cake', meaning: 'Something very easy to do.' },
+  { phrase: 'Spill the beans', meaning: 'To tell a secret.' },
+  { phrase: 'Burn the midnight oil', meaning: 'To work late into the night.' },
+  { phrase: 'Barking up the wrong tree', meaning: 'Looking for the answer in the wrong place.' },
+  { phrase: 'Beat around the bush', meaning: 'To avoid saying what you mean.' },
+  { phrase: 'Cost an arm and a leg', meaning: 'To be very expensive.' },
+  { phrase: 'Every cloud has a silver lining', meaning: 'Every bad situation has something good in it.' },
+  { phrase: 'Kill two birds with one stone', meaning: 'To get two things done with one action.' },
+  { phrase: 'The ball is in your court', meaning: 'It is your turn to decide or act.' },
+  { phrase: 'Cut corners', meaning: 'To do something badly to save time or money.' },
+  { phrase: 'Get out of hand', meaning: 'To become hard to control.' },
+  { phrase: 'Hit the sack', meaning: 'To go to bed.' },
+  { phrase: 'On the ball', meaning: 'Alert and quick to understand.' },
+  { phrase: 'Pull someone’s leg', meaning: 'To tease someone by telling them something untrue.' },
+  { phrase: 'Speak of the devil', meaning: 'Said when the person you were just talking about appears.' },
+  { phrase: 'Sit on the fence', meaning: 'To avoid choosing a side.' },
+  { phrase: 'Take it with a pinch of salt', meaning: 'To not believe something completely.' },
+  { phrase: 'The last straw', meaning: 'The final small problem that makes a situation too much to bear.' },
+  { phrase: 'A storm in a teacup', meaning: 'A lot of fuss about something unimportant.' },
+  { phrase: 'Bob’s your uncle', meaning: 'And there you have it: said after simple instructions.' },
+  { phrase: 'Over the moon', meaning: 'Extremely happy.' },
+  { phrase: 'Raining cats and dogs', meaning: 'Raining very heavily.' },
+  { phrase: 'Pigs might fly', meaning: 'Said about something that will never happen.' },
+  { phrase: 'Don’t count your chickens before they hatch', meaning: 'Don’t rely on something good until it has actually happened.' },
+  { phrase: 'Till the cows come home', meaning: 'For a very long time.' },
+  { phrase: 'The elephant in the room', meaning: 'An obvious problem that nobody wants to talk about.' },
+  { phrase: 'Hold your horses', meaning: 'Wait a moment.' },
+  { phrase: 'Let sleeping dogs lie', meaning: 'To leave a settled problem alone rather than stir it up again.' },
+  { phrase: 'A bird in the hand is worth two in the bush', meaning: 'What you already have is worth more than what you might get.' },
+  { phrase: 'The early bird catches the worm', meaning: 'Whoever starts first has the best chance.' },
+  { phrase: 'Bite off more than you can chew', meaning: 'To take on more than you can manage.' },
+  { phrase: 'Go the extra mile', meaning: 'To make more effort than is expected.' },
+  { phrase: 'Make hay while the sun shines', meaning: 'To make the most of a good opportunity while it lasts.' },
+]

@@ -1,0 +1,50 @@
+/** A Spanish word or short phrase, and what it means in English. */
+export interface SpanishWord {
+  word: string
+  translation: string
+}
+
+/** The Spanish words that take turns as the Spanish word of the day, in the order they are shown. */
+export const SPANISH_WORDS: SpanishWord[] = [
+  { word: 'la madrugada', translation: 'the early hours, between midnight and dawn' },
+  { word: 'la sobremesa', translation: 'the time spent chatting at the table after a meal' },
+  { word: 'estrenar', translation: 'to use or wear something for the first time' },
+  { word: 'la merienda', translation: 'an afternoon snack' },
+  { word: 'friolero', translation: 'someone who feels the cold easily' },
+  { word: 'anteayer', translation: 'the day before yesterday' },
+  { word: 'empalagoso', translation: 'sickly sweet' },
+  { word: 'el tocayo', translation: 'someone who shares your first name' },
+  { word: 'trasnochar', translation: 'to stay up very late' },
+  { word: 'desvelado', translation: 'wide awake, unable to sleep' },
+  { word: 'la mariposa', translation: 'butterfly' },
+  { word: 'el susurro', translation: 'whisper' },
+  { word: 'el amanecer', translation: 'dawn' },
+  { word: 'el atardecer', translation: 'dusk' },
+  { word: 'la lluvia', translation: 'rain' },
+  { word: 'el girasol', translation: 'sunflower' },
+  { word: 'la estrella', translation: 'star' },
+  { word: 'el cariño', translation: 'affection; also "darling"' },
+  { word: 'ojalá', translation: 'hopefully; if only' },
+  { word: 'la sonrisa', translation: 'smile' },
+  { word: 'el abrazo', translation: 'hug' },
+  { word: 'la luciérnaga', translation: 'firefly' },
+  { word: 'el arcoíris', translation: 'rainbow' },
+  { word: 'la almohada', translation: 'pillow' },
+  { word: 'ronronear', translation: 'to purr' },
+  { word: 'la chispa', translation: 'spark' },
+  { word: 'las cosquillas', translation: 'tickles' },
+  { word: 'la golosina', translation: 'a sweet treat' },
+  { word: 'el paraguas', translation: 'umbrella' },
+  { word: 'el murciélago', translation: 'bat (the animal)' },
+  { word: 'el relámpago', translation: 'a flash of lightning' },
+  { word: 'el aguacate', translation: 'avocado' },
+  { word: 'el duende', translation: 'an elf or goblin; also a magical charm' },
+  { word: 'la querencia', translation: 'the place where you feel most at home' },
+  { word: 'la vergüenza ajena', translation: 'embarrassment felt on someone else’s behalf' },
+  { word: 'bostezar', translation: 'to yawn' },
+  { word: 'travieso', translation: 'mischievous' },
+  { word: 'acogedor', translation: 'cosy' },
+  { word: 'la ternura', translation: 'tenderness' },
+  { word: 'la pereza', translation: 'laziness' },
+  { word: 'enhorabuena', translation: 'congratulations' },
+]

@@ -1,8 +1,9 @@
-import { LayoutDashboard, ListTodo, type LucideIcon } from 'lucide-react'
+import { Languages, LayoutDashboard, ListTodo, type LucideIcon } from 'lucide-react'
 import type { JSX } from 'react'
 
 import { DashboardPage } from '@/pages/dashboard/DashboardPage'
 import { RemindersPage } from '@/pages/reminders/RemindersPage'
+import { WordOfTheDayPage } from '@/pages/wordOfTheDay/WordOfTheDayPage'
 
 /** A screen that can be shown, and how to find it. */
 export interface Page {
@@ -22,4 +23,5 @@ export interface Page {
 export const PAGES: Page[] = [
   { path: '/', title: 'Dashboard', icon: LayoutDashboard, component: DashboardPage },
   { path: '/reminders', title: 'Reminders', icon: ListTodo, component: RemindersPage },
+  { path: '/word-of-the-day', title: 'Word of the day', icon: Languages, component: WordOfTheDayPage },
 ]
