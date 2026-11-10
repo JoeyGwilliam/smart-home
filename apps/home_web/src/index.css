@@ -301,12 +301,93 @@
     animation: lightning 11s steps(1) infinite;
 }
 
+/*
+ * A farm animal jumping in fright at the lightning. It shares the lightning's 11s cycle, and jumps on its first flash,
+ * so the two stay in step as long as they start together, which they do, as both appear with the thunder.
+ */
+@keyframes startle {
+    0%, 90.5%, 93%, 100% { transform: translateY(0); }
+    91% { transform: translateY(-10px); }
+}
+
+@utility animate-startle {
+    animation: startle 11s steps(1) infinite;
+}
+
+/* A word floating up and away from an animal, such as a sleeper's "z" or a yawn, fading in and then out. */
+@keyframes float-away {
+    0% { transform: translate(0, 0); opacity: 0; }
+    20% { opacity: 1; }
+    100% { transform: translate(20px, -72px); opacity: 0; }
+}
+
+@utility animate-float-away {
+    animation: float-away var(--float-duration, 6s) steps(16) var(--float-delay, 0s) infinite;
+}
+
+/* A butterfly's wingbeat: its wings fold to half their width and open again. */
+@keyframes flap {
+    50% { transform: scaleX(0.4); }
+}
+
+@utility animate-flap {
+    animation: flap 0.5s steps(1) infinite;
+}
+
+/*
+ * A butterfly's lazy loop over the grass. It moves with "translate" rather than "transform", so that it doesn't
+ * fight the wingbeat, which is a transform.
+ */
+@keyframes flutter {
+    0%, 100% { translate: 0 0; }
+    25% { translate: 48px -28px; }
+    50% { translate: 100px -6px; }
+    75% { translate: 44px -40px; }
+}
+
+@utility animate-flutter {
+    animation: flutter var(--flutter-duration, 14s) steps(70) var(--flutter-delay, 0s) infinite;
+}
+
+/* A firefly's slow blink. */
+@keyframes glow {
+    0%, 100% { opacity: 0; }
+    40%, 60% { opacity: 1; }
+}
+
+@utility animate-glow {
+    animation: glow var(--glow-duration, 3s) ease-in-out var(--glow-delay, 0s) infinite;
+}
+
+/* A firefly's aimless hovering. */
+@keyframes wander {
+    0%, 100% { translate: 0 0; }
+    33% { translate: 16px -12px; }
+    66% { translate: -12px -20px; }
+}
+
+@utility animate-wander {
+    animation: wander var(--wander-duration, 10s) steps(40) infinite;
+}
+
+/* A bright star dimming and brightening again. */
+@keyframes twinkle {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.3; }
+}
+
+@utility animate-twinkle {
+    animation: twinkle var(--twinkle-duration, 3s) steps(1) var(--twinkle-delay, 0s) infinite;
+}
+
 @media (prefers-reduced-motion: reduce) {
-    .animate-drift, .animate-hop, .animate-fall {
+    .animate-drift, .animate-hop, .animate-fall, .animate-flutter, .animate-wander {
         animation-play-state: paused;
     }
 
-    .animate-lightning {
+    /* These would freeze at a moment when they are faint, or mid-jump, so they are shown at rest instead. The Zzzs
+       then sit on top of each other, as a single z. */
+    .animate-lightning, .animate-startle, .animate-float-away, .animate-flap, .animate-glow, .animate-twinkle {
         animation: none;
     }
 }

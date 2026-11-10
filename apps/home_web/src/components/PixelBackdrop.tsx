@@ -1,9 +1,8 @@
 import type { CSSProperties } from 'react'
 
+import { FieldLife } from '@/components/FieldLife'
+import { CREAM, PixelSprite, SCENE_PIXEL_SIZE, type Sprite } from '@/components/PixelSprite'
 import type { Scene, SceneWeather, TimeOfDay } from '@/scene/scene'
-
-/** Each drawn pixel of the grass, the animals and the rain is this many screen pixels across. */
-const SCENE_PIXEL_SIZE = 4
 
 interface Cloud {
   /** Where the cloud sits in the sky, and how big it is. */
@@ -43,18 +42,6 @@ const WEATHER_WITH_CLOUD_BANK: SceneWeather[] = ['cloudy', ...WET_WEATHER]
 
 /** The weather that leaves the sun or moon visible. In anything heavier, the cloud hides it. */
 const WEATHER_SHOWING_SKY: SceneWeather[] = ['clear', 'cloudy']
-
-/**
- * A picture drawn as rows of pixels. Each character is one pixel, and stands for the colour that `palette` gives it.
- * A full stop is a transparent pixel. Every row must be the same length.
- */
-interface Sprite {
-  rows: string[]
-  palette: Record<string, string>
-}
-
-const CREAM = '#fff8e7'
-const CHARCOAL = '#3d302c'
 
 const DISC_ROWS = ['..oooo..', '.oooooo.', 'oooooooo', 'oooooooo', 'oooooooo', 'oooooooo', '.oooooo.', '..oooo..']
 const MIDDAY_SUN: Sprite = { rows: DISC_ROWS, palette: { o: '#ffd94a' } }
@@ -112,65 +99,6 @@ function drawMoon(phase: number): Sprite {
   return { rows, palette: { o: CREAM, d: '#4d4f7d' } }
 }
 
-const CHICKEN: Sprite = {
-  rows: [
-    '.....r..',
-    '....www.',
-    '....wkwo',
-    'w..wwww.',
-    'wwwwwww.',
-    '.wwwwww.',
-    '..wwww..',
-    '...o.o..',
-  ],
-  palette: { w: CREAM, k: CHARCOAL, r: '#d9412f', o: '#f29a2e' },
-}
-
-const SHEEP: Sprite = {
-  rows: [
-    '..wwwwww....',
-    '.wwwwwwwwff.',
-    'wwwwwwwwfeff',
-    'wwwwwwwwffff',
-    'wwwwwwwww...',
-    '.wwwwwwww...',
-    '..ff...ff...',
-    '..ff...ff...',
-  ],
-  palette: { w: CREAM, f: CHARCOAL, e: CREAM },
-}
-
-const COW: Sprite = {
-  rows: [
-    '.........h...h',
-    '.........wwwww',
-    '.wwbbwwwwwkwkw',
-    'wwwbbbwwwwwwww',
-    'wwwwbwwbbwpppp',
-    'wwwwwwwbbw....',
-    '.wwwwwwwww....',
-    '.ww.pp..ww....',
-    '.ww.....ww....',
-    '.kk.....kk....',
-  ],
-  palette: { w: CREAM, b: '#6b4a3a', k: CHARCOAL, h: '#d8c9a8', p: '#f2a7b0' },
-}
-
-interface Animal {
-  sprite: Sprite
-  /** Where along the grass the animal stands, and which way it faces. Sprites are drawn facing right. */
-  className: string
-  /** How often the animal hops, so that the animals hop out of step with each other. */
-  hopInterval: string
-}
-
-const ANIMALS: Animal[] = [
-  { sprite: COW, className: 'left-[10%]', hopInterval: '7s' },
-  { sprite: CHICKEN, className: 'left-[36%] -scale-x-100', hopInterval: '2.3s' },
-  { sprite: SHEEP, className: 'left-[60%]', hopInterval: '5s' },
-  { sprite: CHICKEN, className: 'left-[82%]', hopInterval: '3.1s' },
-]
-
 /**
  * The pixel-art scene behind the page: a banded sky above a strip of grass where farm animals stand. The scene
  * decides the rest: where the sun or moon sits, the moon's phase, how much cloud there is, and whether drizzle, rain,
@@ -188,6 +116,7 @@ export function PixelBackdrop({ scene }: { scene: Scene }) {
           <PixelSprite sprite={sunOrMoon} pixelSize={SUN_PIXEL_SIZE} />
         </div>
       )}
+      {timeOfDay === 'night' && weather === 'clear' && <TwinklingStars />}
       {CLOUDS.slice(0, CLOUD_COUNTS[weather]).map((cloud) => (
         <PixelCloud key={cloud.className} cloud={cloud} />
       ))}
@@ -199,16 +128,7 @@ export function PixelBackdrop({ scene }: { scene: Scene }) {
             <PixelSprite sprite={PUDDLE} pixelSize={SCENE_PIXEL_SIZE} />
           </div>
         ))}
-      {ANIMALS.map((animal) => (
-        // The animals stand a little way into the grass rather than on its top edge, so that they look planted in the field.
-        <div
-          key={animal.className}
-          className={`animate-hop absolute bottom-[28px] dark:brightness-75 ${animal.className}`}
-          style={{ '--hop-interval': animal.hopInterval } as CSSProperties}
-        >
-          <PixelSprite sprite={animal.sprite} pixelSize={SCENE_PIXEL_SIZE} />
-        </div>
-      ))}
+      <FieldLife scene={scene} />
       {weather === 'fog' && <FogBanks />}
       {weather === 'drizzle' && <Precipitation kind={DRIZZLE} />}
       {(weather === 'rain' || weather === 'thunder') && <Precipitation kind={RAIN} />}
@@ -216,6 +136,29 @@ export function PixelBackdrop({ scene }: { scene: Scene }) {
       {weather === 'thunder' && <div className="animate-lightning absolute inset-0 bg-white opacity-0" />}
     </div>
   )
+}
+
+const SPARKLE: Sprite = { rows: ['.o.', 'ooo', '.o.'], palette: { o: CREAM } }
+
+/** Where the brighter stars sit, clear of the moon, and how they twinkle out of step with each other. */
+const SPARKLES = [
+  { className: 'top-[6%] left-[38%]', twinkleDuration: '2.6s', twinkleDelay: '0s' },
+  { className: 'top-[16%] left-[62%]', twinkleDuration: '3.4s', twinkleDelay: '-1.2s' },
+  { className: 'top-[9%] left-[84%]', twinkleDuration: '2.9s', twinkleDelay: '-2s' },
+  { className: 'top-[28%] left-[50%]', twinkleDuration: '3.8s', twinkleDelay: '-0.6s' },
+]
+
+/** A few brighter stars that twinkle, among the fainter ones that index.css scatters over a clear night sky. */
+function TwinklingStars() {
+  return SPARKLES.map((sparkle) => (
+    <div
+      key={sparkle.className}
+      className={`animate-twinkle absolute ${sparkle.className}`}
+      style={{ '--twinkle-duration': sparkle.twinkleDuration, '--twinkle-delay': sparkle.twinkleDelay } as CSSProperties}
+    >
+      <PixelSprite sprite={SPARKLE} pixelSize={SCENE_PIXEL_SIZE} />
+    </div>
+  ))
 }
 
 function PixelCloud({ cloud }: { cloud: Cloud }) {
@@ -400,20 +343,5 @@ function FogBanks() {
       <div className="absolute inset-x-0 top-[52%] h-[40px] bg-(--fog)" />
       <div className="absolute inset-x-0 bottom-0 h-[25%] bg-(--fog)" />
     </>
-  )
-}
-
-function PixelSprite({ sprite, pixelSize }: { sprite: Sprite; pixelSize: number }) {
-  const width = sprite.rows[0].length
-  const height = sprite.rows.length
-
-  return (
-    <svg viewBox={`0 0 ${width} ${height}`} width={width * pixelSize} height={height * pixelSize} shapeRendering="crispEdges" className="block">
-      {sprite.rows.flatMap((row, y) =>
-        [...row].map((character, x) =>
-          character === '.' ? null : <rect key={`${x},${y}`} x={x} y={y} width="1" height="1" fill={sprite.palette[character]} />,
-        ),
-      )}
-    </svg>
   )
 }
