@@ -80,6 +80,13 @@
     --cloud-shade: oklch(0.9 0.035 235);
     --grass: oklch(0.78 0.15 142);
     --grass-shade: oklch(0.69 0.15 145);
+    /* How much of the sky's colour heavy weather replaces with the grey of --overcast-tint. */
+    --overcast: 0%;
+    --overcast-tint: oklch(0.78 0.02 250);
+    /* Translucent, so that rain reads as a soft shimmer rather than hard streaks. */
+    --rain: oklch(0.6 0.1 245 / 50%);
+    --snow: oklch(1 0 0);
+    --fog: oklch(1 0 0 / 45%);
 
     /* Highlights for how pressing a reminder is. They stay light in both schemes, so dark text always sits on them. */
     --peach: oklch(0.84 0.11 45);
@@ -90,7 +97,7 @@
 }
 
 /*
- * Night mode: the same farm after dark. The panels turn a deep plum with candle-lit cream text, and stars come out in
+ * Night: the same farm after dark. The panels turn a deep plum with candle-lit cream text, and stars come out in
  * a navy sky. The pink stays the brightest colour on the screen.
  */
 .dark {
@@ -126,12 +133,77 @@
     --cloud-shade: oklch(0.35 0.06 270);
     --grass: oklch(0.42 0.1 145);
     --grass-shade: oklch(0.34 0.08 150);
+    --overcast-tint: oklch(0.24 0.02 270);
+    --rain: oklch(0.8 0.07 245 / 45%);
+    --fog: oklch(0.8 0.02 270 / 16%);
 
     --peach: oklch(0.8 0.08 45);
     --butter: oklch(0.86 0.08 95);
     --mint: oklch(0.82 0.07 165);
     --sky: oklch(0.82 0.06 235);
     --lavender: oklch(0.72 0.07 300);
+}
+
+/*
+ * The backdrop follows the scene (see src/scene), which RootLayout writes onto the root element: the "dark" class at
+ * night, the time of day as data-time-of-day, and the weather as data-weather. Day and night use the palettes above.
+ * Sunrise and sunset keep the daytime palette for everything but the sky, which stays light enough for dark text.
+ */
+[data-time-of-day="sunrise"] {
+    --background: oklch(0.9 0.075 60);
+    --sky-mid: oklch(0.86 0.08 5);
+    --sky-high: oklch(0.8 0.08 285);
+    --cloud: oklch(0.98 0.02 40);
+    --cloud-shade: oklch(0.9 0.05 5);
+}
+
+[data-time-of-day="sunset"] {
+    --background: oklch(0.85 0.11 60);
+    --sky-mid: oklch(0.78 0.12 15);
+    --sky-high: oklch(0.68 0.11 305);
+    --cloud: oklch(0.93 0.06 45);
+    --cloud-shade: oklch(0.82 0.09 10);
+    --grass: oklch(0.72 0.14 138);
+    --grass-shade: oklch(0.63 0.14 142);
+}
+
+/* Heavier weather greys the sky more, whatever the time of day. */
+[data-weather="drizzle"] { --overcast: 30%; }
+[data-weather="cloudy"], [data-weather="rain"] { --overcast: 50%; }
+[data-weather="snow"] { --overcast: 60%; }
+[data-weather="fog"] { --overcast: 70%; }
+[data-weather="thunder"] { --overcast: 85%; }
+
+/* By day, storm clouds are grey and a thunderstorm darkens the sky. At night everything is dark enough already. */
+:root:not(.dark)[data-weather="thunder"] {
+    --cloud: oklch(0.87 0.015 250);
+    --cloud-shade: oklch(0.77 0.02 250);
+}
+
+/* Rain clouds are only a little greyer than fair-weather ones, which keeps a shower from looking gloomy. */
+:root:not(.dark)[data-weather="rain"] {
+    --cloud: oklch(0.94 0.012 250);
+    --cloud-shade: oklch(0.85 0.02 250);
+}
+
+:root:not(.dark)[data-weather="thunder"] {
+    --overcast-tint: oklch(0.64 0.03 260);
+}
+
+/* Snow settles on the grass. */
+[data-weather="snow"] {
+    --grass: oklch(0.97 0.01 230);
+    --grass-shade: oklch(0.89 0.025 235);
+}
+
+.dark[data-weather="snow"] {
+    --grass: oklch(0.62 0.03 260);
+    --grass-shade: oklch(0.52 0.035 262);
+}
+
+/* Stars only show through a clear night sky. */
+.dark:not([data-weather="clear"]) {
+    --sky-stars: none;
 }
 
 @layer base {
@@ -164,11 +236,20 @@
     }
 }
 
-/* The sky behind the page: two darker bands above the background colour, with any stars scattered on top. */
+/*
+ * The sky behind the page: two bands above the background colour, with any stars scattered on top. Each band is greyed
+ * by as much as the weather is overcast.
+ */
 @utility pixel-sky {
+    background-color: color-mix(in oklch, var(--background), var(--overcast-tint) var(--overcast));
     background-image:
         var(--sky-stars),
-        linear-gradient(to bottom, var(--sky-high) 0 18%, var(--sky-mid) 18% 40%, transparent 40%);
+        linear-gradient(
+            to bottom,
+            color-mix(in oklch, var(--sky-high), var(--overcast-tint) var(--overcast)) 0 18%,
+            color-mix(in oklch, var(--sky-mid), var(--overcast-tint) var(--overcast)) 18% 40%,
+            transparent 40%
+        );
 }
 
 /* Carries a cloud from off the left edge of the screen to off the right. It moves in jumps, like a sprite. */
@@ -191,16 +272,43 @@
     animation: hop var(--hop-interval, 4s) steps(1) infinite;
 }
 
+/*
+ * Slides falling rain or snow from one row of its tiles to the next, which lands it exactly where it started (see
+ * Precipitation in PixelBackdrop).
+ */
+@keyframes fall {
+    to { transform: translate(var(--fall-drift, 0), var(--fall-distance)); }
+}
+
+@utility animate-fall {
+    animation: fall var(--fall-duration, 1s) linear infinite;
+}
+
+/* A double flash of lightning every so often. It is kept dim and brief, so that it is gentle on the eyes. */
+@keyframes lightning {
+    0%, 90%, 92.5%, 95%, 100% { opacity: 0; }
+    91% { opacity: 0.4; }
+    93.5% { opacity: 0.2; }
+}
+
+@utility animate-lightning {
+    animation: lightning 11s steps(1) infinite;
+}
+
 @media (prefers-reduced-motion: reduce) {
-    .animate-drift, .animate-hop {
+    .animate-drift, .animate-hop, .animate-fall {
         animation-play-state: paused;
+    }
+
+    .animate-lightning {
+        animation: none;
     }
 }
 
 /*
  * View transitions. Each kind of change gives its transition a type, and these rules animate each type differently.
  *
- * "theme" (started by SettingsMenu): the new colour scheme is revealed as a circle growing from the settings button. The
+ * "theme" (started by SettingsMenu): the new scene is revealed as a circle growing from the settings button. The
  * centre is the middle of that button as RootLayout places it: 1rem from the corner, plus half of its 2.25rem size.
  */
 html:active-view-transition-type(theme)::view-transition-old(root),

@@ -17,7 +17,9 @@ Moving between pages is animated with view transitions (see `src/index.css`).
 - `src/reminders/`: the reminders API client, and the rules for ordering and describing reminders.
 - `src/weather/`: the forecast, fetched by the browser straight from [Open-Meteo](https://open-meteo.com), which needs
   no key.
-- `src/settings/`: per-device settings, such as night mode, remembered by the browser.
+- `src/scene/`: what the backdrop behind every page shows: the time of day and the weather, either live or as chosen in
+  the settings.
+- `src/settings/`: per-device settings, such as the backdrop's weather, remembered by the browser.
 - `src/components/`: pieces that pages share, such as `ReminderList`. `src/components/ui/` holds components generated
   by shadcn/ui (`npx shadcn@latest add <name>`); they are ours to restyle.
 
