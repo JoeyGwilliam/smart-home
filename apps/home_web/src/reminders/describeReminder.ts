@@ -21,11 +21,19 @@ export interface Countdown {
   caption: string
 }
 
+/** A due time, split so that a narrow screen can wrap it between the date and the time, rather than within either. */
+export interface DueLabel {
+  /** The date, such as "Mon 10 Nov". */
+  date: string
+  /** The time of day, such as "12:00". */
+  time: string
+}
+
 /** Everything needed to show a reminder's timing, in the viewer's local time zone. */
 export interface ReminderDescription {
   urgency: Urgency
-  /** The due time, such as "Mon 10 Nov, 12:00", or null if there is no due time. */
-  dueLabel: string | null
+  /** The due time, or null if there is no due time. */
+  dueLabel: DueLabel | null
   /** How far away the due time is, or null if there is no due time. */
   countdown: Countdown | null
 }
@@ -41,7 +49,7 @@ export function describeReminder(reminder: Reminder, now: Date): ReminderDescrip
   const { dueAt } = reminder
   return {
     urgency: describeUrgency(reminder, now),
-    dueLabel: dueAt ? format(dueAt, 'EEE d MMM, HH:mm') : null,
+    dueLabel: dueAt ? { date: format(dueAt, 'EEE d MMM'), time: format(dueAt, 'HH:mm') } : null,
     countdown: dueAt ? describeTimeUntil(dueAt, now) : null,
   }
 }

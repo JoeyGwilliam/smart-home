@@ -1,4 +1,5 @@
 import {
+  ChevronDown,
   Cloud,
   CloudDrizzle,
   CloudFog,
@@ -23,16 +24,15 @@ import { Button } from '@/components/ui/button'
 import {
   DropdownMenu,
   DropdownMenuContent,
+  DropdownMenuItem,
   DropdownMenuLabel,
   DropdownMenuRadioGroup,
   DropdownMenuRadioItem,
   DropdownMenuSeparator,
-  DropdownMenuSub,
-  DropdownMenuSubContent,
-  DropdownMenuSubTrigger,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
 import { useSettings, type Settings } from '@/settings/useSettings'
+import { cn } from 'cn'
 
 /** One of the values a setting can take, as the menu offers it. */
 interface Choice<Value> {
@@ -60,13 +60,24 @@ const SCENE_WEATHER_CHOICES: Choice<Settings['sceneWeather']>[] = [
   { value: 'thunder', label: 'Thunder', icon: CloudLightning },
 ]
 
+/** The settings that the menu offers a list of choices for. */
+type ChoiceSetting = 'sceneTime' | 'sceneWeather'
+
 /** A gear button that opens this device's settings: the time of day and the weather that the backdrop shows. */
 export function SettingsMenu() {
   const [settings, changeSettings] = useSettings()
   const [isOpen, setIsOpen] = useState(false)
+  // Only one setting's choices show at a time, which keeps the menu short enough to fit on a phone.
+  const [expandedSetting, setExpandedSetting] = useState<ChoiceSetting | null>(null)
+
+  const toggleExpanded = (setting: ChoiceSetting) => setExpandedSetting(expandedSetting === setting ? null : setting)
+  const changeIsOpen = (isNowOpen: boolean) => {
+    setIsOpen(isNowOpen)
+    if (!isNowOpen) setExpandedSetting(null)
+  }
 
   return (
-    <DropdownMenu open={isOpen} onOpenChange={setIsOpen}>
+    <DropdownMenu open={isOpen} onOpenChange={changeIsOpen}>
       <DropdownMenuTrigger asChild>
         <Button
           variant="ghost"
@@ -82,50 +93,77 @@ export function SettingsMenu() {
       <DropdownMenuContent align="end" className="w-56 rounded-2xl border-[3px] border-panel-edge p-1.5 shadow-xl shadow-shade">
         <DropdownMenuLabel className="font-heading text-base font-semibold">Settings</DropdownMenuLabel>
         <DropdownMenuSeparator />
-        <ChoiceMenu
+        <ChoiceList
           title="Time of day"
           icon={SunMoon}
           choices={SCENE_TIME_CHOICES}
           chosenValue={settings.sceneTime}
           onChoose={(sceneTime) => changeSettings({ sceneTime })}
+          isExpanded={expandedSetting === 'sceneTime'}
+          onToggleExpanded={() => toggleExpanded('sceneTime')}
         />
-        <ChoiceMenu
+        <ChoiceList
           title="Weather"
           icon={CloudSun}
           choices={SCENE_WEATHER_CHOICES}
           chosenValue={settings.sceneWeather}
           onChoose={(sceneWeather) => changeSettings({ sceneWeather })}
+          isExpanded={expandedSetting === 'sceneWeather'}
+          onToggleExpanded={() => toggleExpanded('sceneWeather')}
         />
       </DropdownMenuContent>
     </DropdownMenu>
   )
 }
 
-interface ChoiceMenuProps<Value extends string> {
+interface ChoiceListProps<Value extends string> {
   title: string
   icon: LucideIcon
   choices: Choice<Value>[]
   chosenValue: Value
   /** Called with the new value when a different choice is picked. */
   onChoose: (value: Value) => void
+  /** Whether the choices are showing beneath the title. */
+  isExpanded: boolean
+  /** Called when the title is picked, to show or hide the choices. */
+  onToggleExpanded: () => void
 }
 
-/** A row of the settings menu that opens a list of choices for one setting, with the current one ticked. */
-function ChoiceMenu<Value extends string>({ title, icon: Icon, choices, chosenValue, onChoose }: ChoiceMenuProps<Value>) {
+/**
+ * A row of the settings menu for one setting. Picking it shows the setting's choices beneath it, with the current one
+ * ticked. They open beneath the row, rather than to its side, because a phone has no room beside the menu.
+ */
+function ChoiceList<Value extends string>({
+  title,
+  icon: Icon,
+  choices,
+  chosenValue,
+  onChoose,
+  isExpanded,
+  onToggleExpanded,
+}: ChoiceListProps<Value>) {
   return (
-    <DropdownMenuSub>
-      <DropdownMenuSubTrigger className="rounded-xl px-2.5 py-2 font-semibold">
+    <>
+      <DropdownMenuItem
+        aria-expanded={isExpanded}
+        // Selecting an item normally closes the menu, but this one only shows or hides the choices.
+        onSelect={(event) => {
+          event.preventDefault()
+          onToggleExpanded()
+        }}
+        className="rounded-xl px-2.5 py-2 font-semibold"
+      >
         <Icon />
         {title}
-      </DropdownMenuSubTrigger>
-      <DropdownMenuSubContent className="w-56 rounded-2xl border-[3px] border-panel-edge p-1.5 shadow-xl shadow-shade">
-        <DropdownMenuRadioGroup value={chosenValue}>
+        <ChevronDown className={cn('ml-auto transition-transform', isExpanded && 'rotate-180')} />
+      </DropdownMenuItem>
+      {isExpanded && (
+        <DropdownMenuRadioGroup value={chosenValue} aria-label={title} className="pl-3">
           {choices.map((choice) => (
             <DropdownMenuRadioItem
               key={choice.value}
               value={choice.value}
-              // Selecting an item normally closes the menu. Keeping it open lets the person see the backdrop change,
-              // and try another choice.
+              // Keeping the menu open lets the person see the backdrop change, and try another choice.
               onSelect={(event) => {
                 event.preventDefault()
                 revealChange(() => onChoose(choice.value))
@@ -137,8 +175,8 @@ function ChoiceMenu<Value extends string>({ title, icon: Icon, choices, chosenVa
             </DropdownMenuRadioItem>
           ))}
         </DropdownMenuRadioGroup>
-      </DropdownMenuSubContent>
-    </DropdownMenuSub>
+      )}
+    </>
   )
 }
 

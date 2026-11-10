@@ -19,7 +19,7 @@ test('labels the due time in local time when the reminder has one', () => {
 
   const description = describeReminder(reminder, new Date('2026-11-09T10:00:00Z'))
 
-  expect(description.dueLabel).toBe('Thu 12 Nov, 18:30')
+  expect(description.dueLabel).toEqual({ date: 'Thu 12 Nov', time: '18:30' })
 })
 
 test('is overdue when the due time has passed', () => {

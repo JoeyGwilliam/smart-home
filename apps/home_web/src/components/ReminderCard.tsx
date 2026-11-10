@@ -83,12 +83,18 @@ export function ReminderCard({ reminder, now, canDelete, areDetailsShownAtFirst 
           {reminder.title}
         </p>
         {isShowingDetails && reminder.notes && <p className="mt-1 break-words text-muted-foreground">{reminder.notes}</p>}
+        {/* The card leaves little width for text on a phone, so the urgency and the due time get a line each, and the
+            due time can only wrap between its date and its time. */}
         {isShowingDetails && dueLabel && (
-          <p className="mt-1.5 flex items-center gap-1.5 font-semibold text-muted-foreground">
-            <Clock className="size-4" />
-            {style.prefix && <span className="text-foreground">{style.prefix} ·</span>}
-            {dueLabel}
-          </p>
+          <div className="mt-1.5 font-semibold text-muted-foreground">
+            {style.prefix && <p className="text-foreground">{style.prefix}</p>}
+            <p className="flex items-start gap-1.5">
+              <Clock className="mt-[0.2em] size-4 shrink-0" />
+              <span>
+                <span className="whitespace-nowrap">{dueLabel.date},</span> <span className="whitespace-nowrap">{dueLabel.time}</span>
+              </span>
+            </p>
+          </div>
         )}
       </button>
 
