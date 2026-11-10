@@ -1,12 +1,27 @@
 import tailwindcss from '@tailwindcss/vite'
 import react from '@vitejs/plugin-react'
 import { fileURLToPath } from 'node:url'
-import { defineConfig } from 'vitest/config'
+import { defineConfig, type Plugin } from 'vitest/config'
+
+// Identifies this build, so that an open page can tell when a newer one has been deployed (see src/deploy/useReloadOnNewBuild.ts).
+const BUILD_ID = new Date().toISOString()
+
+/** Publishes the build ID at /build-id.json, alongside the app, for open pages to compare against their own. */
+function publishBuildId(): Plugin {
+  return {
+    name: 'publish-build-id',
+    apply: 'build',
+    generateBundle() {
+      this.emitFile({ type: 'asset', fileName: 'build-id.json', source: JSON.stringify({ buildId: BUILD_ID }) })
+    },
+  }
+}
 
 // The app calls the reminders API under /api, on its own origin, so the API needs no CORS setup and can stay private.
 // In development this proxy forwards those calls; in production nginx.conf does the same job.
 export default defineConfig({
-  plugins: [react(), tailwindcss()],
+  plugins: [react(), tailwindcss(), publishBuildId()],
+  define: { __BUILD_ID__: JSON.stringify(BUILD_ID) },
   resolve: {
     alias: { '@': fileURLToPath(new URL('./src', import.meta.url)) },
   },
