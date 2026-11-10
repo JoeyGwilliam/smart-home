@@ -33,7 +33,7 @@ function Header({ now }: { now: Date }) {
   return (
     <motion.header initial={{ opacity: 0, y: -12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}>
       <p className="text-sm font-extrabold tracking-[0.2em] text-primary-text uppercase">{greet(now)}</p>
-      <h1 className="mt-1 text-5xl leading-[1.05] font-semibold tracking-tight sm:text-6xl">{format(now, 'EEEE d MMMM')}</h1>
+      <h1 className="mt-1 text-4xl leading-[1.05] font-semibold tracking-tight sm:text-6xl">{format(now, 'EEEE d MMMM')}</h1>
       <div className="mt-3 flex min-h-7 flex-wrap items-center gap-2">
         {reminders && (
           <>

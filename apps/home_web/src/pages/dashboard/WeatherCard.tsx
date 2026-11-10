@@ -43,7 +43,7 @@ function ForecastCard({ forecast }: { forecast: Forecast }) {
           </motion.span>
           <div className="min-w-0 flex-1">
             <p className="text-sm font-extrabold tracking-[0.2em] text-primary-text uppercase">{FORECAST_LOCATION_NAME}</p>
-            <p className="font-heading text-6xl leading-none font-semibold">{formatTemperature(current.temperature)}</p>
+            <p className="font-heading text-5xl leading-none sm:text-6xl font-semibold">{formatTemperature(current.temperature)}</p>
             <p className="mt-1 font-semibold">{current.condition.label}</p>
           </div>
           <motion.span animate={{ rotate: isExpanded ? 180 : 0 }} className="grid size-9 shrink-0 place-items-center rounded-full bg-field text-muted-foreground">

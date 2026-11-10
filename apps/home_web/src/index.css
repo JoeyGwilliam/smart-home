@@ -213,9 +213,15 @@
 
     html {
         @apply font-sans;
-        /* The pages are read from across a room, so all text is a size up from the browser's default. Sizes and spacing
-           are in rem, so the whole layout grows with it. */
-        font-size: 112.5%;
+    }
+
+    /* On the kiosk the pages are read from across a room, so all text is a size up from the browser's default. Sizes
+       and spacing are in rem, so the whole layout grows with it. A phone is held close and has little width to spare,
+       so it keeps the default size. The width is Tailwind's "sm" breakpoint, where the headings also step up. */
+    @media (width >= 40rem) {
+        html {
+            font-size: 112.5%;
+        }
     }
 
     h1, h2, h3 {

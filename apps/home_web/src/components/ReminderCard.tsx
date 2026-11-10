@@ -76,7 +76,7 @@ export function ReminderCard({ reminder, now, canDelete, areDetailsShownAtFirst 
       >
         <p
           className={cn(
-            'text-2xl leading-snug font-bold break-words transition-colors',
+            'text-xl leading-snug font-bold break-words transition-colors sm:text-2xl',
             isCompleted && 'text-muted-foreground line-through decoration-primary decoration-2',
           )}
         >
@@ -138,7 +138,7 @@ function CountdownBubble({ countdown, className, isPulsing }: CountdownBubblePro
       animate={isPulsing ? { scale: [1, 1.06, 1] } : { scale: 1 }}
       transition={isPulsing ? { duration: 2.2, repeat: Infinity, ease: 'easeInOut' } : undefined}
     >
-      <span className="font-heading text-2xl leading-none font-semibold">{countdown.value}</span>
+      <span className="font-heading text-xl leading-none font-semibold sm:text-2xl">{countdown.value}</span>
       <span className="mt-1 text-[0.7rem] leading-none font-bold tracking-wide uppercase">{countdown.caption}</span>
     </motion.div>
   )

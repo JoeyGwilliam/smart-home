@@ -23,7 +23,7 @@ export function DashboardPage() {
         transition={{ duration: 0.5, delay: 0.1 }}
         aria-labelledby="due-today-heading"
       >
-        <h2 id="due-today-heading" className="px-2 pt-2 text-3xl font-semibold">
+        <h2 id="due-today-heading" className="px-2 pt-2 text-2xl font-semibold sm:text-3xl">
           Due today
         </h2>
         <ReminderList
