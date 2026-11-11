@@ -64,6 +64,39 @@
           ]
         },
         {
+          "name": "SetAssigneeIntent",
+          "slots": [
+            { "name": "person", "type": "HOME_PERSON" }
+          ],
+          "samples": [
+            "{person}",
+            "for {person}",
+            "it's for {person}",
+            "it is for {person}",
+            "assign it to {person}",
+            "give it to {person}",
+            "it's {person}'s"
+          ]
+        },
+        {
+          "name": "NoAssigneeIntent",
+          "slots": [],
+          "samples": [
+            "nobody",
+            "no one",
+            "noone",
+            "anyone",
+            "anybody",
+            "unassigned",
+            "not assigned",
+            "it's for nobody",
+            "it's for no one",
+            "it's for anyone",
+            "assign it to nobody",
+            "assign it to no one"
+          ]
+        },
+        {
           "name": "ListRemindersIntent",
           "slots": [
             { "name": "period", "type": "AMAZON.DATE" }
@@ -277,7 +310,15 @@
         { "name": "AMAZON.NavigateHomeIntent", "samples": [] },
         { "name": "AMAZON.FallbackIntent", "samples": [] }
       ],
-      "types": []
+      "types": [
+        {
+          "name": "HOME_PERSON",
+          "values": [
+            { "id": "JOEY", "name": { "value": "Joey" } },
+            { "id": "GEORGIE", "name": { "value": "Georgie" } }
+          ]
+        }
+      ]
     }
   }
 }

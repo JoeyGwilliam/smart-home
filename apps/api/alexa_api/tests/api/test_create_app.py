@@ -55,7 +55,7 @@ def test_asks_question_and_keeps_conversation_open_when_person_starts_reminder()
     }
 
 
-def test_adds_reminder_and_ends_conversation_when_person_answers_with_due_time() -> None:
+def test_asks_who_it_is_for_when_person_answers_with_due_time() -> None:
     alexa = FakeAlexa()
     held_reminders: list[dict[str, Any]] = []
     client = _create_client(alexa, held_reminders)
@@ -74,14 +74,42 @@ def test_adds_reminder_and_ends_conversation_when_person_answers_with_due_time()
 
     assert response.json() == {
         "version": "1.0",
-        "sessionAttributes": {},
+        "sessionAttributes": {
+            "new_reminder_title": "Buy milk",
+            "new_reminder_due_at": "2030-01-01T09:00:00+00:00",
+            "question": "Who is it for? You can say Joey, Georgie, or nobody.",
+        },
         "response": {
-            "outputSpeech": {"type": "PlainText", "text": "I've added Buy milk, due on Tuesday 1 January at 9 AM."},
-            "shouldEndSession": True,
+            "outputSpeech": {"type": "PlainText", "text": "Who is it for? You can say Joey, Georgie, or nobody."},
+            "reprompt": {"outputSpeech": {"type": "PlainText", "text": "Who is it for? You can say Joey, Georgie, or nobody."}},
+            "shouldEndSession": False,
         },
     }
+    assert held_reminders == []
+
+
+def test_adds_reminder_and_ends_conversation_when_person_answers_with_who_it_is_for() -> None:
+    alexa = FakeAlexa()
+    held_reminders: list[dict[str, Any]] = []
+    client = _create_client(alexa, held_reminders)
+    body = alexa.create_request_body(
+        {
+            "type": "IntentRequest",
+            "intent": {"name": "SetAssigneeIntent", "slots": {"person": {"name": "person", "value": "georgie"}}},
+        },
+        conversation_memory={
+            "new_reminder_title": "Buy milk",
+            "new_reminder_due_at": "2030-01-01T09:00:00+00:00",
+            "question": "Who is it for?",
+        },
+    )
+
+    response = client.post("/", content=body, headers=alexa.create_headers(body))
+
+    assert response.json()["response"]["outputSpeech"]["text"] == "I've added Buy milk, due on Tuesday 1 January at 9 AM, for Georgie."
+    assert response.json()["response"]["shouldEndSession"] is True
     assert held_reminders == [
-        {"id": "new-reminder", "title": "Buy milk", "notes": None, "due_at": "2030-01-01T09:00:00+00:00", "completed_at": None, "repeats": None},
+        {"id": "new-reminder", "title": "Buy milk", "notes": None, "due_at": "2030-01-01T09:00:00+00:00", "completed_at": None, "repeats": None, "assigned_to": "Georgie"},
     ]
 
 

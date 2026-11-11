@@ -1,4 +1,4 @@
-import type { Reminder, ReminderContent, Repeat } from '@/reminders/reminder'
+import type { Assignee, Reminder, ReminderContent, Repeat } from '@/reminders/reminder'
 
 // nginx.conf and vite.config.ts forward this to the reminders API.
 const REMINDERS_URL = '/api/reminders'
@@ -17,6 +17,7 @@ interface ReminderJson {
   due_at: string | null
   completed_at: string | null
   repeats: Repeat | null
+  assigned_to: Assignee | null
 }
 
 /**
@@ -110,6 +111,7 @@ function parseReminder(reminderJson: ReminderJson): Reminder {
     dueAt: parseTime(reminderJson.due_at),
     completedAt: parseTime(reminderJson.completed_at),
     repeats: reminderJson.repeats,
+    assignedTo: reminderJson.assigned_to,
   }
 }
 
@@ -120,5 +122,6 @@ function formatReminder(reminder: Omit<Reminder, 'id'>): Omit<ReminderJson, 'id'
     due_at: formatTime(reminder.dueAt),
     completed_at: formatTime(reminder.completedAt),
     repeats: reminder.repeats,
+    assigned_to: reminder.assignedTo,
   }
 }

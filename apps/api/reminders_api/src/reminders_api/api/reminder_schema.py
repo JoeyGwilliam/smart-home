@@ -5,6 +5,7 @@ from uuid import UUID, uuid7
 
 from pydantic import AfterValidator, AwareDatetime, BaseModel, ConfigDict, Field, model_validator
 
+from reminders_api.core.assignee import Assignee
 from reminders_api.core.reminder import Reminder
 from reminders_api.core.repeat import Repeat
 
@@ -30,6 +31,8 @@ class ReminderSchema(BaseModel):
         repeats:
             How often the reminder comes round again once it is completed, such as "weekly", or None if it only
             happens once. Only a reminder with a due time can repeat.
+        assigned_to:
+            The person the reminder is for, either "Joey" or "Georgie", or None if it is for nobody in particular.
         id:
             Unique identifier that stays the same when the reminder is edited. Ignored in a request, so that clients
             can send back a reminder that they received.
@@ -41,6 +44,7 @@ class ReminderSchema(BaseModel):
     due_at: _UtcDatetime | None = None
     completed_at: _UtcDatetime | None = None
     repeats: Repeat | None = None
+    assigned_to: Assignee | None = None
     id: UUID = Field(default_factory=uuid7)
 
     @model_validator(mode="after")

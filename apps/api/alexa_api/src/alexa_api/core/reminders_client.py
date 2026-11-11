@@ -24,7 +24,7 @@ class RemindersClient:
         """
         self._api = HomeApi("reminders", reminders_api_url, transport)
 
-    def add_reminder(self, title: str, due_at: datetime | None) -> None:
+    def add_reminder(self, title: str, due_at: datetime | None, assigned_to: str | None = None) -> None:
         """ Adds a reminder, which the site then shows.
 
         Args:
@@ -32,8 +32,15 @@ class RemindersClient:
                 Short description of the reminder. Must contain non-whitespace text.
             due_at:
                 Timezone-aware due time, or None if there is no due time.
+            assigned_to:
+                The name of the person the reminder is for, which the reminders API must know, or None if it is for
+                nobody in particular.
         """
-        self._api.send("POST", "/reminders", json={"title": title, "due_at": _represent_moment(due_at)})
+        self._api.send("POST", "/reminders", json={
+            "title": title,
+            "due_at": _represent_moment(due_at),
+            "assigned_to": assigned_to,
+        })
 
     def list_unfinished_reminders(self) -> list[Reminder]:
         """ Lists every reminder that hasn't been completed.
@@ -48,6 +55,7 @@ class RemindersClient:
                 notes=reminder["notes"],
                 due_at=None if reminder["due_at"] is None else datetime.fromisoformat(reminder["due_at"]),
                 repeats=reminder["repeats"],
+                assigned_to=reminder["assigned_to"],
             )
             for reminder in self._api.send("GET", "/reminders").json()
             if reminder["completed_at"] is None
@@ -66,6 +74,7 @@ class RemindersClient:
             "due_at": _represent_moment(reminder.due_at),
             "completed_at": _represent_moment(reminder.completed_at),
             "repeats": reminder.repeats,
+            "assigned_to": reminder.assigned_to,
         })
 
     def delete_reminder(self, reminder: Reminder) -> None:

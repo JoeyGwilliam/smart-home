@@ -35,7 +35,7 @@ def test_hands_request_about_reminders_to_reminder_controls_when_responding() ->
     held_reminders: list[dict[str, Any]] = []
     skill = _create_skill(reminders_api=create_fake_reminders_api(held_reminders))
 
-    reply = skill.respond(SkillRequest("NoDueTimeIntent", _NOON, conversation_memory={"new_reminder_title": "Buy milk"}))
+    reply = skill.respond(SkillRequest("NoAssigneeIntent", _NOON, conversation_memory={"new_reminder_title": "Buy milk", "new_reminder_due_at": ""}))
 
     assert reply == SkillReply("I've added Buy milk.")
     assert [reminder["title"] for reminder in held_reminders] == ["Buy milk"]

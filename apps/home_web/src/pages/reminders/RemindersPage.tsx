@@ -1,31 +1,41 @@
 import { format } from 'date-fns'
 import { CloudOff } from 'lucide-react'
 import { AnimatePresence, motion } from 'motion/react'
+import { useState } from 'react'
 
+import { AssigneeFilterBar } from '@/components/AssigneeFilterBar'
 import { Pill } from '@/components/Pill'
 import { ReminderList } from '@/components/ReminderList'
 import { AddReminderCard } from '@/pages/reminders/AddReminderCard'
 import { describeReminder } from '@/reminders/describeReminder'
+import { filterByAssignee, type AssigneeFilter } from '@/reminders/filterByAssignee'
 import { useReminders } from '@/reminders/useReminders'
 import { greet } from '@/time/greet'
 import { useNow } from '@/time/useNow'
 
-/** Every reminder, with today's date and a form for adding more. */
+/** Every reminder, which can be narrowed to one person's, with today's date and a form for adding more. */
 export function RemindersPage() {
   const now = useNow()
+  const [assigneeFilter, setAssigneeFilter] = useState<AssigneeFilter>('everyone')
 
   return (
     <main className="mx-auto grid w-full max-w-2xl gap-6 px-4 pb-10 sm:pb-14">
-      <Header now={now} />
+      <Header now={now} assigneeFilter={assigneeFilter} />
       <AddReminderCard />
-      <ReminderList now={now} emptyMessage={{ title: 'Nothing to do', detail: 'Enjoy it.' }} areDetailsShownAtFirst />
+      <AssigneeFilterBar value={assigneeFilter} onChange={setAssigneeFilter} />
+      <ReminderList
+        now={now}
+        select={(reminders) => filterByAssignee(reminders, assigneeFilter)}
+        emptyMessage={{ title: 'Nothing to do', detail: 'Enjoy it.' }}
+        areDetailsShownAtFirst
+      />
     </main>
   )
 }
 
-function Header({ now }: { now: Date }) {
+function Header({ now, assigneeFilter }: { now: Date; assigneeFilter: AssigneeFilter }) {
   const remindersQuery = useReminders()
-  const reminders = remindersQuery.data
+  const reminders = remindersQuery.data && filterByAssignee(remindersQuery.data, assigneeFilter)
   const urgencies = (reminders ?? []).map((reminder) => describeReminder(reminder, now).urgency)
   const toDoCount = urgencies.filter((urgency) => urgency !== 'completed').length
   const overdueCount = urgencies.filter((urgency) => urgency === 'overdue').length

@@ -8,6 +8,7 @@ from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, sessionmaker
 from sqlalchemy.pool import NullPool
 from sqlalchemy.types import TypeDecorator
 
+from .assignee import Assignee
 from .reminder import Reminder
 from .repeat import Repeat
 
@@ -79,12 +80,14 @@ class ReminderStore:
 
 
 def _add_columns_missing_from_older_databases(engine: Engine) -> None:
-    # create_all only creates tables that don't exist, so a database made before reminders could repeat lacks the
-    # column. Every existing reminder happens once, which is what an empty column means.
+    # create_all only creates tables that don't exist, so a database made before reminders could repeat or be
+    # assigned lacks those columns. Every existing reminder happens once and is for nobody in particular, which is
+    # what an empty column means.
     column_names = {column["name"] for column in inspect(engine).get_columns(_ReminderRow.__tablename__)}
-    if "repeats" not in column_names:
-        with engine.begin() as connection:
-            connection.execute(text(f"ALTER TABLE {_ReminderRow.__tablename__} ADD COLUMN repeats VARCHAR"))
+    for new_column_name in ("repeats", "assigned_to"):
+        if new_column_name not in column_names:
+            with engine.begin() as connection:
+                connection.execute(text(f"ALTER TABLE {_ReminderRow.__tablename__} ADD COLUMN {new_column_name} VARCHAR"))
 
 
 class _UtcDateTime(TypeDecorator[datetime]):
@@ -113,6 +116,7 @@ class _ReminderRow(_ReminderDBBase):
     due_at: Mapped[datetime | None] = mapped_column(_UtcDateTime)
     completed_at: Mapped[datetime | None] = mapped_column(_UtcDateTime)
     repeats: Mapped[str | None]
+    assigned_to: Mapped[str | None]
 
     def to_reminder(self) -> Reminder:
         return Reminder(
@@ -121,5 +125,6 @@ class _ReminderRow(_ReminderDBBase):
             due_at=self.due_at,
             completed_at=self.completed_at,
             repeats=Repeat(self.repeats) if self.repeats else None,
+            assigned_to=Assignee(self.assigned_to) if self.assigned_to else None,
             id=self.id,
         )

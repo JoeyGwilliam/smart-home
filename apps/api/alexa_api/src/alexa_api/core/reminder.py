@@ -23,6 +23,9 @@ class Reminder:
             How often the reminder comes round again, such as "weekly", or None if it happens once. The skill never
             changes it, but has to send it back when saving. The reminders API creates the next occurrence when a
             repeating reminder is completed.
+        assigned_to:
+            The name of the person the reminder is for, such as "Joey", or None if it is for nobody in particular.
+            The skill never changes it on an existing reminder, but has to send it back when saving.
     """
 
     id: str
@@ -31,3 +34,4 @@ class Reminder:
     due_at: datetime | None = None
     completed_at: datetime | None = None
     repeats: str | None = None
+    assigned_to: str | None = None

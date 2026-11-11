@@ -8,6 +8,7 @@ from uuid import uuid7
 import pytest
 from sqlalchemy.exc import OperationalError
 
+from reminders_api.core.assignee import Assignee
 from reminders_api.core.reminder import Reminder
 from reminders_api.core.reminder_store import ReminderStore
 from reminders_api.core.repeat import Repeat
@@ -21,6 +22,7 @@ def test_returns_all_fields_when_getting_saved_reminder(tmp_path: Path) -> None:
         due_at=datetime(2026, 11, 8, 9, 30, 15, 123456, tzinfo=UTC),
         completed_at=datetime(2026, 11, 8, 10, 0, tzinfo=UTC),
         repeats=Repeat.WEEKLY,
+        assigned_to=Assignee.GEORGIE,
     )
 
     store.save(reminder)
@@ -129,6 +131,21 @@ def test_loads_existing_reminders_as_one_offs_when_database_predates_repeats(tmp
         connection.execute(
             "CREATE TABLE reminders (id CHAR(32) PRIMARY KEY, title VARCHAR NOT NULL, notes VARCHAR, due_at DATETIME, "
             "completed_at DATETIME)"
+        )
+        connection.execute("INSERT INTO reminders (id, title) VALUES (?, 'Take out bins')", (reminder_id.hex,))
+
+    store = ReminderStore(database_path)
+
+    assert store.list_all() == [Reminder(title="Take out bins", id=reminder_id)]
+
+
+def test_loads_existing_reminders_as_unassigned_when_database_predates_assignees(tmp_path: Path) -> None:
+    database_path = tmp_path / "before_assignees.db"
+    reminder_id = uuid7()
+    with closing(sqlite3.connect(database_path)) as connection, connection:
+        connection.execute(
+            "CREATE TABLE reminders (id CHAR(32) PRIMARY KEY, title VARCHAR NOT NULL, notes VARCHAR, due_at DATETIME, "
+            "completed_at DATETIME, repeats VARCHAR)"
         )
         connection.execute("INSERT INTO reminders (id, title) VALUES (?, 'Take out bins')", (reminder_id.hex,))
 

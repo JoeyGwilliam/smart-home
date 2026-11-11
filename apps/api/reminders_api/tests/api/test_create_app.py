@@ -81,6 +81,7 @@ def test_overwrites_every_field_when_replacing_reminder(tmp_path: Path) -> None:
         "due_at": None,
         "completed_at": None,
         "repeats": None,
+        "assigned_to": None,
     }
 
 
@@ -196,7 +197,7 @@ def test_marks_every_field_as_required_when_generating_openapi_response_schema(t
     openapi_schema = client.get("/openapi.json").json()
 
     response_schema = openapi_schema["components"]["schemas"]["ReminderSchema-Output"]
-    assert set(response_schema["required"]) == {"id", "title", "notes", "due_at", "completed_at", "repeats"}
+    assert set(response_schema["required"]) == {"id", "title", "notes", "due_at", "completed_at", "repeats", "assigned_to"}
 
 
 def test_uses_database_from_environment_when_variable_is_set(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
@@ -282,3 +283,32 @@ def test_returns_422_when_repeat_is_unknown(tmp_path: Path) -> None:
     response = client.post("/reminders", json={"title": "Take out bins", "due_at": "2026-11-10T19:00:00Z", "repeats": "hourly"})
 
     assert response.status_code == 422
+
+
+def test_returns_assignee_when_reminder_is_assigned(tmp_path: Path) -> None:
+    client = TestClient(create_app(tmp_path / "reminders.db", ZoneInfo("Europe/London")))
+
+    created_reminder = client.post("/reminders", json={"title": "Take out bins", "assigned_to": "Georgie"}).json()
+
+    assert created_reminder["assigned_to"] == "Georgie"
+    assert client.get(f"/reminders/{created_reminder['id']}").json()["assigned_to"] == "Georgie"
+
+
+def test_returns_422_when_reminder_is_assigned_to_someone_unknown(tmp_path: Path) -> None:
+    client = TestClient(create_app(tmp_path / "reminders.db", ZoneInfo("Europe/London")))
+
+    response = client.post("/reminders", json={"title": "Take out bins", "assigned_to": "Sam"})
+
+    assert response.status_code == 422
+
+
+def test_assigns_next_reminder_to_same_person_when_repeating_reminder_is_ticked_off(tmp_path: Path) -> None:
+    client = TestClient(create_app(tmp_path / "reminders.db", ZoneInfo("Europe/London")))
+    bins = {"title": "Take out bins", "due_at": "2026-11-10T19:00:00Z", "repeats": "weekly", "assigned_to": "Joey"}
+    created_reminder = client.post("/reminders", json=bins).json()
+
+    client.put(f"/reminders/{created_reminder['id']}", json=bins | {"completed_at": "2026-11-10T19:30:00Z"})
+
+    completed_reminder, next_reminder = client.get("/reminders").json()
+    assert completed_reminder["assigned_to"] == "Joey"
+    assert next_reminder["assigned_to"] == "Joey"

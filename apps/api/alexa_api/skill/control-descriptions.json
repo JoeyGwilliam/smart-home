@@ -5,7 +5,8 @@
     "time": "a time",
     "preset": "its name",
     "request": "what you want",
-    "period": "a day or week"
+    "period": "a day or week",
+    "person": "Joey or Georgie"
   },
   "groups": [
     {
@@ -14,7 +15,7 @@
         {
           "intent": "AddReminderIntent",
           "title": "Add a reminder",
-          "description": "Starts a new reminder for the reminders page. Home hub then asks when it is due."
+          "description": "Starts a new reminder for the reminders page. Home hub then asks when it is due, and who it is for."
         },
         {
           "intent": "ListRemindersIntent",
@@ -47,6 +48,18 @@
           "title": "Skip the due time",
           "description": "Leaves the reminder you are adding or moving without a due time. Saying \"no\" does the same.",
           "answers": "When is it due?"
+        },
+        {
+          "intent": "SetAssigneeIntent",
+          "title": "Say who it is for",
+          "description": "Assigns the reminder you are adding to Joey or Georgie, so that the reminders page can show it when filtering by that person.",
+          "answers": "Who is it for?"
+        },
+        {
+          "intent": "NoAssigneeIntent",
+          "title": "Assign it to nobody",
+          "description": "Leaves the reminder you are adding without anyone to do it. Saying \"no\" does the same.",
+          "answers": "Who is it for?"
         }
       ]
     },

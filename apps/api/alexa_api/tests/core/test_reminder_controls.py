@@ -20,7 +20,7 @@ def _respond(held_reminders: list[dict[str, Any]], request: SkillRequest) -> Ski
 
 
 def _hold_reminder(reminder_id: str, title: str, due_at: str | None = None, completed_at: str | None = None) -> dict[str, Any]:
-    return {"id": reminder_id, "title": title, "notes": None, "due_at": due_at, "completed_at": completed_at, "repeats": None}
+    return {"id": reminder_id, "title": title, "notes": None, "due_at": due_at, "completed_at": completed_at, "repeats": None, "assigned_to": None}
 
 
 def test_asks_for_due_time_and_remembers_capitalised_title_when_reminder_is_started() -> None:
@@ -49,7 +49,7 @@ def test_asks_what_the_reminder_is_when_reminder_is_started_without_title() -> N
     assert held_reminders == []
 
 
-def test_adds_reminder_and_ends_conversation_when_due_time_is_said_for_new_reminder() -> None:
+def test_asks_who_it_is_for_and_remembers_due_time_when_due_time_is_said_for_new_reminder() -> None:
     held_reminders: list[dict[str, Any]] = []
 
     reply = _respond(held_reminders, SkillRequest(
@@ -59,24 +59,29 @@ def test_adds_reminder_and_ends_conversation_when_due_time_is_said_for_new_remin
         conversation_memory={"new_reminder_title": "Buy milk", "question": "When is it due?"},
     ))
 
-    assert reply == SkillReply("I've added Buy milk, due tomorrow at 5 PM.")
-    assert held_reminders == [
-        {"id": "new-reminder", "title": "Buy milk", "notes": None, "due_at": "2026-11-12T17:00:00+00:00", "completed_at": None, "repeats": None},
-    ]
+    assert reply == SkillReply(
+        "Who is it for? You can say Joey, Georgie, or nobody.",
+        reprompt="Who is it for? You can say Joey, Georgie, or nobody.",
+        conversation_memory={
+            "new_reminder_title": "Buy milk",
+            "new_reminder_due_at": "2026-11-12T17:00:00+00:00",
+            "question": "Who is it for? You can say Joey, Georgie, or nobody.",
+        },
+    )
+    assert held_reminders == []
 
 
-def test_adds_reminder_at_home_clock_time_when_summer_time_is_in_force() -> None:
-    held_reminders: list[dict[str, Any]] = []
+def test_remembers_due_time_at_home_clock_time_when_summer_time_is_in_force() -> None:
     summer_noon = datetime(2026, 6, 10, 11, 0, tzinfo=UTC)
 
-    _respond(held_reminders, SkillRequest(
+    reply = _respond([], SkillRequest(
         "SetDueTimeIntent",
         summer_noon,
         slots={"time": "17:00"},
         conversation_memory={"new_reminder_title": "Buy milk", "question": "When is it due?"},
     ))
 
-    assert held_reminders[0]["due_at"] == "2026-06-10T17:00:00+01:00"
+    assert reply.conversation_memory["new_reminder_due_at"] == "2026-06-10T17:00:00+01:00"
 
 
 def test_asks_same_question_again_and_keeps_memory_when_due_time_cannot_be_resolved() -> None:
@@ -109,7 +114,7 @@ def test_asks_what_the_reminder_is_when_due_time_is_said_before_anything_else() 
 
 
 @pytest.mark.parametrize("intent_name", ["NoDueTimeIntent", "AMAZON.NoIntent"])
-def test_adds_reminder_without_due_time_when_person_declines_to_give_one(intent_name: str) -> None:
+def test_asks_who_it_is_for_and_remembers_no_due_time_when_person_declines_to_give_one(intent_name: str) -> None:
     held_reminders: list[dict[str, Any]] = []
 
     reply = _respond(held_reminders, SkillRequest(
@@ -118,10 +123,92 @@ def test_adds_reminder_without_due_time_when_person_declines_to_give_one(intent_
         conversation_memory={"new_reminder_title": "Buy milk", "question": "When is it due?"},
     ))
 
+    assert reply.speech == "Who is it for? You can say Joey, Georgie, or nobody."
+    assert reply.conversation_memory["new_reminder_due_at"] == ""
+    assert held_reminders == []
+
+
+def test_adds_reminder_assigned_to_person_and_ends_conversation_when_person_says_who_it_is_for() -> None:
+    held_reminders: list[dict[str, Any]] = []
+
+    reply = _respond(held_reminders, SkillRequest(
+        "SetAssigneeIntent",
+        _WEDNESDAY_NOON,
+        slots={"person": "joey"},
+        conversation_memory={
+            "new_reminder_title": "Buy milk",
+            "new_reminder_due_at": "2026-11-12T17:00:00+00:00",
+            "question": "Who is it for?",
+        },
+    ))
+
+    assert reply == SkillReply("I've added Buy milk, due tomorrow at 5 PM, for Joey.")
+    assert held_reminders == [
+        {"id": "new-reminder", "title": "Buy milk", "notes": None, "due_at": "2026-11-12T17:00:00+00:00", "completed_at": None, "repeats": None, "assigned_to": "Joey"},
+    ]
+
+
+def test_adds_reminder_without_due_time_when_person_says_who_it_is_for_after_declining_a_due_time() -> None:
+    held_reminders: list[dict[str, Any]] = []
+
+    reply = _respond(held_reminders, SkillRequest(
+        "SetAssigneeIntent",
+        _WEDNESDAY_NOON,
+        slots={"person": "Georgie"},
+        conversation_memory={"new_reminder_title": "Buy milk", "new_reminder_due_at": "", "question": "Who is it for?"},
+    ))
+
+    assert reply == SkillReply("I've added Buy milk, for Georgie.")
+    assert held_reminders[0]["due_at"] is None
+    assert held_reminders[0]["assigned_to"] == "Georgie"
+
+
+@pytest.mark.parametrize("intent_name", ["NoAssigneeIntent", "NoDueTimeIntent", "AMAZON.NoIntent"])
+def test_adds_unassigned_reminder_when_person_says_nobody(intent_name: str) -> None:
+    held_reminders: list[dict[str, Any]] = []
+
+    reply = _respond(held_reminders, SkillRequest(
+        intent_name,
+        _WEDNESDAY_NOON,
+        conversation_memory={"new_reminder_title": "Buy milk", "new_reminder_due_at": "", "question": "Who is it for?"},
+    ))
+
     assert reply == SkillReply("I've added Buy milk.")
     assert held_reminders == [
-        {"id": "new-reminder", "title": "Buy milk", "notes": None, "due_at": None, "completed_at": None, "repeats": None},
+        {"id": "new-reminder", "title": "Buy milk", "notes": None, "due_at": None, "completed_at": None, "repeats": None, "assigned_to": None},
     ]
+
+
+def test_asks_same_question_again_and_adds_nothing_when_person_is_not_one_of_the_two() -> None:
+    held_reminders: list[dict[str, Any]] = []
+    memory = {"new_reminder_title": "Buy milk", "new_reminder_due_at": "", "question": "Who is it for? You can say Joey, Georgie, or nobody."}
+
+    reply = _respond(held_reminders, SkillRequest("SetAssigneeIntent", _WEDNESDAY_NOON, slots={"person": "sam"}, conversation_memory=memory))
+
+    assert reply == SkillReply(
+        "Sorry, I didn't catch who. Who is it for? You can say Joey, Georgie, or nobody.",
+        reprompt="Who is it for? You can say Joey, Georgie, or nobody.",
+        conversation_memory=memory,
+    )
+    assert held_reminders == []
+
+
+def test_asks_what_the_reminder_is_when_who_it_is_for_is_said_before_anything_else() -> None:
+    held_reminders: list[dict[str, Any]] = []
+
+    reply = _respond(held_reminders, SkillRequest("SetAssigneeIntent", _WEDNESDAY_NOON, slots={"person": "joey"}))
+
+    assert reply.speech == "First tell me what the reminder is. Say, remind me to, and then the reminder."
+    assert held_reminders == []
+
+
+def test_changes_nothing_and_ends_conversation_when_nobody_is_said_with_nothing_asked() -> None:
+    held_reminders = [_hold_reminder("milk", "Buy milk")]
+
+    reply = _respond(held_reminders, SkillRequest("NoAssigneeIntent", _WEDNESDAY_NOON))
+
+    assert reply == SkillReply("OK.")
+    assert held_reminders == [_hold_reminder("milk", "Buy milk")]
 
 
 @pytest.mark.parametrize("intent_name", ["NoDueTimeIntent", "AMAZON.NoIntent"])

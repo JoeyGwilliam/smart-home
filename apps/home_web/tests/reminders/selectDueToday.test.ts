@@ -3,7 +3,7 @@ import { selectDueToday } from '@/reminders/selectDueToday'
 
 // Vitest runs in Europe/London (see vite.config.ts), and these dates are in winter, so local time is UTC.
 function createReminder(overrides: Partial<Reminder>): Reminder {
-  return { id: '1', title: 'Water the plants', notes: null, dueAt: null, completedAt: null, repeats: null, ...overrides }
+  return { id: '1', title: 'Water the plants', notes: null, dueAt: null, completedAt: null, repeats: null, assignedTo: null, ...overrides }
 }
 
 test('includes a reminder when it is due later today', () => {

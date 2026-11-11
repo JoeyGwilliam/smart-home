@@ -14,7 +14,7 @@ interface EditReminderDialogProps {
   onOpenChange: (isOpen: boolean) => void
 }
 
-/** A dialog for changing what a reminder says, when it is due and how often it repeats. Closes once the change is saved. */
+/** A dialog for changing what a reminder says, when it is due, how often it repeats and who it is for. Closes once the change is saved. */
 export function EditReminderDialog({ reminder, isOpen, onOpenChange }: EditReminderDialogProps) {
   return (
     <Dialog open={isOpen} onOpenChange={onOpenChange}>

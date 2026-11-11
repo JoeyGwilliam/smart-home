@@ -4,6 +4,7 @@ from zoneinfo import ZoneInfo
 
 import pytest
 
+from reminders_api.core.assignee import Assignee
 from reminders_api.core.reminder import Reminder
 from reminders_api.core.repeat import Repeat
 
@@ -76,6 +77,19 @@ def test_creates_uncompleted_copy_due_one_repeat_later_when_creating_next_occurr
     assert next_reminder.due_at == datetime(2026, 11, 17, 19, 0, tzinfo=UTC)
     assert next_reminder.completed_at is None
     assert next_reminder.repeats == Repeat.WEEKLY
+
+
+def test_keeps_assignee_when_creating_next_occurrence() -> None:
+    reminder = Reminder(
+        title="Take out bins",
+        due_at=datetime(2026, 11, 10, 19, 0, tzinfo=UTC),
+        repeats=Repeat.WEEKLY,
+        assigned_to=Assignee.JOEY,
+    )
+
+    next_reminder = reminder.create_next_occurrence(ZoneInfo("Europe/London"))
+
+    assert next_reminder.assigned_to == Assignee.JOEY
 
 
 def test_skips_missed_repeats_when_reminder_was_completed_long_after_it_was_due() -> None:

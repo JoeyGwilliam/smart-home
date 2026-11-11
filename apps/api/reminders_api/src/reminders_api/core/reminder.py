@@ -5,6 +5,7 @@ from typing import Self
 from uuid import UUID, uuid7
 from zoneinfo import ZoneInfo
 
+from .assignee import Assignee
 from .repeat import Repeat
 
 
@@ -26,6 +27,8 @@ class Reminder:
         repeats:
             How often the reminder comes round again once it is completed, or None if it only happens once. Only a
             reminder with a due time can repeat.
+        assigned_to:
+            The person who the reminder is for, or None if it is for nobody in particular.
         id:
             Unique identifier that stays the same when the reminder is edited. Generated identifiers sort by
             creation time.
@@ -40,6 +43,7 @@ class Reminder:
     due_at: datetime | None = None
     completed_at: datetime | None = None
     repeats: Repeat | None = None
+    assigned_to: Assignee | None = None
     id: UUID = field(default_factory=uuid7)
 
     def __post_init__(self) -> None:
@@ -62,7 +66,7 @@ class Reminder:
                 clocks change.
 
         Returns:
-            A new, uncompleted reminder with its own id and the same title, notes and repeat. It is due at the first
+            A new, uncompleted reminder with its own id and the same title, notes, repeat and assignee. It is due at the first
             repeat that is after both this reminder's due time and its completion time, so ticking off a reminder that
             has been overdue for several repeats doesn't create one that is already overdue.
 

@@ -1,4 +1,4 @@
-import type { ReminderContent, Repeat } from '@/reminders/reminder'
+import type { Assignee, ReminderContent, Repeat } from '@/reminders/reminder'
 import type { SaveOutcome } from '@/reminders/useReminders'
 
 /** A reminder's content while someone is writing it, in the form the fields hold it. */
@@ -9,6 +9,8 @@ export interface ReminderDraft {
   dueAt: Date | null
   /** Kept while the due time is removed, so that adding a due time back brings the repeat back too. */
   repeats: Repeat | null
+  /** The person the reminder is for, or null if it is for nobody in particular. */
+  assignedTo: Assignee | null
 }
 
 /**
@@ -18,7 +20,13 @@ export interface ReminderDraft {
  * @returns The draft.
  */
 export function createDraft(content?: ReminderContent): ReminderDraft {
-  return { title: content?.title ?? '', notes: content?.notes ?? '', dueAt: content?.dueAt ?? null, repeats: content?.repeats ?? null }
+  return {
+    title: content?.title ?? '',
+    notes: content?.notes ?? '',
+    dueAt: content?.dueAt ?? null,
+    repeats: content?.repeats ?? null,
+    assignedTo: content?.assignedTo ?? null,
+  }
 }
 
 /**
@@ -36,7 +44,13 @@ export function isDraftComplete(draft: ReminderDraft): boolean {
  * @returns The content, with blank notes treated as no notes, and no repeat if there is no due time to repeat from.
  */
 export function toReminderContent(draft: ReminderDraft): ReminderContent {
-  return { title: draft.title.trim(), notes: draft.notes.trim() || null, dueAt: draft.dueAt, repeats: draft.dueAt ? draft.repeats : null }
+  return {
+    title: draft.title.trim(),
+    notes: draft.notes.trim() || null,
+    dueAt: draft.dueAt,
+    repeats: draft.dueAt ? draft.repeats : null,
+    assignedTo: draft.assignedTo,
+  }
 }
 
 /**

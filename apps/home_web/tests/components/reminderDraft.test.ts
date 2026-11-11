@@ -1,7 +1,7 @@
 import { createDraft, isDraftComplete, toReminderContent } from '@/components/reminderDraft'
 
 test('is incomplete when the title is only whitespace', () => {
-  const draft = { title: '   ', notes: '', dueAt: null, repeats: null }
+  const draft = { title: '   ', notes: '', dueAt: null, repeats: null, assignedTo: null }
 
   const isComplete = isDraftComplete(draft)
 
@@ -9,7 +9,7 @@ test('is incomplete when the title is only whitespace', () => {
 })
 
 test('is complete when the title has text', () => {
-  const draft = { title: 'Water the plants', notes: '', dueAt: null, repeats: null }
+  const draft = { title: 'Water the plants', notes: '', dueAt: null, repeats: null, assignedTo: null }
 
   const isComplete = isDraftComplete(draft)
 
@@ -17,15 +17,15 @@ test('is complete when the title has text', () => {
 })
 
 test('trims the title and notes when converting to content', () => {
-  const draft = { title: '  Water the plants ', notes: ' The fern too  ', dueAt: null, repeats: null }
+  const draft = { title: '  Water the plants ', notes: ' The fern too  ', dueAt: null, repeats: null, assignedTo: null }
 
   const content = toReminderContent(draft)
 
-  expect(content).toEqual({ title: 'Water the plants', notes: 'The fern too', dueAt: null, repeats: null })
+  expect(content).toEqual({ title: 'Water the plants', notes: 'The fern too', dueAt: null, repeats: null, assignedTo: null })
 })
 
 test('has no notes when the notes are blank', () => {
-  const draft = { title: 'Water the plants', notes: '  ', dueAt: null, repeats: null }
+  const draft = { title: 'Water the plants', notes: '  ', dueAt: null, repeats: null, assignedTo: null }
 
   const content = toReminderContent(draft)
 
@@ -33,15 +33,15 @@ test('has no notes when the notes are blank', () => {
 })
 
 test('starts with empty notes when the reminder has none', () => {
-  const content = { title: 'Water the plants', notes: null, dueAt: null, repeats: null }
+  const content = { title: 'Water the plants', notes: null, dueAt: null, repeats: null, assignedTo: null }
 
   const draft = createDraft(content)
 
-  expect(draft).toEqual({ title: 'Water the plants', notes: '', dueAt: null, repeats: null })
+  expect(draft).toEqual({ title: 'Water the plants', notes: '', dueAt: null, repeats: null, assignedTo: null })
 })
 
 test('drops the repeat when converting a draft with no due time', () => {
-  const draft = { title: 'Water the plants', notes: '', dueAt: null, repeats: 'weekly' as const }
+  const draft = { title: 'Water the plants', notes: '', dueAt: null, repeats: 'weekly' as const, assignedTo: null }
 
   const content = toReminderContent(draft)
 
@@ -49,7 +49,7 @@ test('drops the repeat when converting a draft with no due time', () => {
 })
 
 test('keeps the repeat when converting a draft with a due time', () => {
-  const draft = { title: 'Water the plants', notes: '', dueAt: new Date('2026-11-10T09:00:00Z'), repeats: 'weekly' as const }
+  const draft = { title: 'Water the plants', notes: '', dueAt: new Date('2026-11-10T09:00:00Z'), repeats: 'weekly' as const, assignedTo: null }
 
   const content = toReminderContent(draft)
 

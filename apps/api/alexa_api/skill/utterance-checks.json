@@ -17,6 +17,12 @@
   { "utterance": "no time", "intent": "NoDueTimeIntent" },
   { "utterance": "no due time", "intent": "NoDueTimeIntent" },
   { "utterance": "whenever", "intent": "NoDueTimeIntent" },
+  { "utterance": "joey", "intent": "SetAssigneeIntent", "slots": { "person": "joey" } },
+  { "utterance": "it's for georgie", "intent": "SetAssigneeIntent", "slots": { "person": "georgie" } },
+  { "utterance": "assign it to joey", "intent": "SetAssigneeIntent", "slots": { "person": "joey" } },
+  { "utterance": "nobody", "intent": "NoAssigneeIntent" },
+  { "utterance": "no one", "intent": "NoAssigneeIntent" },
+  { "utterance": "assign it to nobody", "intent": "NoAssigneeIntent" },
   { "utterance": "no", "intent": "AMAZON.NoIntent" },
   { "utterance": "yes", "intent": "AMAZON.YesIntent" },
 

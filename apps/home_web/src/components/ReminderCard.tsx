@@ -1,4 +1,4 @@
-import { Clock, Pencil, Repeat as RepeatIcon, Trash2 } from 'lucide-react'
+import { Clock, Pencil, Repeat as RepeatIcon, Trash2, User } from 'lucide-react'
 import { motion } from 'motion/react'
 import { useState } from 'react'
 
@@ -33,7 +33,7 @@ interface ReminderCardProps {
 
 /**
  * Shows a reminder, with controls to tick it off, edit it and, optionally, delete it. Tapping it shows or hides its
- * notes, due time and how often it repeats.
+ * notes, due time and how often it repeats. Who it is for always shows, so that it can be seen at a glance.
  */
 export function ReminderCard({ reminder, now, canDelete, areDetailsShownAtFirst }: ReminderCardProps) {
   const { saveReminder, deleteReminder } = useReminderActions()
@@ -76,6 +76,12 @@ export function ReminderCard({ reminder, now, canDelete, areDetailsShownAtFirst 
         >
           {reminder.title}
         </p>
+        {reminder.assignedTo && (
+          <p className="mt-1 flex items-center gap-1.5 font-semibold text-primary-text">
+            <User className="size-4 shrink-0" />
+            {reminder.assignedTo}
+          </p>
+        )}
         {isShowingDetails && reminder.notes && <p className="mt-1 break-words text-muted-foreground">{reminder.notes}</p>}
         {/* The card leaves little width for text on a phone, so the due time can only wrap between its date and its time.
             How pressing it is needs no words here, as the countdown already shows it. */}

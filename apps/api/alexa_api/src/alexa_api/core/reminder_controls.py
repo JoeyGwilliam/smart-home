@@ -11,18 +11,24 @@ from alexa_api.core.skill_request import SkillRequest
 from alexa_api.core.spoken_match import find_spoken_match
 from alexa_api.core.spoken_period import SpokenPeriod, resolve_spoken_period
 
-# What the skill remembers while it waits for an answer. At most one of these is remembered at a time, and which one
-# it is says what the answer is for.
+# What the skill remembers while it waits for an answer. Which of these is remembered says what the answer is for. A
+# new reminder is remembered by its title while its due time is asked, then also by its due time (empty if it has none)
+# while the person it is for is asked.
 _NEW_TITLE_MEMORY_KEY = "new_reminder_title"
+_NEW_DUE_AT_MEMORY_KEY = "new_reminder_due_at"
 _RESCHEDULED_ID_MEMORY_KEY = "rescheduled_reminder_id"
 _DELETED_ID_MEMORY_KEY = "deleted_reminder_id"
 
 _WAYS_TO_ANSWER_DUE_TIME = "You can say a day, a time, or no time."
+_ASSIGNEES = ("Joey", "Georgie")
+_WAYS_TO_ANSWER_ASSIGNEE = "You can say Joey, Georgie, or nobody."
 _HOW_TO_START_REMINDER = "Say, remind me to, and then the reminder."
 
 
 class ReminderControls:
     """ What the skill can do with the reminders that the home's site shows: add, read out, tick off, move and delete.
+
+    Adding asks when the reminder is due and then who it is for, which is Joey, Georgie or nobody.
 
     Reading out covers today unless the person names a day, a weekend or a week, such as tomorrow or this week.
 
@@ -55,6 +61,8 @@ class ReminderControls:
             "DeleteReminderIntent": self._start_deletion,
             "SetDueTimeIntent": self._answer_with_due_time,
             "NoDueTimeIntent": self._answer_without_due_time,
+            "SetAssigneeIntent": self._answer_with_assignee,
+            "NoAssigneeIntent": self._answer_with_nobody,
             "AMAZON.YesIntent": self._answer_yes,
             "AMAZON.NoIntent": self._answer_no,
         }
@@ -138,19 +146,52 @@ class ReminderControls:
             return ask(memory[QUESTION_MEMORY_KEY], memory, preamble="Sorry, I didn't catch when. ")
 
         if _NEW_TITLE_MEMORY_KEY in memory:
-            self._reminders_client.add_reminder(memory[_NEW_TITLE_MEMORY_KEY], due_at)
-            return SkillReply(f"I've added {memory[_NEW_TITLE_MEMORY_KEY]}, due {describe_due_time(due_at, now)}.")
+            return self._ask_who_new_reminder_is_for(memory[_NEW_TITLE_MEMORY_KEY], due_at)
         return self._change_due_time(memory[_RESCHEDULED_ID_MEMORY_KEY], due_at, now)
 
     def _answer_without_due_time(self, request: SkillRequest) -> SkillReply:
         memory = request.conversation_memory
+        if _NEW_DUE_AT_MEMORY_KEY in memory:
+            # "None" or "no", to "Who is it for?", means nobody.
+            return self._answer_with_nobody(request)
         if _NEW_TITLE_MEMORY_KEY in memory:
-            self._reminders_client.add_reminder(memory[_NEW_TITLE_MEMORY_KEY], due_at=None)
-            return SkillReply(f"I've added {memory[_NEW_TITLE_MEMORY_KEY]}.")
+            return self._ask_who_new_reminder_is_for(memory[_NEW_TITLE_MEMORY_KEY], due_at=None)
         if _RESCHEDULED_ID_MEMORY_KEY in memory:
             now = self._convert_to_home_time(request.received_at)
             return self._change_due_time(memory[_RESCHEDULED_ID_MEMORY_KEY], None, now)
         return SkillReply("OK.")
+
+    def _answer_with_assignee(self, request: SkillRequest) -> SkillReply:
+        memory = request.conversation_memory
+        if _NEW_DUE_AT_MEMORY_KEY not in memory:
+            return SkillReply(f"First tell me what the reminder is. {_HOW_TO_START_REMINDER}", reprompt=_HOW_TO_START_REMINDER)
+
+        assignee = _find_assignee(request.slots.get("person", ""))
+        if assignee is None:
+            return ask(memory[QUESTION_MEMORY_KEY], memory, preamble="Sorry, I didn't catch who. ")
+        return self._add_new_reminder(memory, assignee, self._convert_to_home_time(request.received_at))
+
+    def _answer_with_nobody(self, request: SkillRequest) -> SkillReply:
+        memory = request.conversation_memory
+        if _NEW_DUE_AT_MEMORY_KEY not in memory:
+            return SkillReply("OK.")
+        return self._add_new_reminder(memory, None, self._convert_to_home_time(request.received_at))
+
+    def _ask_who_new_reminder_is_for(self, title: str, due_at: datetime | None) -> SkillReply:
+        memory = {_NEW_TITLE_MEMORY_KEY: title, _NEW_DUE_AT_MEMORY_KEY: "" if due_at is None else due_at.isoformat()}
+        return ask(f"Who is it for? {_WAYS_TO_ANSWER_ASSIGNEE}", memory)
+
+    def _add_new_reminder(self, memory: dict[str, str], assignee: str | None, now: datetime) -> SkillReply:
+        title = memory[_NEW_TITLE_MEMORY_KEY]
+        due_at = datetime.fromisoformat(memory[_NEW_DUE_AT_MEMORY_KEY]) if memory[_NEW_DUE_AT_MEMORY_KEY] else None
+        self._reminders_client.add_reminder(title, due_at, assignee)
+
+        description = f"I've added {title}"
+        if due_at is not None:
+            description += f", due {describe_due_time(due_at, now)}"
+        if assignee is not None:
+            description += f", for {assignee}"
+        return SkillReply(f"{description}.")
 
     def _answer_yes(self, request: SkillRequest) -> SkillReply:
         memory = request.conversation_memory
@@ -200,3 +241,7 @@ class ReminderControls:
 
     def _convert_to_home_time(self, moment: datetime) -> datetime:
         return moment.astimezone(self._home_time_zone)
+
+
+def _find_assignee(spoken_name: str) -> str | None:
+    return next((assignee for assignee in _ASSIGNEES if assignee.casefold() == spoken_name.strip().casefold()), None)
