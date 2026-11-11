@@ -7,8 +7,8 @@ from alexa_api.core.skill_reply import QUESTION_MEMORY_KEY, SkillReply, ask
 from alexa_api.core.skill_request import SkillRequest
 from alexa_api.core.timer_controls import TimerControls
 
-_HELP = ("You can say, remind me to water the plants. Or ask, what's due today. "
-         "The Alexa controls page on the site lists everything else.")
+_GREETING = "I'm listening."
+_HELP = "The Alexa controls page on the site lists everything you can say."
 
 
 class HomeHubSkill:
@@ -38,7 +38,7 @@ class HomeHubSkill:
                 Handles what people say about changing the site.
         """
         self._responders: dict[str, Callable[[SkillRequest], SkillReply]] = {
-            "LaunchRequest": self._offer_help,
+            "LaunchRequest": self._greet,
             "AMAZON.HelpIntent": self._offer_help,
             "AMAZON.StopIntent": self._end_conversation,
             "AMAZON.CancelIntent": self._end_conversation,
@@ -69,6 +69,9 @@ class HomeHubSkill:
             # Nothing the skill does is worth retrying while the person waits, so every action fails the same way:
             # by telling them. They can ask again once the API is back.
             return SkillReply(f"Sorry, I couldn't reach the {error.spoken_name}. Please try again later.")
+
+    def _greet(self, request: SkillRequest) -> SkillReply:
+        return SkillReply(_GREETING, reprompt=_GREETING)
 
     def _offer_help(self, request: SkillRequest) -> SkillReply:
         return SkillReply(_HELP, reprompt=_HELP)

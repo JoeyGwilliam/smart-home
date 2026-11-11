@@ -60,14 +60,21 @@ def test_hands_request_about_site_to_site_editor_controls_when_responding() -> N
     assert received_messages == ["Make the clock bigger"]
 
 
-@pytest.mark.parametrize("request_name", ["LaunchRequest", "AMAZON.HelpIntent"])
-def test_explains_what_can_be_said_and_keeps_listening_when_opened_or_asked_for_help(request_name: str) -> None:
+def test_says_it_is_listening_and_keeps_listening_when_opened() -> None:
     skill = _create_skill()
 
-    reply = skill.respond(SkillRequest(request_name, _NOON))
+    reply = skill.respond(SkillRequest("LaunchRequest", _NOON))
 
-    assert reply.speech == ("You can say, remind me to water the plants. Or ask, what's due today. "
-                            "The Alexa controls page on the site lists everything else.")
+    assert reply.speech == "I'm listening."
+    assert reply.reprompt is not None
+
+
+def test_explains_where_to_find_what_can_be_said_and_keeps_listening_when_asked_for_help() -> None:
+    skill = _create_skill()
+
+    reply = skill.respond(SkillRequest("AMAZON.HelpIntent", _NOON))
+
+    assert reply.speech == "The Alexa controls page on the site lists everything you can say."
     assert reply.reprompt is not None
 
 
