@@ -1,0 +1,30 @@
+[
+  { "utterance": "remind me to buy milk", "intent": "AddReminderIntent", "slots": { "title": "buy milk" } },
+  { "utterance": "remind me about the dentist", "intent": "AddReminderIntent", "slots": { "title": "the dentist" } },
+  { "utterance": "add a reminder to water the plants", "intent": "AddReminderIntent", "slots": { "title": "water the plants" } },
+  { "utterance": "set a reminder to call mum", "intent": "AddReminderIntent", "slots": { "title": "call mum" } },
+  { "utterance": "i need to take the bins out", "intent": "AddReminderIntent", "slots": { "title": "take the bins out" } },
+
+  { "utterance": "tomorrow", "intent": "SetDueTimeIntent", "slots": { "date": null } },
+  { "utterance": "tomorrow at five pm", "intent": "SetDueTimeIntent", "slots": { "date": null, "time": "17:00" } },
+  { "utterance": "at half past nine in the morning", "intent": "SetDueTimeIntent", "slots": { "time": "09:30" } },
+  { "utterance": "on friday", "intent": "SetDueTimeIntent", "slots": { "date": null } },
+  { "utterance": "on friday at noon", "intent": "SetDueTimeIntent", "slots": { "date": null, "time": "12:00" } },
+  { "utterance": "tomorrow morning", "intent": "SetDueTimeIntent", "slots": { "date": null, "time": "MO" } },
+  { "utterance": "six pm", "intent": "SetDueTimeIntent", "slots": { "time": "18:00" } },
+  { "utterance": "it's due tomorrow at three pm", "intent": "SetDueTimeIntent", "slots": { "date": null, "time": "15:00" } },
+
+  { "utterance": "no time", "intent": "NoDueTimeIntent" },
+  { "utterance": "no due time", "intent": "NoDueTimeIntent" },
+  { "utterance": "whenever", "intent": "NoDueTimeIntent" },
+  { "utterance": "no", "intent": "AMAZON.NoIntent" },
+
+  { "utterance": "what's due today", "intent": "ListRemindersIntent" },
+  { "utterance": "what are my reminders", "intent": "ListRemindersIntent" },
+  { "utterance": "what do i need to do today", "intent": "ListRemindersIntent" },
+  { "utterance": "read my reminders", "intent": "ListRemindersIntent" },
+
+  { "utterance": "help", "intent": "AMAZON.HelpIntent" },
+  { "utterance": "stop", "intent": "AMAZON.StopIntent" },
+  { "utterance": "cancel", "intent": "AMAZON.CancelIntent" }
+]

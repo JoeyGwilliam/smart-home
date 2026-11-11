@@ -1,0 +1,8 @@
+{
+  "permissions": {
+    "allow": [
+      "PowerShell(.\update_alexa_skill.bat)",
+      "Bash(ask smapi profile-nlu:*)"
+    ]
+  }
+}
