@@ -1,6 +1,7 @@
-import { Languages, LayoutDashboard, ListTodo, Timer, WandSparkles, type LucideIcon } from 'lucide-react'
+import { Languages, LayoutDashboard, ListTodo, Mic, Timer, WandSparkles, type LucideIcon } from 'lucide-react'
 import type { JSX } from 'react'
 
+import { AlexaControlsPage } from '@/pages/alexaControls/AlexaControlsPage'
 import { AdhdTimerPage } from '@/pages/adhdTimer/AdhdTimerPage'
 import { DashboardPage } from '@/pages/dashboard/DashboardPage'
 import { RemindersPage } from '@/pages/reminders/RemindersPage'
@@ -27,5 +28,6 @@ export const PAGES: Page[] = [
   { path: '/reminders', title: 'Reminders', icon: ListTodo, component: RemindersPage },
   { path: '/adhd-timer', title: 'ADHD timer', icon: Timer, component: AdhdTimerPage },
   { path: '/word-of-the-day', title: 'Word of the day', icon: Languages, component: WordOfTheDayPage },
+  { path: '/alexa-controls', title: 'Alexa controls', icon: Mic, component: AlexaControlsPage },
   { path: '/site-editor', title: 'Site editor', icon: WandSparkles, component: SiteEditorPage },
 ]

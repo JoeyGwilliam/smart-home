@@ -17,6 +17,10 @@ function publishBuildId(): Plugin {
   }
 }
 
+// The Alexa skill's own files, which the Alexa controls page is built from (see src/alexa/homeHubSkill.ts). They live
+// with the skill rather than in this app. The Dockerfile copies them to the same place relative to the app.
+const ALEXA_SKILL_DIRECTORY = fileURLToPath(new URL('../api/alexa_api/skill', import.meta.url))
+
 // The app calls the APIs under /api, on its own origin, so they need no CORS setup and can stay private: the timers API
 // under /api/timers, the site editor API under /api/site-editor, and the reminders API under everything else. In
 // development this proxy forwards those calls; in production nginx.conf does the same job.
@@ -24,9 +28,11 @@ export default defineConfig({
   plugins: [react(), tailwindcss(), publishBuildId()],
   define: { __BUILD_ID__: JSON.stringify(BUILD_ID) },
   resolve: {
-    alias: { '@': fileURLToPath(new URL('./src', import.meta.url)) },
+    alias: { '@': fileURLToPath(new URL('./src', import.meta.url)), '@alexa-skill': ALEXA_SKILL_DIRECTORY },
   },
   server: {
+    // The development server refuses to serve files from outside the app unless they are named here.
+    fs: { allow: ['.', ALEXA_SKILL_DIRECTORY] },
     proxy: {
       // Vite uses the first entry that matches, so the longer prefixes have to come first.
       '/api/timers': {

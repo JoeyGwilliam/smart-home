@@ -39,7 +39,11 @@ services:
 
   # Every page for the home's screens: the reminders viewer, dashboards, and so on.
   home-web:
-    build: ./apps/home_web
+    build:
+      context: ./apps/home_web
+      additional_contexts:
+        # The Alexa controls page is built from the skill's own files, so that it always describes this commit's skill.
+        alexa-skill: ./apps/api/alexa_api/skill
     restart: unless-stopped
     depends_on:
       reminders-api:

@@ -1,0 +1,27 @@
+{
+  "slots": {
+    "title": "what to do",
+    "date": "a day",
+    "time": "a time"
+  },
+  "controls": {
+    "AddReminderIntent": {
+      "title": "Add a reminder",
+      "description": "Starts a new reminder for the reminders page. Home hub then asks when it is due."
+    },
+    "SetDueTimeIntent": {
+      "title": "Give the due time",
+      "description": "Adds the reminder with a due time. A day by itself means 9 in the morning, and a time by itself means the next time the clock shows it.",
+      "answers": "When is it due?"
+    },
+    "NoDueTimeIntent": {
+      "title": "Skip the due time",
+      "description": "Adds the reminder without a due time. Saying \"no\" does the same.",
+      "answers": "When is it due?"
+    },
+    "ListRemindersIntent": {
+      "title": "Hear what's due",
+      "description": "Reads out the unfinished reminders that are due today or overdue."
+    }
+  }
+}

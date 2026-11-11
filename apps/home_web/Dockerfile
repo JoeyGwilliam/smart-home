@@ -9,6 +9,10 @@ COPY package.json package-lock.json ./
 RUN --mount=type=cache,target=/root/.npm npm ci --no-audit --no-fund
 
 COPY . .
+# The Alexa controls page is built from the skill's own files, which live outside this app. compose.yaml provides them
+# as the alexa-skill build context; to build without compose, add --build-context alexa-skill=../api/alexa_api/skill.
+# They go where vite.config.ts looks for them: the same place relative to the app as in the repository.
+COPY --from=alexa-skill . /api/alexa_api/skill
 RUN npm run build
 
 # The unprivileged image runs nginx as a non-root user, which is why it listens on 8080 rather than 80.

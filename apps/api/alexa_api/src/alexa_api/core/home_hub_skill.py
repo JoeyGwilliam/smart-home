@@ -19,7 +19,8 @@ class HomeHubSkill:
 
     The skill's interaction model (`skill/skill-package/interactionModels`) defines what people can say and the
     intent that each phrase becomes. Every intent there needs to be handled here; one that isn't gets a spoken
-    apology, so a phrase can be added to the model before the skill can act on it.
+    apology, so a phrase can be added to the model before the skill can act on it. The site's Alexa controls page
+    lists every intent with its phrases, and explains each one using `skill/control-descriptions.json`.
 
     Adding a reminder is a short conversation, because Alexa can't pick both free text and a time out of one
     sentence: the person says what the reminder is, the skill asks when it is due, and the person answers.
