@@ -2,7 +2,7 @@ import { organiseReminders } from '@/reminders/organiseReminders'
 import type { Reminder } from '@/reminders/reminder'
 
 function createReminder(overrides: Partial<Reminder>): Reminder {
-  return { id: '1', title: 'Water the plants', notes: null, dueAt: null, completedAt: null, ...overrides }
+  return { id: '1', title: 'Water the plants', notes: null, dueAt: null, completedAt: null, repeats: null, ...overrides }
 }
 
 test('separates completed reminders from active ones when both exist', () => {

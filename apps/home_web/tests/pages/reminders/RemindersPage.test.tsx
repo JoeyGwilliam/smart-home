@@ -19,8 +19,8 @@ afterEach(() => {
 
 test('shows active and completed reminders when the API has both', async () => {
   vi.stubGlobal('fetch', vi.fn().mockResolvedValue(Response.json([
-    { id: '1', title: 'Water the plants', notes: null, due_at: null, completed_at: null },
-    { id: '2', title: 'Book the dentist', notes: null, due_at: null, completed_at: '2026-11-09T10:00:00Z' },
+    { id: '1', title: 'Water the plants', notes: null, due_at: null, completed_at: null, repeats: null },
+    { id: '2', title: 'Book the dentist', notes: null, due_at: null, completed_at: '2026-11-09T10:00:00Z', repeats: null },
   ])))
 
   renderPage()
@@ -32,7 +32,7 @@ test('shows active and completed reminders when the API has both', async () => {
 
 test('shows the notes of a reminder when it has not been tapped', async () => {
   vi.stubGlobal('fetch', vi.fn().mockResolvedValue(Response.json([
-    { id: '1', title: 'Water the plants', notes: 'Not the cactus', due_at: null, completed_at: null },
+    { id: '1', title: 'Water the plants', notes: 'Not the cactus', due_at: null, completed_at: null, repeats: null },
   ])))
 
   renderPage()
@@ -59,7 +59,7 @@ test('explains the problem when the API cannot be reached', async () => {
 test('sends the new reminder to the API when one is added', async () => {
   const fetch = vi.fn().mockImplementation((_url: string, request?: RequestInit) =>
     Promise.resolve(request?.method === 'POST'
-      ? Response.json({ id: '1', title: 'Water the plants', notes: null, due_at: null, completed_at: null }, { status: 201 })
+      ? Response.json({ id: '1', title: 'Water the plants', notes: null, due_at: null, completed_at: null, repeats: null }, { status: 201 })
       : Response.json([])),
   )
   vi.stubGlobal('fetch', fetch)
@@ -69,5 +69,44 @@ test('sends the new reminder to the API when one is added', async () => {
   await userEvent.click(screen.getByRole('button', { name: 'Add' }))
 
   const postRequest = fetch.mock.calls.find(([, request]) => request?.method === 'POST')?.[1]
-  expect(JSON.parse(postRequest.body)).toEqual({ title: 'Water the plants', notes: null, due_at: null, completed_at: null })
+  expect(JSON.parse(postRequest.body)).toEqual({ title: 'Water the plants', notes: null, due_at: null, completed_at: null, repeats: null })
+})
+
+test('shows how often a reminder repeats when it repeats', async () => {
+  vi.stubGlobal('fetch', vi.fn().mockResolvedValue(Response.json([
+    { id: '1', title: 'Take out the bins', notes: null, due_at: '2026-11-10T19:00:00Z', completed_at: null, repeats: 'weekly' },
+  ])))
+
+  renderPage()
+
+  expect(await screen.findByText('Every week')).toBeInTheDocument()
+})
+
+test('sends the chosen repeat to the API when a repeating reminder is added', async () => {
+  const fetch = vi.fn().mockImplementation((_url: string, request?: RequestInit) =>
+    Promise.resolve(request?.method === 'POST'
+      ? Response.json({ id: '1', title: 'Take out the bins', notes: null, due_at: null, completed_at: null, repeats: null }, { status: 201 })
+      : Response.json([])),
+  )
+  vi.stubGlobal('fetch', fetch)
+  renderPage()
+
+  await userEvent.type(await screen.findByLabelText('Title'), 'Take out the bins')
+  await userEvent.click(screen.getByRole('button', { name: 'Add a due time' }))
+  await userEvent.click(screen.getByRole('button', { name: 'Tomorrow morning' }))
+  await userEvent.click(screen.getByRole('button', { name: "Doesn't repeat" }))
+  await userEvent.click(await screen.findByRole('menuitemradio', { name: 'Every 2 weeks' }))
+  await userEvent.click(screen.getByRole('button', { name: 'Add' }))
+
+  const postRequest = fetch.mock.calls.find(([, request]) => request?.method === 'POST')?.[1]
+  expect(JSON.parse(postRequest.body).repeats).toBe('fortnightly')
+})
+
+test('offers no repeat when the new reminder has no due time', async () => {
+  vi.stubGlobal('fetch', vi.fn().mockResolvedValue(Response.json([])))
+  renderPage()
+
+  await userEvent.type(await screen.findByLabelText('Title'), 'Take out the bins')
+
+  expect(screen.queryByRole('button', { name: "Doesn't repeat" })).not.toBeInTheDocument()
 })

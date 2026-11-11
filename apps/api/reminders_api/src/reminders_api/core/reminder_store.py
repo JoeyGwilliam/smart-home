@@ -3,12 +3,13 @@ from datetime import UTC, datetime
 from pathlib import Path
 from uuid import UUID
 
-from sqlalchemy import URL, DateTime, Dialect, create_engine, delete, select
+from sqlalchemy import URL, DateTime, Dialect, Engine, create_engine, delete, inspect, select, text
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, sessionmaker
 from sqlalchemy.pool import NullPool
 from sqlalchemy.types import TypeDecorator
 
 from .reminder import Reminder
+from .repeat import Repeat
 
 
 class ReminderStore:
@@ -28,6 +29,7 @@ class ReminderStore:
         url = URL.create("sqlite", database=str(database_path))
         engine = create_engine(url, poolclass=NullPool)
         _ReminderDBBase.metadata.create_all(engine)
+        _add_columns_missing_from_older_databases(engine)
 
         self._begin_session = sessionmaker(engine).begin
 
@@ -76,6 +78,15 @@ class ReminderStore:
             session.execute(delete(_ReminderRow).where(_ReminderRow.id == reminder_id))
 
 
+def _add_columns_missing_from_older_databases(engine: Engine) -> None:
+    # create_all only creates tables that don't exist, so a database made before reminders could repeat lacks the
+    # column. Every existing reminder happens once, which is what an empty column means.
+    column_names = {column["name"] for column in inspect(engine).get_columns(_ReminderRow.__tablename__)}
+    if "repeats" not in column_names:
+        with engine.begin() as connection:
+            connection.execute(text(f"ALTER TABLE {_ReminderRow.__tablename__} ADD COLUMN repeats VARCHAR"))
+
+
 class _UtcDateTime(TypeDecorator[datetime]):
     """ A timezone-aware datetime, stored as naive UTC because SQLite cannot store time zones."""
     impl = DateTime
@@ -101,6 +112,7 @@ class _ReminderRow(_ReminderDBBase):
     notes: Mapped[str | None]
     due_at: Mapped[datetime | None] = mapped_column(_UtcDateTime)
     completed_at: Mapped[datetime | None] = mapped_column(_UtcDateTime)
+    repeats: Mapped[str | None]
 
     def to_reminder(self) -> Reminder:
         return Reminder(
@@ -108,5 +120,6 @@ class _ReminderRow(_ReminderDBBase):
             notes=self.notes,
             due_at=self.due_at,
             completed_at=self.completed_at,
+            repeats=Repeat(self.repeats) if self.repeats else None,
             id=self.id,
         )

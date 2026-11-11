@@ -1,4 +1,4 @@
-import type { Reminder, ReminderContent } from '@/reminders/reminder'
+import type { Reminder, ReminderContent, Repeat } from '@/reminders/reminder'
 
 // nginx.conf and vite.config.ts forward this to the reminders API.
 const REMINDERS_URL = '/api/reminders'
@@ -6,7 +6,7 @@ const REMINDERS_URL = '/api/reminders'
 /** The reminders API could not be reached, or failed to handle a request. */
 export class RemindersUnavailableError extends Error {}
 
-/** The reminders API rejected a reminder's content, which happens when its title is blank. */
+/** The reminders API rejected a reminder's content, which happens when its title is blank or it repeats without a due time. */
 export class InvalidReminderError extends Error {}
 
 /** A reminder as the API sends and receives it. */
@@ -16,6 +16,7 @@ interface ReminderJson {
   notes: string | null
   due_at: string | null
   completed_at: string | null
+  repeats: Repeat | null
 }
 
 /**
@@ -45,6 +46,7 @@ export async function createReminder(content: ReminderContent): Promise<Reminder
 
 /**
  * Saves every part of a reminder, replacing what the API held. Recreates the reminder if it was deleted elsewhere.
+ * Ticking off a repeating reminder also makes the API add the next one, which the next listing includes.
  *
  * @param reminder The reminder as it should now be.
  * @throws InvalidReminderError If the API rejects the content.
@@ -107,6 +109,7 @@ function parseReminder(reminderJson: ReminderJson): Reminder {
     notes: reminderJson.notes,
     dueAt: parseTime(reminderJson.due_at),
     completedAt: parseTime(reminderJson.completed_at),
+    repeats: reminderJson.repeats,
   }
 }
 
@@ -116,5 +119,6 @@ function formatReminder(reminder: Omit<Reminder, 'id'>): Omit<ReminderJson, 'id'
     notes: reminder.notes,
     due_at: formatTime(reminder.dueAt),
     completed_at: formatTime(reminder.completedAt),
+    repeats: reminder.repeats,
   }
 }

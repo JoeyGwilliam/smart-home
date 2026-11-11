@@ -14,6 +14,8 @@ services:
     restart: unless-stopped
     environment:
       REMINDERS_DATABASE_PATH: /data/reminders.db
+      # The time zone whose clocks repeating reminders follow, so that one due at 09:00 stays at 09:00 when they change.
+      HOME_TIME_ZONE: Europe/London
     ports:
       # The API has no login, so it is only reachable from this machine by default. To let other devices reach it, set
       # REMINDERS_API_BIND_ADDRESS to this machine's LAN address in a git-ignored .env file next to this one.

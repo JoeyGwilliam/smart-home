@@ -19,6 +19,10 @@ class Reminder:
             Timezone-aware due time, or None if there is no due time.
         completed_at:
             Timezone-aware completion time, or None if not completed.
+        repeats:
+            How often the reminder comes round again, such as "weekly", or None if it happens once. The skill never
+            changes it, but has to send it back when saving. The reminders API creates the next occurrence when a
+            repeating reminder is completed.
     """
 
     id: str
@@ -26,3 +30,4 @@ class Reminder:
     notes: str | None = None
     due_at: datetime | None = None
     completed_at: datetime | None = None
+    repeats: str | None = None

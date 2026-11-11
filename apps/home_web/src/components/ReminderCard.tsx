@@ -1,4 +1,4 @@
-import { Clock, Pencil, Trash2 } from 'lucide-react'
+import { Clock, Pencil, Repeat as RepeatIcon, Trash2 } from 'lucide-react'
 import { motion } from 'motion/react'
 import { useState } from 'react'
 
@@ -7,6 +7,7 @@ import { EditReminderDialog } from '@/components/EditReminderDialog'
 import { TickButton } from '@/components/TickButton'
 import { Button } from '@/components/ui/button'
 import { describeReminder, type Countdown, type Urgency } from '@/reminders/describeReminder'
+import { REPEAT_DESCRIPTIONS } from '@/reminders/describeRepeat'
 import type { Reminder } from '@/reminders/reminder'
 import { useReminderActions } from '@/reminders/useReminders'
 import { cn } from 'cn'
@@ -32,7 +33,7 @@ interface ReminderCardProps {
 
 /**
  * Shows a reminder, with controls to tick it off, edit it and, optionally, delete it. Tapping it shows or hides its
- * notes and due time.
+ * notes, due time and how often it repeats.
  */
 export function ReminderCard({ reminder, now, canDelete, areDetailsShownAtFirst }: ReminderCardProps) {
   const { saveReminder, deleteReminder } = useReminderActions()
@@ -84,6 +85,12 @@ export function ReminderCard({ reminder, now, canDelete, areDetailsShownAtFirst 
             <span>
               <span className="whitespace-nowrap">{dueLabel.date},</span> <span className="whitespace-nowrap">{dueLabel.time}</span>
             </span>
+          </p>
+        )}
+        {isShowingDetails && reminder.repeats && (
+          <p className="mt-1 flex items-center gap-1.5 font-semibold text-muted-foreground">
+            <RepeatIcon className="size-4 shrink-0" />
+            {REPEAT_DESCRIPTIONS[reminder.repeats]}
           </p>
         )}
       </button>

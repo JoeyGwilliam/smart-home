@@ -20,7 +20,7 @@ def _respond(held_reminders: list[dict[str, Any]], request: SkillRequest) -> Ski
 
 
 def _hold_reminder(reminder_id: str, title: str, due_at: str | None = None, completed_at: str | None = None) -> dict[str, Any]:
-    return {"id": reminder_id, "title": title, "notes": None, "due_at": due_at, "completed_at": completed_at}
+    return {"id": reminder_id, "title": title, "notes": None, "due_at": due_at, "completed_at": completed_at, "repeats": None}
 
 
 def test_asks_for_due_time_and_remembers_capitalised_title_when_reminder_is_started() -> None:
@@ -61,7 +61,7 @@ def test_adds_reminder_and_ends_conversation_when_due_time_is_said_for_new_remin
 
     assert reply == SkillReply("I've added Buy milk, due tomorrow at 5 PM.")
     assert held_reminders == [
-        {"id": "new-reminder", "title": "Buy milk", "notes": None, "due_at": "2026-11-12T17:00:00+00:00", "completed_at": None},
+        {"id": "new-reminder", "title": "Buy milk", "notes": None, "due_at": "2026-11-12T17:00:00+00:00", "completed_at": None, "repeats": None},
     ]
 
 
@@ -120,7 +120,7 @@ def test_adds_reminder_without_due_time_when_person_declines_to_give_one(intent_
 
     assert reply == SkillReply("I've added Buy milk.")
     assert held_reminders == [
-        {"id": "new-reminder", "title": "Buy milk", "notes": None, "due_at": None, "completed_at": None},
+        {"id": "new-reminder", "title": "Buy milk", "notes": None, "due_at": None, "completed_at": None, "repeats": None},
     ]
 
 

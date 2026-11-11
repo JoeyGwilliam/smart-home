@@ -6,6 +6,7 @@ from uuid import UUID, uuid7
 from pydantic import AfterValidator, AwareDatetime, BaseModel, ConfigDict, Field, model_validator
 
 from reminders_api.core.reminder import Reminder
+from reminders_api.core.repeat import Repeat
 
 # Converting on the way in means that every response gives the same instant in the same form, including the response
 # to the request that saved it.
@@ -26,6 +27,9 @@ class ReminderSchema(BaseModel):
         completed_at:
             Completion time, or None if not completed. Must include a time zone in a request, and is always UTC in a
             response.
+        repeats:
+            How often the reminder comes round again once it is completed, such as "weekly", or None if it only
+            happens once. Only a reminder with a due time can repeat.
         id:
             Unique identifier that stays the same when the reminder is edited. Ignored in a request, so that clients
             can send back a reminder that they received.
@@ -36,6 +40,7 @@ class ReminderSchema(BaseModel):
     notes: str | None = None
     due_at: _UtcDatetime | None = None
     completed_at: _UtcDatetime | None = None
+    repeats: Repeat | None = None
     id: UUID = Field(default_factory=uuid7)
 
     @model_validator(mode="after")

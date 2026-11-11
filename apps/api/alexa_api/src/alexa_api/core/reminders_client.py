@@ -47,6 +47,7 @@ class RemindersClient:
                 title=reminder["title"],
                 notes=reminder["notes"],
                 due_at=None if reminder["due_at"] is None else datetime.fromisoformat(reminder["due_at"]),
+                repeats=reminder["repeats"],
             )
             for reminder in self._api.send("GET", "/reminders").json()
             if reminder["completed_at"] is None
@@ -64,6 +65,7 @@ class RemindersClient:
             "notes": reminder.notes,
             "due_at": _represent_moment(reminder.due_at),
             "completed_at": _represent_moment(reminder.completed_at),
+            "repeats": reminder.repeats,
         })
 
     def delete_reminder(self, reminder: Reminder) -> None:

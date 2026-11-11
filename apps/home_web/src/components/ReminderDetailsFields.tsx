@@ -1,5 +1,6 @@
 import { DueTimePicker } from '@/components/DueTimePicker'
 import type { ReminderDraft } from '@/components/reminderDraft'
+import { RepeatPicker } from '@/components/RepeatPicker'
 import { Textarea } from '@/components/ui/textarea'
 
 interface ReminderDetailsFieldsProps {
@@ -7,7 +8,10 @@ interface ReminderDetailsFieldsProps {
   onChange: (draft: ReminderDraft) => void
 }
 
-/** The optional parts of a reminder: its notes and due time. Forms show the title themselves, in their own style. */
+/**
+ * The optional parts of a reminder: its notes, due time and how often it repeats. Repeating is only offered once there
+ * is a due time to repeat from. Forms show the title themselves, in their own style.
+ */
 export function ReminderDetailsFields({ draft, onChange }: ReminderDetailsFieldsProps) {
   return (
     <div className="grid gap-3">
@@ -19,7 +23,10 @@ export function ReminderDetailsFields({ draft, onChange }: ReminderDetailsFields
         rows={2}
         className="min-h-0 resize-none rounded-2xl border-input bg-field px-4 py-2.5 text-base"
       />
-      <DueTimePicker value={draft.dueAt} onChange={(dueAt) => onChange({ ...draft, dueAt })} />
+      <div className="flex flex-wrap items-center gap-2">
+        <DueTimePicker value={draft.dueAt} onChange={(dueAt) => onChange({ ...draft, dueAt })} />
+        {draft.dueAt && <RepeatPicker value={draft.repeats} onChange={(repeats) => onChange({ ...draft, repeats })} />}
+      </div>
     </div>
   )
 }

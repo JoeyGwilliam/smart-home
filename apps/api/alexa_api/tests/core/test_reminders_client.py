@@ -18,7 +18,7 @@ def test_creates_reminder_with_due_time_and_time_zone_when_adding_reminder() -> 
     client.add_reminder("Buy milk", due_at)
 
     assert held_reminders == [
-        {"id": "new-reminder", "title": "Buy milk", "notes": None, "due_at": "2026-06-11T17:00:00+01:00", "completed_at": None},
+        {"id": "new-reminder", "title": "Buy milk", "notes": None, "due_at": "2026-06-11T17:00:00+01:00", "completed_at": None, "repeats": None},
     ]
 
 
@@ -34,24 +34,24 @@ def test_creates_reminder_with_no_due_time_when_adding_reminder_without_one() ->
 
 def test_lists_only_reminders_without_completion_time_when_listing_unfinished_reminders() -> None:
     held_reminders = [
-        {"id": "milk", "title": "Buy milk", "notes": "Semi-skimmed", "due_at": "2026-11-11T17:00:00Z", "completed_at": None},
-        {"id": "dentist", "title": "Call the dentist", "notes": None, "due_at": None, "completed_at": "2026-11-10T09:00:00Z"},
-        {"id": "plants", "title": "Water the plants", "notes": None, "due_at": None, "completed_at": None},
+        {"id": "milk", "title": "Buy milk", "notes": "Semi-skimmed", "due_at": "2026-11-11T17:00:00Z", "completed_at": None, "repeats": "weekly"},
+        {"id": "dentist", "title": "Call the dentist", "notes": None, "due_at": None, "completed_at": "2026-11-10T09:00:00Z", "repeats": None},
+        {"id": "plants", "title": "Water the plants", "notes": None, "due_at": None, "completed_at": None, "repeats": None},
     ]
     client = RemindersClient("http://reminders-api", create_fake_reminders_api(held_reminders))
 
     reminders = client.list_unfinished_reminders()
 
     assert reminders == [
-        Reminder("milk", "Buy milk", notes="Semi-skimmed", due_at=datetime(2026, 11, 11, 17, 0, tzinfo=UTC)),
+        Reminder("milk", "Buy milk", notes="Semi-skimmed", due_at=datetime(2026, 11, 11, 17, 0, tzinfo=UTC), repeats="weekly"),
         Reminder("plants", "Water the plants"),
     ]
 
 
 def test_replaces_every_field_of_held_reminder_when_saving_reminder() -> None:
     held_reminders = [
-        {"id": "milk", "title": "Buy milk", "notes": "Semi-skimmed", "due_at": None, "completed_at": None},
-        {"id": "plants", "title": "Water the plants", "notes": None, "due_at": None, "completed_at": None},
+        {"id": "milk", "title": "Buy milk", "notes": "Semi-skimmed", "due_at": None, "completed_at": None, "repeats": None},
+        {"id": "plants", "title": "Water the plants", "notes": None, "due_at": None, "completed_at": None, "repeats": None},
     ]
     client = RemindersClient("http://reminders-api", create_fake_reminders_api(held_reminders))
     completed_reminder = Reminder(
@@ -60,6 +60,7 @@ def test_replaces_every_field_of_held_reminder_when_saving_reminder() -> None:
         notes="Semi-skimmed",
         due_at=datetime(2026, 11, 11, 17, 0, tzinfo=UTC),
         completed_at=datetime(2026, 11, 11, 12, 0, tzinfo=UTC),
+        repeats="weekly",
     )
 
     client.save_reminder(completed_reminder)
@@ -71,15 +72,16 @@ def test_replaces_every_field_of_held_reminder_when_saving_reminder() -> None:
             "notes": "Semi-skimmed",
             "due_at": "2026-11-11T17:00:00+00:00",
             "completed_at": "2026-11-11T12:00:00+00:00",
+            "repeats": "weekly",
         },
-        {"id": "plants", "title": "Water the plants", "notes": None, "due_at": None, "completed_at": None},
+        {"id": "plants", "title": "Water the plants", "notes": None, "due_at": None, "completed_at": None, "repeats": None},
     ]
 
 
 def test_removes_only_that_reminder_when_deleting_reminder() -> None:
     held_reminders = [
-        {"id": "milk", "title": "Buy milk", "notes": None, "due_at": None, "completed_at": None},
-        {"id": "plants", "title": "Water the plants", "notes": None, "due_at": None, "completed_at": None},
+        {"id": "milk", "title": "Buy milk", "notes": None, "due_at": None, "completed_at": None, "repeats": None},
+        {"id": "plants", "title": "Water the plants", "notes": None, "due_at": None, "completed_at": None, "repeats": None},
     ]
     client = RemindersClient("http://reminders-api", create_fake_reminders_api(held_reminders))
 

@@ -10,7 +10,8 @@ def create_fake_reminders_api(reminders: list[dict[str, Any]]) -> httpx.MockTran
     Args:
         reminders:
             The reminders that the API holds, in its JSON form, each with an `id`. The API's changes are made to
-            this list: created reminders are appended with the id `new-reminder`, no notes and no completion time.
+            this list: created reminders are appended with the id `new-reminder`, no notes, no completion time and no
+            repeat.
 
     Returns:
         The transport.
@@ -19,7 +20,7 @@ def create_fake_reminders_api(reminders: list[dict[str, Any]]) -> httpx.MockTran
         reminder_id = request.url.path.removeprefix("/reminders").removeprefix("/")
         position = next((index for index, reminder in enumerate(reminders) if reminder["id"] == reminder_id), None)
         if request.method == "POST" and not reminder_id:
-            reminders.append({"id": "new-reminder", "notes": None, "completed_at": None} | json.loads(request.content))
+            reminders.append({"id": "new-reminder", "notes": None, "completed_at": None, "repeats": None} | json.loads(request.content))
             return httpx.Response(201, json=reminders[-1])
         if request.method == "GET" and not reminder_id:
             return httpx.Response(200, json=reminders)
