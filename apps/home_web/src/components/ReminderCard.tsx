@@ -2,7 +2,7 @@ import { Clock, Pencil, Trash2 } from 'lucide-react'
 import { motion } from 'motion/react'
 import { useState } from 'react'
 
-import { DeleteReminderDialog } from '@/components/DeleteReminderDialog'
+import { ConfirmDeleteDialog } from '@/components/ConfirmDeleteDialog'
 import { EditReminderDialog } from '@/components/EditReminderDialog'
 import { TickButton } from '@/components/TickButton'
 import { Button } from '@/components/ui/button'
@@ -109,8 +109,9 @@ export function ReminderCard({ reminder, now, canDelete, areDetailsShownAtFirst 
 
       <EditReminderDialog reminder={reminder} isOpen={isEditing} onOpenChange={setIsEditing} />
       {canDelete && (
-        <DeleteReminderDialog
-          reminderTitle={reminder.title}
+        <ConfirmDeleteDialog
+          question="Delete this reminder?"
+          itemName={reminder.title}
           isOpen={isConfirmingDelete}
           onOpenChange={setIsConfirmingDelete}
           onConfirm={() => void deleteReminder(reminder.id)}

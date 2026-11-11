@@ -94,6 +94,9 @@
     --mint: oklch(0.88 0.1 160);
     --sky: oklch(0.87 0.08 235);
     --lavender: oklch(0.86 0.085 300);
+
+    /* Laid over the part of the ADHD timer's ring whose time has passed, to grey it out (see TimerDial). */
+    --elapsed: oklch(0.82 0.008 15 / 88%);
 }
 
 /*
@@ -142,6 +145,9 @@
     --mint: oklch(0.82 0.07 165);
     --sky: oklch(0.82 0.06 235);
     --lavender: oklch(0.72 0.07 300);
+
+    /* Kept light enough at night for the dark task names that are written over it. */
+    --elapsed: oklch(0.6 0.012 5 / 90%);
 }
 
 /*
@@ -449,4 +455,52 @@ html:active-view-transition-type(page)::view-transition-new(page) {
 @utility panel {
     border: 3px solid var(--panel-edge);
     background-color: var(--card);
+}
+
+/*
+ * A slider with a soft track and a round pink thumb that is big enough for a finger, in place of the browser's own.
+ * Browsers only let these parts be styled under their own names for them, which is why each appears twice.
+ */
+@utility soft-slider {
+    appearance: none;
+    background: transparent;
+
+    &::-webkit-slider-runnable-track {
+        box-sizing: border-box;
+        height: 0.75rem;
+        border: 2px solid var(--border);
+        border-radius: 9999px;
+        background: var(--field);
+    }
+
+    &::-moz-range-track {
+        box-sizing: border-box;
+        height: 0.75rem;
+        border: 2px solid var(--border);
+        border-radius: 9999px;
+        background: var(--field);
+    }
+
+    &::-webkit-slider-thumb {
+        appearance: none;
+        box-sizing: border-box;
+        width: 1.75rem;
+        height: 1.75rem;
+        /* Centres the thumb on the track, which this browser would otherwise hang it beneath. */
+        margin-top: calc((0.75rem - 4px - 1.75rem) / 2);
+        border: 3px solid var(--card);
+        border-radius: 9999px;
+        background: var(--primary);
+        box-shadow: 0 2px 6px var(--shade);
+    }
+
+    &::-moz-range-thumb {
+        box-sizing: border-box;
+        width: 1.75rem;
+        height: 1.75rem;
+        border: 3px solid var(--card);
+        border-radius: 9999px;
+        background: var(--primary);
+        box-shadow: 0 2px 6px var(--shade);
+    }
 }

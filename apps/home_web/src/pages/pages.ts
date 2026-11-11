@@ -1,6 +1,7 @@
-import { Languages, LayoutDashboard, ListTodo, type LucideIcon } from 'lucide-react'
+import { Languages, LayoutDashboard, ListTodo, Timer, type LucideIcon } from 'lucide-react'
 import type { JSX } from 'react'
 
+import { AdhdTimerPage } from '@/pages/adhdTimer/AdhdTimerPage'
 import { DashboardPage } from '@/pages/dashboard/DashboardPage'
 import { RemindersPage } from '@/pages/reminders/RemindersPage'
 import { WordOfTheDayPage } from '@/pages/wordOfTheDay/WordOfTheDayPage'
@@ -23,5 +24,6 @@ export interface Page {
 export const PAGES: Page[] = [
   { path: '/', title: 'Dashboard', icon: LayoutDashboard, component: DashboardPage },
   { path: '/reminders', title: 'Reminders', icon: ListTodo, component: RemindersPage },
+  { path: '/adhd-timer', title: 'ADHD timer', icon: Timer, component: AdhdTimerPage },
   { path: '/word-of-the-day', title: 'Word of the day', icon: Languages, component: WordOfTheDayPage },
 ]

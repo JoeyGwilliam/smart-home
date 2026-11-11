@@ -17,8 +17,9 @@ function publishBuildId(): Plugin {
   }
 }
 
-// The app calls the reminders API under /api, on its own origin, so the API needs no CORS setup and can stay private.
-// In development this proxy forwards those calls; in production nginx.conf does the same job.
+// The app calls the APIs under /api, on its own origin, so they need no CORS setup and can stay private: the timers API
+// under /api/timers, and the reminders API under everything else. In development this proxy forwards those calls; in
+// production nginx.conf does the same job.
 export default defineConfig({
   plugins: [react(), tailwindcss(), publishBuildId()],
   define: { __BUILD_ID__: JSON.stringify(BUILD_ID) },
@@ -27,6 +28,11 @@ export default defineConfig({
   },
   server: {
     proxy: {
+      // Vite uses the first entry that matches, so the longer prefix has to come first.
+      '/api/timers': {
+        target: 'http://localhost:8001',
+        rewrite: (path) => path.replace(/^\/api\/timers/, ''),
+      },
       '/api': {
         target: 'http://localhost:8000',
         rewrite: (path) => path.replace(/^\/api/, ''),
