@@ -1,5 +1,5 @@
 import { format } from 'date-fns'
-import { GripVertical, Plus, X } from 'lucide-react'
+import { GripVertical, X } from 'lucide-react'
 import { Reorder, useDragControls } from 'motion/react'
 import { useState, type FormEvent, type KeyboardEvent } from 'react'
 
@@ -207,10 +207,7 @@ function AddTaskForm({ onAdd }: { onAdd: (task: TimerTask) => void }) {
   }
 
   return (
-    <form onSubmit={addTask} className="flex flex-wrap items-center gap-2 rounded-3xl border-2 border-dashed border-border py-1.5 pr-2 pl-1.5">
-      <span className="grid size-9 shrink-0 place-items-center rounded-full bg-primary text-primary-foreground" aria-hidden>
-        <Plus className="size-5" strokeWidth={2.5} />
-      </span>
+    <form onSubmit={addTask} className="flex flex-wrap items-center gap-2 rounded-3xl border-2 border-dashed border-border py-1.5 pr-2 pl-4">
       <input
         value={name}
         onChange={(event) => setName(event.target.value)}
