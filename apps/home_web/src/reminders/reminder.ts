@@ -1,5 +1,5 @@
 /** How often a repeating reminder comes round again. */
-export type Repeat = 'daily' | 'weekly' | 'fortnightly' | 'monthly' | 'yearly'
+export type Repeat = 'daily' | 'every_2_days' | 'every_3_days' | 'every_4_days' | 'weekly' | 'fortnightly' | 'monthly' | 'yearly'
 
 /** A reminder held by the reminders API. */
 export interface Reminder {

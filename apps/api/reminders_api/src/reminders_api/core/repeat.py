@@ -7,6 +7,9 @@ class Repeat(StrEnum):
     """ How often a repeating reminder comes round again. """
 
     DAILY = "daily"
+    EVERY_2_DAYS = "every_2_days"
+    EVERY_3_DAYS = "every_3_days"
+    EVERY_4_DAYS = "every_4_days"
     WEEKLY = "weekly"
     FORTNIGHTLY = "fortnightly"
     MONTHLY = "monthly"
@@ -31,6 +34,12 @@ class Repeat(StrEnum):
         match self:
             case Repeat.DAILY:
                 return moment + timedelta(days=count)
+            case Repeat.EVERY_2_DAYS:
+                return moment + timedelta(days=2 * count)
+            case Repeat.EVERY_3_DAYS:
+                return moment + timedelta(days=3 * count)
+            case Repeat.EVERY_4_DAYS:
+                return moment + timedelta(days=4 * count)
             case Repeat.WEEKLY:
                 return moment + timedelta(weeks=count)
             case Repeat.FORTNIGHTLY:

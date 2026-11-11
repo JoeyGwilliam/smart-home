@@ -8,7 +8,10 @@ from reminders_api.core.repeat import Repeat
 
 @pytest.mark.parametrize(("repeat", "expected_moment"), [
     (Repeat.DAILY, datetime(2026, 11, 13, 9, 0, tzinfo=ZoneInfo("Europe/London"))),
-    (Repeat.WEEKLY, datetime(2026, 11, 25, 9, 0, tzinfo=ZoneInfo("Europe/London"))),
+    (Repeat.EVERY_2_DAYS, datetime(2026, 11, 15, 9, 0, tzinfo=ZoneInfo("Europe/London"))),
+    (Repeat.EVERY_3_DAYS, datetime(2026, 11, 17, 9, 0, tzinfo=ZoneInfo("Europe/London"))),
+    (Repeat.EVERY_4_DAYS, datetime(2026, 11, 19, 9, 0, tzinfo=ZoneInfo("Europe/London"))),
+    (Repeat.WEEKLY,datetime(2026, 11, 25, 9, 0, tzinfo=ZoneInfo("Europe/London"))),
     (Repeat.FORTNIGHTLY, datetime(2026, 12, 9, 9, 0, tzinfo=ZoneInfo("Europe/London"))),
     (Repeat.MONTHLY, datetime(2027, 1, 11, 9, 0, tzinfo=ZoneInfo("Europe/London"))),
     (Repeat.YEARLY, datetime(2028, 11, 11, 9, 0, tzinfo=ZoneInfo("Europe/London"))),
