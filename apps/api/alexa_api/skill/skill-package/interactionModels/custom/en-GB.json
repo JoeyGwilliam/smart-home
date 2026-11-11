@@ -1,0 +1,92 @@
+{
+  "interactionModel": {
+    "languageModel": {
+      "invocationName": "home hub",
+      "intents": [
+        {
+          "name": "AddReminderIntent",
+          "slots": [
+            { "name": "title", "type": "AMAZON.SearchQuery" }
+          ],
+          "samples": [
+            "remind me to {title}",
+            "remind me about {title}",
+            "remind me that {title}",
+            "add a reminder to {title}",
+            "add a reminder about {title}",
+            "create a reminder to {title}",
+            "set a reminder to {title}",
+            "make a reminder to {title}",
+            "i need to {title}",
+            "don't let me forget to {title}"
+          ]
+        },
+        {
+          "name": "SetDueTimeIntent",
+          "slots": [
+            { "name": "date", "type": "AMAZON.DATE" },
+            { "name": "time", "type": "AMAZON.TIME" }
+          ],
+          "samples": [
+            "{date}",
+            "{time}",
+            "{date} at {time}",
+            "{date} {time}",
+            "{time} {date}",
+            "at {time}",
+            "at {time} {date}",
+            "on {date}",
+            "on {date} at {time}",
+            "by {date}",
+            "by {time}",
+            "by {time} {date}",
+            "due {date}",
+            "due {date} at {time}",
+            "it's due {date}",
+            "it's due at {time}",
+            "it's due {date} at {time}"
+          ]
+        },
+        {
+          "name": "NoDueTimeIntent",
+          "slots": [],
+          "samples": [
+            "no time",
+            "no due time",
+            "no date",
+            "no rush",
+            "never",
+            "whenever",
+            "any time",
+            "none",
+            "it has no due time",
+            "it isn't due"
+          ]
+        },
+        {
+          "name": "ListRemindersIntent",
+          "slots": [],
+          "samples": [
+            "what's due today",
+            "what is due today",
+            "what's due",
+            "what are my reminders",
+            "what are my reminders for today",
+            "what do i need to do today",
+            "what do i have to do today",
+            "read my reminders",
+            "list my reminders",
+            "tell me my reminders"
+          ]
+        },
+        { "name": "AMAZON.NoIntent", "samples": [] },
+        { "name": "AMAZON.HelpIntent", "samples": [] },
+        { "name": "AMAZON.StopIntent", "samples": [] },
+        { "name": "AMAZON.CancelIntent", "samples": [] },
+        { "name": "AMAZON.NavigateHomeIntent", "samples": [] },
+        { "name": "AMAZON.FallbackIntent", "samples": [] }
+      ],
+      "types": []
+    }
+  }
+}

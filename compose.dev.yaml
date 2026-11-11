@@ -10,6 +10,10 @@ services:
   cloudflared:
     profiles: ["home-server-only"]
 
+  # Alexa can only reach this through the tunnel, so it never starts either.
+  alexa-api:
+    profiles: ["home-server-only"]
+
   reminders-api:
     restart: "no"
     # Windows file changes don't reach containers as events, so the reloader has to poll for them.

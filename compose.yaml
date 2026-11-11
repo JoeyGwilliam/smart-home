@@ -20,6 +20,9 @@ services:
       - "${REMINDERS_API_BIND_ADDRESS:-127.0.0.1}:8000:8000"
     volumes:
       - reminders-data:/data
+    networks:
+      - default
+      - alexa
 
   # Holds the presets for the ADHD timer page.
   timers-api:
@@ -53,12 +56,42 @@ services:
       # work on plain Docker too, and nginx won't start if it can't look the name up.
       - "host.docker.internal:host-gateway"
 
+  # Lets people add and hear reminders by talking to an Echo. Amazon sends what they say to the home's Alexa skill
+  # (apps/api/alexa_api/skill) here, through the tunnel below.
+  # Unlike everything else, this is reachable from the internet without a login, because Alexa can't log in. It
+  # refuses every request that Amazon didn't sign for this skill, and the rest of this entry limits what a flaw in it
+  # could be used for: it can't change its own files, has no special permissions, and is on a network of its own
+  # where it can reach the reminders API but not the other services.
+  alexa-api:
+    build: ./apps/api/alexa_api
+    restart: unless-stopped
+    environment:
+      # Amazon's id for the skill, which is not a secret. `ask deploy` wrote it to
+      # apps/api/alexa_api/skill/.ask/ask-states.json when it created the skill; it only changes if the skill is
+      # deleted and created again.
+      ALEXA_SKILL_ID: amzn1.ask.skill.1c28046b-ed3c-42d3-a607-aa8274598990
+      REMINDERS_API_URL: http://reminders-api:8000
+      # The time zone that people mean when they tell Alexa a time.
+      HOME_TIME_ZONE: Europe/London
+    depends_on:
+      reminders-api:
+        condition: service_healthy
+    read_only: true
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-privileges:true
+    networks:
+      - alexa
+
   # Makes the pages reachable from outside the home, through a Cloudflare Tunnel. It connects out to Cloudflare, so no
   # router ports need opening, and it reaches home-web over this file's network, so the port above can stay private.
   # Anyone can reach the tunnel's public hostname, so it relies on Cloudflare Access, set up in the Zero Trust
   # dashboard, to ask visitors to log in; nothing here enforces that.
   # The tunnel and its hostnames are set up in the dashboard too. Put its token in the git-ignored .env file as
   # CLOUDFLARE_TUNNEL_TOKEN.
+  # A second hostname, alexa.joeygw.uk, leads to alexa-api. It must stay outside Cloudflare Access, and it doesn't
+  # wait for alexa-api to be healthy, so that a problem there can't take the pages down with it.
   cloudflared:
     image: cloudflare/cloudflared:latest
     restart: unless-stopped
@@ -68,6 +101,13 @@ services:
     depends_on:
       home-web:
         condition: service_healthy
+    networks:
+      - default
+      - alexa
+
+networks:
+  # Holds only what alexa-api needs to reach, or be reached by.
+  alexa:
 
 volumes:
   reminders-data:

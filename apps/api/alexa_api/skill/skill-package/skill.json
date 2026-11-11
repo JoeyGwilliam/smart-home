@@ -1,0 +1,32 @@
+{
+  "manifest": {
+    "manifestVersion": "1.0",
+    "publishingInformation": {
+      "locales": {
+        "en-GB": {
+          "name": "Home Hub",
+          "summary": "Talks to the home server.",
+          "description": "Adds reminders to the home server's site and reads out what is due. Private to this home, so it is never published.",
+          "examplePhrases": [
+            "Alexa, open home hub",
+            "Alexa, tell home hub to remind me to water the plants",
+            "Alexa, ask home hub what's due today"
+          ]
+        }
+      },
+      "isAvailableWorldwide": false,
+      "distributionCountries": [
+        "GB"
+      ],
+      "category": "ORGANIZERS_AND_ASSISTANTS"
+    },
+    "apis": {
+      "custom": {
+        "endpoint": {
+          "uri": "https://alexa.joeygw.uk/",
+          "sslCertificateType": "Wildcard"
+        }
+      }
+    }
+  }
+}
