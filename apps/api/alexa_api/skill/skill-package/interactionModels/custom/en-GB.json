@@ -79,6 +79,133 @@
             "tell me my reminders"
           ]
         },
+        {
+          "name": "CompleteReminderIntent",
+          "slots": [
+            { "name": "title", "type": "AMAZON.SearchQuery" }
+          ],
+          "samples": [
+            "tick off {title}",
+            "check off {title}",
+            "mark {title} as done",
+            "mark {title} as complete",
+            "complete {title}",
+            "i've done {title}",
+            "i have done {title}",
+            "i've finished {title}",
+            "i finished {title}"
+          ]
+        },
+        {
+          "name": "ChangeDueTimeIntent",
+          "slots": [
+            { "name": "title", "type": "AMAZON.SearchQuery" }
+          ],
+          "samples": [
+            "change when {title} is due",
+            "change the due time of {title}",
+            "change the time of {title}",
+            "move the reminder {title}",
+            "move {title}",
+            "reschedule {title}",
+            "postpone {title}"
+          ]
+        },
+        {
+          "name": "DeleteReminderIntent",
+          "slots": [
+            { "name": "title", "type": "AMAZON.SearchQuery" }
+          ],
+          "samples": [
+            "delete the reminder {title}",
+            "delete {title}",
+            "remove the reminder {title}",
+            "remove {title}",
+            "cancel the reminder {title}",
+            "forget about {title}"
+          ]
+        },
+        {
+          "name": "StartPresetTimerIntent",
+          "slots": [
+            { "name": "preset", "type": "AMAZON.SearchQuery" }
+          ],
+          "samples": [
+            "start the {preset} timer",
+            "start my {preset} timer",
+            "begin the {preset} timer",
+            "run the {preset} timer",
+            "load the {preset} timer",
+            "start the timer for {preset}",
+            "start the preset {preset}"
+          ]
+        },
+        {
+          "name": "StartTimerIntent",
+          "slots": [],
+          "samples": [
+            "start the timer",
+            "start timer",
+            "begin the timer",
+            "restart the timer",
+            "start the countdown"
+          ]
+        },
+        {
+          "name": "StopTimerIntent",
+          "slots": [],
+          "samples": [
+            "stop the timer",
+            "stop timer",
+            "end the timer",
+            "cancel the timer",
+            "turn off the timer"
+          ]
+        },
+        {
+          "name": "ListTimerPresetsIntent",
+          "slots": [],
+          "samples": [
+            "what timers do i have",
+            "what are my timers",
+            "what timers are saved",
+            "what presets do i have",
+            "list my timers",
+            "read my saved timers"
+          ]
+        },
+        {
+          "name": "RequestSiteChangeIntent",
+          "slots": [
+            { "name": "request", "type": "AMAZON.SearchQuery" }
+          ],
+          "samples": [
+            "change the site to {request}",
+            "change the website to {request}",
+            "update the site to {request}",
+            "edit the site to {request}",
+            "ask the site editor to {request}",
+            "tell the site editor to {request}",
+            "ask claude to {request}",
+            "request a change to {request}",
+            "request a feature to {request}"
+          ]
+        },
+        {
+          "name": "SiteChangeProgressIntent",
+          "slots": [],
+          "samples": [
+            "how is the site change going",
+            "how is the change going",
+            "what is the site editor doing",
+            "what's the site editor doing",
+            "is the site change ready",
+            "is the change ready",
+            "has claude finished",
+            "check on the site editor"
+          ]
+        },
+        { "name": "AMAZON.YesIntent", "samples": [] },
         { "name": "AMAZON.NoIntent", "samples": [] },
         { "name": "AMAZON.HelpIntent", "samples": [] },
         { "name": "AMAZON.StopIntent", "samples": [] },

@@ -18,11 +18,48 @@
   { "utterance": "no due time", "intent": "NoDueTimeIntent" },
   { "utterance": "whenever", "intent": "NoDueTimeIntent" },
   { "utterance": "no", "intent": "AMAZON.NoIntent" },
+  { "utterance": "yes", "intent": "AMAZON.YesIntent" },
 
   { "utterance": "what's due today", "intent": "ListRemindersIntent" },
   { "utterance": "what are my reminders", "intent": "ListRemindersIntent" },
   { "utterance": "what do i need to do today", "intent": "ListRemindersIntent" },
   { "utterance": "read my reminders", "intent": "ListRemindersIntent" },
+
+  { "utterance": "tick off buy milk", "intent": "CompleteReminderIntent", "slots": { "title": "buy milk" } },
+  { "utterance": "mark the bins as done", "intent": "CompleteReminderIntent", "slots": { "title": "the bins" } },
+  { "utterance": "i've done the washing up", "intent": "CompleteReminderIntent", "slots": { "title": "the washing up" } },
+  { "utterance": "i've finished the washing up", "intent": "CompleteReminderIntent", "slots": { "title": "the washing up" } },
+
+  { "utterance": "change when the dentist is due", "intent": "ChangeDueTimeIntent", "slots": { "title": "the dentist" } },
+  { "utterance": "move the reminder buy milk", "intent": "ChangeDueTimeIntent", "slots": { "title": "buy milk" } },
+  { "utterance": "reschedule the dentist", "intent": "ChangeDueTimeIntent", "slots": { "title": "the dentist" } },
+  { "utterance": "postpone the bins", "intent": "ChangeDueTimeIntent", "slots": { "title": "the bins" } },
+
+  { "utterance": "delete the reminder buy milk", "intent": "DeleteReminderIntent", "slots": { "title": "buy milk" } },
+  { "utterance": "delete buy milk", "intent": "DeleteReminderIntent", "slots": { "title": "buy milk" } },
+  { "utterance": "remove the reminder call mum", "intent": "DeleteReminderIntent", "slots": { "title": "call mum" } },
+  { "utterance": "forget about the dentist", "intent": "DeleteReminderIntent", "slots": { "title": "the dentist" } },
+
+  { "utterance": "start the school run timer", "intent": "StartPresetTimerIntent", "slots": { "preset": "school run" } },
+  { "utterance": "start my bedtime timer", "intent": "StartPresetTimerIntent", "slots": { "preset": "bedtime" } },
+  { "utterance": "start the timer for bedtime", "intent": "StartPresetTimerIntent", "slots": { "preset": "bedtime" } },
+  { "utterance": "start the preset school run", "intent": "StartPresetTimerIntent", "slots": { "preset": "school run" } },
+
+  { "utterance": "start the timer", "intent": "StartTimerIntent" },
+  { "utterance": "restart the timer", "intent": "StartTimerIntent" },
+  { "utterance": "stop the timer", "intent": "StopTimerIntent" },
+  { "utterance": "cancel the timer", "intent": "StopTimerIntent" },
+  { "utterance": "what timers do i have", "intent": "ListTimerPresetsIntent" },
+  { "utterance": "list my timers", "intent": "ListTimerPresetsIntent" },
+
+  { "utterance": "change the site to make the clock bigger", "intent": "RequestSiteChangeIntent", "slots": { "request": "make the clock bigger" } },
+  { "utterance": "ask the site editor to add a shopping list page", "intent": "RequestSiteChangeIntent", "slots": { "request": "add a shopping list page" } },
+  { "utterance": "ask claude to make the background darker", "intent": "RequestSiteChangeIntent", "slots": { "request": "make the background darker" } },
+  { "utterance": "request a feature to show the bin days", "intent": "RequestSiteChangeIntent", "slots": { "request": "show the bin days" } },
+
+  { "utterance": "how is the site change going", "intent": "SiteChangeProgressIntent" },
+  { "utterance": "is the change ready", "intent": "SiteChangeProgressIntent" },
+  { "utterance": "what's the site editor doing", "intent": "SiteChangeProgressIntent" },
 
   { "utterance": "help", "intent": "AMAZON.HelpIntent" },
   { "utterance": "stop", "intent": "AMAZON.StopIntent" },

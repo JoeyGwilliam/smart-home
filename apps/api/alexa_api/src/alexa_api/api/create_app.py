@@ -9,7 +9,12 @@ from alexa_api.api.alexa_request_schema import AlexaRequestSchema
 from alexa_api.api.alexa_response_schema import AlexaResponseSchema
 from alexa_api.core.alexa_request_verifier import AlexaRequestVerifier, UnverifiedRequestError
 from alexa_api.core.home_hub_skill import HomeHubSkill
+from alexa_api.core.reminder_controls import ReminderControls
 from alexa_api.core.reminders_client import RemindersClient
+from alexa_api.core.site_editor_client import SiteEditorClient
+from alexa_api.core.site_editor_controls import SiteEditorControls
+from alexa_api.core.timer_controls import TimerControls
+from alexa_api.core.timers_client import TimersClient
 
 # uvicorn's logger is the one that already reaches the container's log.
 _logger = logging.getLogger("uvicorn.error")
@@ -43,6 +48,8 @@ def create_app_from_environment() -> FastAPI:
 
     - `ALEXA_SKILL_ID`: the id that Amazon gave the skill. Requests for any other skill are refused.
     - `REMINDERS_API_URL`: address of the reminders API, such as `http://reminders-api:8000`.
+    - `TIMERS_API_URL`: address of the timers API, such as `http://timers-api:8000`.
+    - `SITE_EDITOR_API_URL`: address of the site editor API, such as `http://host.docker.internal:8002`.
     - `HOME_TIME_ZONE`: the time zone that people mean when they say a time, such as `Europe/London`.
 
     Returns:
@@ -53,8 +60,11 @@ def create_app_from_environment() -> FastAPI:
             the server rather than leaving it refusing every request, or adding reminders at the wrong time.
         ZoneInfoNotFoundError: If the time zone doesn't exist.
     """
-    reminders_client = RemindersClient(os.environ["REMINDERS_API_URL"])
-    skill = HomeHubSkill(reminders_client, ZoneInfo(os.environ["HOME_TIME_ZONE"]))
+    skill = HomeHubSkill(
+        ReminderControls(RemindersClient(os.environ["REMINDERS_API_URL"]), ZoneInfo(os.environ["HOME_TIME_ZONE"])),
+        TimerControls(TimersClient(os.environ["TIMERS_API_URL"])),
+        SiteEditorControls(SiteEditorClient(os.environ["SITE_EDITOR_API_URL"])),
+    )
     return create_app(skill, AlexaRequestVerifier(os.environ["ALEXA_SKILL_ID"]))
 
 

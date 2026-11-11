@@ -4,10 +4,10 @@
 import controlDescriptions from '@alexa-skill/control-descriptions.json'
 import interactionModel from '@alexa-skill/skill-package/interactionModels/custom/en-GB.json'
 
-import { listAlexaControls, type AlexaControl } from '@/alexa/alexaControls'
+import { listAlexaControlGroups, type AlexaControlGroup } from '@/alexa/alexaControls'
 
 /** What people call the skill when they talk to Alexa, as in "Alexa, ask home hub…". */
 export const HOME_HUB_INVOCATION_NAME: string = interactionModel.interactionModel.languageModel.invocationName
 
-/** Everything that people can do by talking to the home's Alexa skill. */
-export const HOME_HUB_CONTROLS: AlexaControl[] = listAlexaControls(interactionModel, controlDescriptions)
+/** Everything that people can do by talking to the home's Alexa skill, grouped by the part of the home it works on. */
+export const HOME_HUB_CONTROL_GROUPS: AlexaControlGroup[] = listAlexaControlGroups(interactionModel, controlDescriptions)

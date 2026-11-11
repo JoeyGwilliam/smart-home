@@ -36,6 +36,9 @@ services:
       - "${TIMERS_API_BIND_ADDRESS:-127.0.0.1}:8001:8000"
     volumes:
       - timers-data:/data
+    networks:
+      - default
+      - alexa
 
   # Every page for the home's screens: the reminders viewer, dashboards, and so on.
   home-web:
@@ -60,12 +63,12 @@ services:
       # work on plain Docker too, and nginx won't start if it can't look the name up.
       - "host.docker.internal:host-gateway"
 
-  # Lets people add and hear reminders by talking to an Echo. Amazon sends what they say to the home's Alexa skill
-  # (apps/api/alexa_api/skill) here, through the tunnel below.
+  # Lets people work the home by talking to an Echo: reminders, the timer and the site editor. Amazon sends what they
+  # say to the home's Alexa skill (apps/api/alexa_api/skill) here, through the tunnel below.
   # Unlike everything else, this is reachable from the internet without a login, because Alexa can't log in. It
   # refuses every request that Amazon didn't sign for this skill, and the rest of this entry limits what a flaw in it
   # could be used for: it can't change its own files, has no special permissions, and is on a network of its own
-  # where it can reach the reminders API but not the other services.
+  # with only the APIs that it uses.
   alexa-api:
     build: ./apps/api/alexa_api
     restart: unless-stopped
@@ -75,11 +78,19 @@ services:
       # deleted and created again.
       ALEXA_SKILL_ID: amzn1.ask.skill.1c28046b-ed3c-42d3-a607-aa8274598990
       REMINDERS_API_URL: http://reminders-api:8000
+      TIMERS_API_URL: http://timers-api:8000
+      # The site editor API runs on the machine itself rather than in a container (see start_site_editor.bat).
+      SITE_EDITOR_API_URL: http://host.docker.internal:8002
       # The time zone that people mean when they tell Alexa a time.
       HOME_TIME_ZONE: Europe/London
     depends_on:
       reminders-api:
         condition: service_healthy
+      timers-api:
+        condition: service_healthy
+    extra_hosts:
+      # Docker Desktop defines this name by itself; naming it here makes it work on plain Docker too.
+      - "host.docker.internal:host-gateway"
     read_only: true
     cap_drop:
       - ALL

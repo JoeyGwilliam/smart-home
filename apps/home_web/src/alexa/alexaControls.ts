@@ -20,6 +20,14 @@ export interface AlexaControl {
   phrases: PhrasePart[][]
 }
 
+/** The controls for one part of the home, such as its reminders. */
+export interface AlexaControlGroup {
+  /** Names the part of the home, such as "Reminders". Unique among the groups. */
+  title: string
+  /** The group's controls, in the order to show them. Never empty. */
+  controls: AlexaControl[]
+}
+
 /** The part of the skill's interaction model (interactionModels/custom/en-GB.json) that the controls come from. */
 export interface InteractionModel {
   interactionModel: {
@@ -34,34 +42,52 @@ export interface InteractionModel {
 export interface ControlDescriptions {
   /** What to say in place of each slot, by slot name, such as "a day" for "date". */
   slots: Record<string, string>
-  /** How to present each control, by intent name. */
-  controls: Record<string, { title: string; description: string; answers?: string }>
+  /** The parts of the home, each with how to present its controls, all in the order to show them. */
+  groups: { title: string; controls: { intent: string; title: string; description: string; answers?: string }[] }[]
 }
 
+/** Where controls go when no group describes them. */
+export const UNDESCRIBED_GROUP_TITLE = 'Other'
+
 /**
- * Lists what people can do by talking to the skill, in the interaction model's order.
+ * Lists what people can do by talking to the skill, grouped by the part of the home that each control works on.
  *
  * The controls are the intents that have phrases of their own. That leaves out Alexa's built-in intents, such as
- * "stop", which work the same way in every skill. An intent or a slot that hasn't been described is still listed,
- * under a name worked out from its own, so that a control is never hidden by a missing description.
+ * "stop", which work the same way in every skill. The descriptions decide the groups and the order of everything
+ * in them. An intent that hasn't been described is still listed, in a last group of its own and under a name worked
+ * out from the intent's, so that a control is never hidden by a missing description. A description of an intent
+ * that the model doesn't have is ignored.
  *
  * @param model The skill's interaction model.
  * @param descriptions The skill's descriptions of its controls.
- * @returns The controls.
+ * @returns The groups that have at least one control.
  */
-export function listAlexaControls(model: InteractionModel, descriptions: ControlDescriptions): AlexaControl[] {
-  return model.interactionModel.languageModel.intents
-    .filter((intent) => intent.samples !== undefined && intent.samples.length > 0)
-    .map((intent) => {
-      const controlDescription = descriptions.controls[intent.name]
-      return {
-        intent: intent.name,
-        title: controlDescription?.title ?? describeIntentName(intent.name),
-        description: controlDescription?.description ?? null,
-        answers: controlDescription?.answers ?? null,
-        phrases: (intent.samples ?? []).map((sample) => splitIntoParts(sample, descriptions.slots)),
-      }
-    })
+export function listAlexaControlGroups(model: InteractionModel, descriptions: ControlDescriptions): AlexaControlGroup[] {
+  const sayableIntents = model.interactionModel.languageModel.intents.filter((intent) => (intent.samples ?? []).length > 0)
+  const phrasesByIntent = new Map(
+    sayableIntents.map((intent) => [intent.name, (intent.samples ?? []).map((sample) => splitIntoParts(sample, descriptions.slots))]),
+  )
+
+  const describedGroups = descriptions.groups.map((group) => ({
+    title: group.title,
+    controls: group.controls.flatMap(({ intent, title, description, answers }) => {
+      const phrases = phrasesByIntent.get(intent)
+      return phrases === undefined ? [] : [{ intent, title, description, answers: answers ?? null, phrases }]
+    }),
+  }))
+
+  const describedIntents = new Set(descriptions.groups.flatMap((group) => group.controls.map((control) => control.intent)))
+  const undescribedControls = sayableIntents
+    .filter((intent) => !describedIntents.has(intent.name))
+    .map((intent) => ({
+      intent: intent.name,
+      title: describeIntentName(intent.name),
+      description: null,
+      answers: null,
+      phrases: phrasesByIntent.get(intent.name) ?? [],
+    }))
+
+  return [...describedGroups, { title: UNDESCRIBED_GROUP_TITLE, controls: undescribedControls }].filter((group) => group.controls.length > 0)
 }
 
 /** Turns "AddReminderIntent" into "Add reminder". */

@@ -1,27 +1,93 @@
 {
   "slots": {
-    "title": "what to do",
+    "title": "the reminder",
     "date": "a day",
-    "time": "a time"
+    "time": "a time",
+    "preset": "its name",
+    "request": "what you want"
   },
-  "controls": {
-    "AddReminderIntent": {
-      "title": "Add a reminder",
-      "description": "Starts a new reminder for the reminders page. Home hub then asks when it is due."
+  "groups": [
+    {
+      "title": "Reminders",
+      "controls": [
+        {
+          "intent": "AddReminderIntent",
+          "title": "Add a reminder",
+          "description": "Starts a new reminder for the reminders page. Home hub then asks when it is due."
+        },
+        {
+          "intent": "ListRemindersIntent",
+          "title": "Check reminders",
+          "description": "Reads out the unfinished reminders that are due today or overdue."
+        },
+        {
+          "intent": "CompleteReminderIntent",
+          "title": "Tick off a reminder",
+          "description": "Marks a reminder as done. You don't need its exact title: the gist is enough."
+        },
+        {
+          "intent": "ChangeDueTimeIntent",
+          "title": "Move a reminder",
+          "description": "Changes when a reminder is due. Home hub then asks for the new due time."
+        },
+        {
+          "intent": "DeleteReminderIntent",
+          "title": "Delete a reminder",
+          "description": "Deletes a reminder for good. Home hub says which one it found and asks before deleting it, so answer yes or no."
+        },
+        {
+          "intent": "SetDueTimeIntent",
+          "title": "Give a due time",
+          "description": "Sets the due time of the reminder you are adding or moving. A day by itself means 9 in the morning, and a time by itself means the next time the clock shows it.",
+          "answers": "When is it due?"
+        },
+        {
+          "intent": "NoDueTimeIntent",
+          "title": "Skip the due time",
+          "description": "Leaves the reminder you are adding or moving without a due time. Saying \"no\" does the same.",
+          "answers": "When is it due?"
+        }
+      ]
     },
-    "SetDueTimeIntent": {
-      "title": "Give the due time",
-      "description": "Adds the reminder with a due time. A day by itself means 9 in the morning, and a time by itself means the next time the clock shows it.",
-      "answers": "When is it due?"
+    {
+      "title": "Timers",
+      "controls": [
+        {
+          "intent": "StartPresetTimerIntent",
+          "title": "Start a saved timer",
+          "description": "Loads one of the presets saved on the ADHD timer page and starts it on every screen."
+        },
+        {
+          "intent": "StartTimerIntent",
+          "title": "Start the timer",
+          "description": "Starts the timer with whatever plan the ADHD timer page is showing. If it is already running, it starts again from now."
+        },
+        {
+          "intent": "StopTimerIntent",
+          "title": "Stop the timer",
+          "description": "Stops the timer on every screen and keeps its plan."
+        },
+        {
+          "intent": "ListTimerPresetsIntent",
+          "title": "Hear the saved timers",
+          "description": "Reads out the names of the presets saved on the ADHD timer page."
+        }
+      ]
     },
-    "NoDueTimeIntent": {
-      "title": "Skip the due time",
-      "description": "Adds the reminder without a due time. Saying \"no\" does the same.",
-      "answers": "When is it due?"
-    },
-    "ListRemindersIntent": {
-      "title": "Hear what's due",
-      "description": "Reads out the unfinished reminders that are due today or overdue."
+    {
+      "title": "Site editor",
+      "controls": [
+        {
+          "intent": "RequestSiteChangeIntent",
+          "title": "Ask for a change to the site",
+          "description": "Passes your request to Claude, as if you had typed it on the site editor page. The change still has to be looked at and confirmed on that page."
+        },
+        {
+          "intent": "SiteChangeProgressIntent",
+          "title": "Check on a change",
+          "description": "Says whether Claude is still working, or whether the change is ready to look at."
+        }
+      ]
     }
-  }
+  ]
 }

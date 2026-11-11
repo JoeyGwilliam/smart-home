@@ -1,17 +1,22 @@
+import { ChevronDown } from 'lucide-react'
 import type { ReactNode } from 'react'
 
-import type { AlexaControl, PhrasePart } from '@/alexa/alexaControls'
+import type { AlexaControl, AlexaControlGroup, PhrasePart } from '@/alexa/alexaControls'
 import { Pill } from '@/components/Pill'
 
 interface AlexaControlListProps {
   /** What people call the skill when they talk to Alexa, such as "home hub". */
   invocationName: string
-  /** The controls to explain, in the order to show them. */
-  controls: AlexaControl[]
+  /** The controls to explain, grouped by the part of the home that they work on, in the order to show them. */
+  groups: AlexaControlGroup[]
 }
 
-/** Explains how to talk to an Alexa skill: how to start, then each control with the phrases that work for it. */
-export function AlexaControlList({ invocationName, controls }: AlexaControlListProps) {
+/**
+ * Explains how to talk to an Alexa skill: how to start, then the controls for each part of the home. Everything
+ * starts folded away, so that the page is a short list of what the skill covers: a group opens to show its controls,
+ * and a control opens to show what it does and the phrases that work for it.
+ */
+export function AlexaControlList({ invocationName, groups }: AlexaControlListProps) {
   return (
     <main className="mx-auto grid w-full max-w-2xl gap-6 px-4 pb-10 sm:pb-14">
       <header>
@@ -32,28 +37,55 @@ export function AlexaControlList({ invocationName, controls }: AlexaControlListP
         </p>
       </section>
 
-      {controls.map((control) => (
-        <section key={control.intent} className="panel rounded-4xl px-5 py-5 shadow-lg shadow-shade sm:px-7 sm:py-6" aria-label={control.title}>
-          <h2 className="font-heading text-3xl leading-tight font-semibold">{control.title}</h2>
-          {control.answers !== null && (
-            <p className="mt-2">
-              <Pill className="bg-lavender text-[oklch(0.38_0.08_300)]">When it asks “{control.answers}”</Pill>
-            </p>
-          )}
-          {control.description !== null && <p className="mt-2 text-lg text-muted-foreground">{control.description}</p>}
-          <ul className="mt-4 grid gap-2" aria-label={`Ways to say “${control.title}”`}>
-            {control.phrases.map((phrase) => {
-              const phraseAsText = phrase.map((part) => part.text).join('')
-              return (
-                <li key={phraseAsText} className="rounded-2xl bg-accent px-4 py-2 text-lg font-semibold">
-                  <Phrase parts={phrase} />
-                </li>
-              )
-            })}
-          </ul>
-        </section>
+      {groups.map((group) => (
+        // Native details elements fold and unfold by themselves, and work with a keyboard and a screen reader.
+        <details key={group.title} className="group/section panel rounded-4xl shadow-lg shadow-shade">
+          <summary className={`${SUMMARY_CLASS_NAME} rounded-4xl px-5 py-4 sm:px-7 sm:py-5`}>
+            <h2 className="font-heading text-3xl leading-tight font-semibold">{group.title}</h2>
+            <Pill className="ml-auto bg-accent text-primary-text">{group.controls.length}</Pill>
+            <ChevronDown className="size-6 shrink-0 text-muted-foreground transition-transform group-open/section:rotate-180" aria-hidden />
+          </summary>
+          <div className="grid gap-2 px-3 pb-4 sm:px-5 sm:pb-5">
+            {group.controls.map((control) => (
+              <ControlDetails key={control.intent} control={control} />
+            ))}
+          </div>
+        </details>
       ))}
     </main>
+  )
+}
+
+// Hides the browser's own disclosure triangle, which a chevron on the right replaces.
+const SUMMARY_CLASS_NAME = 'flex cursor-pointer list-none items-center gap-3 [&::-webkit-details-marker]:hidden'
+
+/** One control, folded down to its title until it is opened. */
+function ControlDetails({ control }: { control: AlexaControl }) {
+  return (
+    <details className="group/control rounded-2xl bg-accent">
+      <summary className={`${SUMMARY_CLASS_NAME} rounded-2xl px-4 py-3`}>
+        <h3 className="text-xl font-bold">{control.title}</h3>
+        <ChevronDown className="ml-auto size-5 shrink-0 text-muted-foreground transition-transform group-open/control:rotate-180" aria-hidden />
+      </summary>
+      <div className="px-4 pb-4">
+        {control.answers !== null && (
+          <p className="mb-2">
+            <Pill className="bg-lavender text-[oklch(0.38_0.08_300)]">When it asks “{control.answers}”</Pill>
+          </p>
+        )}
+        {control.description !== null && <p className="text-lg text-muted-foreground">{control.description}</p>}
+        <ul className="mt-3 grid gap-1.5" aria-label={`Ways to say “${control.title}”`}>
+          {control.phrases.map((phrase) => {
+            const phraseAsText = phrase.map((part) => part.text).join('')
+            return (
+              <li key={phraseAsText} className="rounded-xl bg-card px-3 py-1.5 text-lg font-semibold">
+                <Phrase parts={phrase} />
+              </li>
+            )
+          })}
+        </ul>
+      </div>
+    </details>
   )
 }
 
