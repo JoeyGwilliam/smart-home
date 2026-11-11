@@ -1,8 +1,9 @@
-from datetime import datetime
+from datetime import datetime, time
 from typing import Any
 
 import httpx
 
+from alexa_api.core.active_timer import ActiveTimer, TimerTask
 from alexa_api.core.home_api import HomeApi
 from alexa_api.core.timer_preset import TimerPreset
 
@@ -46,6 +47,23 @@ class TimersClient:
         """
         plan = self._get_active_plan() if preset is None else preset.plan
         self._api.send("PUT", "/active-timer", json={"plan": plan, "started_at": started_at.isoformat()})
+
+    def get_active_timer(self) -> ActiveTimer:
+        """ Finds the timer that every screen shows, as it is now.
+
+        Returns:
+            The timer, with its plan and whether it has been started.
+        """
+        active_timer = self._api.send("GET", "/active-timer").json()
+        plan = active_timer["plan"]
+        started_at = active_timer["started_at"]
+        return ActiveTimer(
+            name=plan["name"],
+            end_time=time.fromisoformat(plan["end_time"]),
+            tasks=tuple(TimerTask(task["name"], task["duration_minutes"]) for task in plan["tasks"]),
+            faff_multiplier=plan["faff_multiplier"],
+            started_at=None if started_at is None else datetime.fromisoformat(started_at),
+        )
 
     def stop_timer(self) -> None:
         """ Stops the timer that every screen shows, keeping its plan. Does nothing if it isn't running. """

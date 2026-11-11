@@ -50,7 +50,8 @@ def create_app_from_environment() -> FastAPI:
     - `REMINDERS_API_URL`: address of the reminders API, such as `http://reminders-api:8000`.
     - `TIMERS_API_URL`: address of the timers API, such as `http://timers-api:8000`.
     - `SITE_EDITOR_API_URL`: address of the site editor API, such as `http://host.docker.internal:8002`.
-    - `HOME_TIME_ZONE`: the time zone that people mean when they say a time, such as `Europe/London`.
+    - `HOME_TIME_ZONE`: the time zone that people mean when they say a time, and that the home's clocks show, such as
+      `Europe/London`.
 
     Returns:
         The API, ready to be served.
@@ -60,9 +61,10 @@ def create_app_from_environment() -> FastAPI:
             the server rather than leaving it refusing every request, or adding reminders at the wrong time.
         ZoneInfoNotFoundError: If the time zone doesn't exist.
     """
+    home_time_zone = ZoneInfo(os.environ["HOME_TIME_ZONE"])
     skill = HomeHubSkill(
-        ReminderControls(RemindersClient(os.environ["REMINDERS_API_URL"]), ZoneInfo(os.environ["HOME_TIME_ZONE"])),
-        TimerControls(TimersClient(os.environ["TIMERS_API_URL"])),
+        ReminderControls(RemindersClient(os.environ["REMINDERS_API_URL"]), home_time_zone),
+        TimerControls(TimersClient(os.environ["TIMERS_API_URL"]), home_time_zone),
         SiteEditorControls(SiteEditorClient(os.environ["SITE_EDITOR_API_URL"])),
     )
     return create_app(skill, AlexaRequestVerifier(os.environ["ALEXA_SKILL_ID"]))

@@ -69,6 +69,11 @@
           "description": "Stops the timer on every screen and keeps its plan."
         },
         {
+          "intent": "CheckTimerIntent",
+          "title": "Check the timer",
+          "description": "Says which task the timer is on and how long is left for it, what comes next, and when you need to be ready. If the timer isn't running, it says whether it is stopped or has finished."
+        },
+        {
           "intent": "ListTimerPresetsIntent",
           "title": "Hear the saved timers",
           "description": "Reads out the names of the presets saved on the ADHD timer page."

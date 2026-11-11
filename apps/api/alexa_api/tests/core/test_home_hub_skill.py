@@ -26,7 +26,7 @@ def _create_skill(
 ) -> HomeHubSkill:
     return HomeHubSkill(
         ReminderControls(RemindersClient("http://reminders-api", reminders_api or create_fake_reminders_api([])), ZoneInfo("Europe/London")),
-        TimerControls(TimersClient("http://timers-api", timers_api or create_fake_timers_api([], {}))),
+        TimerControls(TimersClient("http://timers-api", timers_api or create_fake_timers_api([], {})), ZoneInfo("Europe/London")),
         SiteEditorControls(SiteEditorClient("http://site-editor", site_editor_api or create_fake_site_editor_api([]))),
     )
 

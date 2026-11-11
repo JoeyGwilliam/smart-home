@@ -21,7 +21,7 @@ def _create_client(alexa: FakeAlexa, held_reminders: list[dict[str, Any]]) -> Te
     reminders_client = RemindersClient("http://reminders-api", create_fake_reminders_api(held_reminders))
     skill = HomeHubSkill(
         ReminderControls(reminders_client, ZoneInfo("Europe/London")),
-        TimerControls(TimersClient("http://timers-api", create_fake_timers_api([], {}))),
+        TimerControls(TimersClient("http://timers-api", create_fake_timers_api([], {})), ZoneInfo("Europe/London")),
         SiteEditorControls(SiteEditorClient("http://site-editor", create_fake_site_editor_api([]))),
     )
     verifier = AlexaRequestVerifier(alexa.skill_id, alexa.trusted_roots, alexa.download_certificate_chain)

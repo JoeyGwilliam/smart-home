@@ -1,8 +1,9 @@
-from datetime import UTC, datetime
+from datetime import UTC, datetime, time
 from typing import Any
 
 import pytest
 
+from alexa_api.core.active_timer import ActiveTimer, TimerTask
 from alexa_api.core.home_api import HomeApiUnavailableError
 from alexa_api.core.timer_preset import TimerPreset
 from alexa_api.core.timers_client import TimersClient
@@ -18,6 +19,34 @@ def test_lists_presets_by_plan_name_when_listing_presets() -> None:
     presets = client.list_presets()
 
     assert presets == [TimerPreset("School run", school_run_plan), TimerPreset("Bedtime", bedtime_plan)]
+
+
+def test_gives_plan_and_start_when_getting_active_timer() -> None:
+    tasks = [{"id": "dress", "name": "Get dressed", "duration_minutes": 10}]
+    active_timer = {
+        "plan": {"name": "School run", "end_time": "08:30:00", "tasks": tasks, "faff_multiplier": 1.5},
+        "started_at": "2026-11-11T07:45:00Z",
+    }
+    client = TimersClient("http://timers-api", create_fake_timers_api([], active_timer))
+
+    timer = client.get_active_timer()
+
+    assert timer == ActiveTimer(
+        name="School run",
+        end_time=time(8, 30),
+        tasks=(TimerTask("Get dressed", 10),),
+        faff_multiplier=1.5,
+        started_at=datetime(2026, 11, 11, 7, 45, tzinfo=UTC),
+    )
+
+
+def test_gives_no_start_when_getting_stopped_active_timer() -> None:
+    active_timer = {"plan": {"name": "", "end_time": "17:00:00", "tasks": [], "faff_multiplier": 1.0}, "started_at": None}
+    client = TimersClient("http://timers-api", create_fake_timers_api([], active_timer))
+
+    timer = client.get_active_timer()
+
+    assert timer.started_at is None
 
 
 def test_replaces_plan_and_sets_start_when_starting_timer_from_preset() -> None:
