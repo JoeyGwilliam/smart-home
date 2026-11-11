@@ -4,7 +4,8 @@
     "date": "a day",
     "time": "a time",
     "preset": "its name",
-    "request": "what you want"
+    "request": "what you want",
+    "period": "a day or week"
   },
   "groups": [
     {
@@ -18,7 +19,7 @@
         {
           "intent": "ListRemindersIntent",
           "title": "Check reminders",
-          "description": "Reads out the unfinished reminders that are due today or overdue."
+          "description": "Reads out the unfinished reminders that are due today, along with any that are overdue. Name a day, a weekend or a week, such as tomorrow or this week, to hear what is due then instead."
         },
         {
           "intent": "CompleteReminderIntent",

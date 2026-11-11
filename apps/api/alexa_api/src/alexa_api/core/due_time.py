@@ -1,14 +1,12 @@
 from datetime import date, datetime, time, timedelta
 
+from alexa_api.core.spoken_period import describe_day, resolve_spoken_period
+
 # Alexa turns "in the morning" and similar into these codes rather than a time of day.
 _TIMES_BY_PART_OF_DAY = {"MO": time(9), "AF": time(13), "EV": time(18), "NI": time(21)}
 
 # A day with no time is given a time early enough that the reminder is seen for most of the day.
 _TIME_WHEN_ONLY_DAY_IS_GIVEN = time(9)
-
-_MONTH_NAMES = ("January", "February", "March", "April", "May", "June", "July", "August", "September", "October",
-                "November", "December")
-_WEEKDAY_NAMES = ("Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday")
 
 
 def resolve_due_time(spoken_date: str | None, spoken_time: str | None, now: datetime) -> datetime | None:
@@ -55,19 +53,7 @@ def describe_due_time(due_at: datetime, now: datetime) -> str:
         A phrase that completes "it is due ...", such as "today at 5 PM", "on Friday at 9:30 AM" or
         "on Friday 20 November at 9 AM".
     """
-    days_away = (due_at.date() - now.date()).days
-    if days_away == 0:
-        day = "today"
-    elif days_away == 1:
-        day = "tomorrow"
-    elif days_away == -1:
-        day = "yesterday"
-    elif 1 < days_away < 7:
-        day = f"on {_WEEKDAY_NAMES[due_at.weekday()]}"
-    else:
-        day = f"on {_WEEKDAY_NAMES[due_at.weekday()]} {due_at.day} {_MONTH_NAMES[due_at.month - 1]}"
-
-    return f"{day} at {describe_time_of_day(due_at)}"
+    return f"{describe_day(due_at.date(), now.date())} at {describe_time_of_day(due_at)}"
 
 
 def describe_time_of_day(moment: datetime) -> str:
@@ -86,15 +72,9 @@ def describe_time_of_day(moment: datetime) -> str:
 
 
 def _parse_date(spoken_date: str) -> date | None:
-    # AMAZON.DATE also gives weeks ("2026-W46"), months ("2026-11") and more, none of which name a single day.
-    # fromisoformat would accept some of those forms, so the length check keeps it to a plain day.
-    if len(spoken_date) != len("2026-11-12"):
-        return None
-    try:
-        return date.fromisoformat(spoken_date)
-    except ValueError:
-        # Not a day after all. The caller asks the person to say it again.
-        return None
+    period = resolve_spoken_period(spoken_date)
+    # A week or a weekend doesn't say which of its days the reminder is due.
+    return period.first_day if period is not None and period.first_day == period.last_day else None
 
 
 def _parse_time(spoken_time: str) -> time | None:

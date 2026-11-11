@@ -171,6 +171,59 @@ def test_says_nothing_is_due_when_listing_with_no_reminders() -> None:
     assert reply == SkillReply("Nothing is due today.")
 
 
+def test_reads_out_only_reminders_due_that_day_when_listing_for_tomorrow() -> None:
+    held_reminders = [
+        _hold_reminder("dentist", "Call the dentist", due_at="2026-11-10T09:30:00Z"),
+        _hold_reminder("milk", "Buy milk", due_at="2026-11-11T17:00:00Z"),
+        _hold_reminder("bins", "Take out the bins", due_at="2026-11-12T19:00:00Z"),
+        _hold_reminder("cat", "Feed the cat", due_at="2026-11-12T08:00:00Z"),
+        _hold_reminder("friday", "Due Friday", due_at="2026-11-13T09:00:00Z"),
+    ]
+
+    reply = _respond(held_reminders, SkillRequest("ListRemindersIntent", _WEDNESDAY_NOON, slots={"period": "2026-11-12"}))
+
+    assert reply == SkillReply("You have 2 reminders due. Feed the cat, due tomorrow at 8 AM. Take out the bins, due tomorrow at 7 PM.")
+
+
+def test_reads_out_reminders_due_by_end_of_week_and_overdue_with_their_days_when_listing_for_this_week() -> None:
+    held_reminders = [
+        _hold_reminder("dentist", "Call the dentist", due_at="2026-11-02T09:30:00Z"),
+        _hold_reminder("milk", "Buy milk", due_at="2026-11-11T17:00:00Z"),
+        _hold_reminder("bins", "Take out the bins", due_at="2026-11-15T19:00:00Z"),
+        _hold_reminder("next", "Due next week", due_at="2026-11-16T09:00:00Z"),
+    ]
+
+    reply = _respond(held_reminders, SkillRequest("ListRemindersIntent", _WEDNESDAY_NOON, slots={"period": "2026-W46"}))
+
+    assert reply == SkillReply(
+        "You have 3 reminders due. Call the dentist, due on Monday 2 November at 9:30 AM. Buy milk, due today at 5 PM. "
+        "Take out the bins, due on Sunday at 7 PM."
+    )
+
+
+def test_leaves_out_overdue_reminders_when_listing_for_a_week_still_to_come() -> None:
+    held_reminders = [
+        _hold_reminder("dentist", "Call the dentist", due_at="2026-11-10T09:30:00Z"),
+        _hold_reminder("next", "Pay rent", due_at="2026-11-16T09:00:00Z"),
+    ]
+
+    reply = _respond(held_reminders, SkillRequest("ListRemindersIntent", _WEDNESDAY_NOON, slots={"period": "2026-W47"}))
+
+    assert reply == SkillReply("You have 1 reminder due. Pay rent, due on Monday at 9 AM.")
+
+
+def test_names_the_period_when_listing_for_a_period_with_nothing_due() -> None:
+    reply = _respond([], SkillRequest("ListRemindersIntent", _WEDNESDAY_NOON, slots={"period": "2026-W46-WE"}))
+
+    assert reply == SkillReply("Nothing is due this weekend.")
+
+
+def test_says_what_can_be_checked_when_listing_for_a_month() -> None:
+    reply = _respond([], SkillRequest("ListRemindersIntent", _WEDNESDAY_NOON, slots={"period": "2026-11"}))
+
+    assert reply == SkillReply("Sorry, I can only check what's due on a day, at a weekend or in a week.")
+
+
 def test_completes_matching_reminder_at_time_of_request_when_reminder_is_ticked_off() -> None:
     held_reminders = [_hold_reminder("milk", "Buy milk"), _hold_reminder("bins", "Take out the bins", due_at="2026-11-11T17:00:00Z")]
 

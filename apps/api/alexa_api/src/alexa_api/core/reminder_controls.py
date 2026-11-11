@@ -9,6 +9,7 @@ from alexa_api.core.reminders_client import RemindersClient
 from alexa_api.core.skill_reply import QUESTION_MEMORY_KEY, SkillReply, ask
 from alexa_api.core.skill_request import SkillRequest
 from alexa_api.core.spoken_match import find_spoken_match
+from alexa_api.core.spoken_period import SpokenPeriod, resolve_spoken_period
 
 # What the skill remembers while it waits for an answer. At most one of these is remembered at a time, and which one
 # it is says what the answer is for.
@@ -22,6 +23,8 @@ _HOW_TO_START_REMINDER = "Say, remind me to, and then the reminder."
 
 class ReminderControls:
     """ What the skill can do with the reminders that the home's site shows: add, read out, tick off, move and delete.
+
+    Reading out covers today unless the person names a day, a weekend or a week, such as tomorrow or this week.
 
     Several of these are short conversations, because Alexa can't pick both free text and a time out of one
     sentence, and because deleting is worth checking first. The person says what they want, the skill asks a
@@ -46,7 +49,7 @@ class ReminderControls:
         self._home_time_zone = home_time_zone
         self.responders: dict[str, Callable[[SkillRequest], SkillReply]] = {
             "AddReminderIntent": self._start_reminder,
-            "ListRemindersIntent": self._list_reminders_due_today,
+            "ListRemindersIntent": self._list_reminders_due,
             "CompleteReminderIntent": self._complete_reminder,
             "ChangeDueTimeIntent": self._start_due_time_change,
             "DeleteReminderIntent": self._start_deletion,
@@ -65,23 +68,34 @@ class ReminderControls:
         title = title[0].upper() + title[1:]
         return ask(f"When is it due? {_WAYS_TO_ANSWER_DUE_TIME}", {_NEW_TITLE_MEMORY_KEY: title})
 
-    def _list_reminders_due_today(self, request: SkillRequest) -> SkillReply:
+    def _list_reminders_due(self, request: SkillRequest) -> SkillReply:
         now = self._convert_to_home_time(request.received_at)
+        today = now.date()
+        spoken_period = request.slots.get("period")
+        period = SpokenPeriod(today, today) if spoken_period is None else resolve_spoken_period(spoken_period)
+        if period is None:
+            return SkillReply("Sorry, I can only check what's due on a day, at a weekend or in a week.")
+
         reminders_in_home_time = [
             replace(reminder, due_at=self._convert_to_home_time(reminder.due_at))
             for reminder in self._reminders_client.list_unfinished_reminders()
             if reminder.due_at is not None
         ]
-        # Overdue reminders still need doing today, so they are read out too.
+        # Overdue reminders still need doing, so they are read out too whenever the period includes today.
         reminders_due = sorted(
-            (reminder for reminder in reminders_in_home_time if reminder.due_at.date() <= now.date()),
+            (
+                reminder for reminder in reminders_in_home_time
+                if period.includes(reminder.due_at.date()) or (period.includes(today) and reminder.due_at.date() < today)
+            ),
             key=lambda reminder: reminder.due_at,
         )
         if not reminders_due:
-            return SkillReply("Nothing is due today.")
+            return SkillReply(f"Nothing is due {period.describe(today)}.")
 
+        # When only today was asked about, saying "today" before every time would be needless.
+        is_only_today = period == SpokenPeriod(today, today)
         descriptions = [
-            f"{reminder.title}, at {describe_time_of_day(reminder.due_at)}" if reminder.due_at.date() == now.date()
+            f"{reminder.title}, at {describe_time_of_day(reminder.due_at)}" if is_only_today and reminder.due_at.date() == today
             else f"{reminder.title}, due {describe_due_time(reminder.due_at, now)}"
             for reminder in reminders_due
         ]

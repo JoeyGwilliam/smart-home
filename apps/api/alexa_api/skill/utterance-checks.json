@@ -24,6 +24,11 @@
   { "utterance": "what are my reminders", "intent": "ListRemindersIntent" },
   { "utterance": "what do i need to do today", "intent": "ListRemindersIntent" },
   { "utterance": "read my reminders", "intent": "ListRemindersIntent" },
+  { "utterance": "what's due tomorrow", "intent": "ListRemindersIntent", "slots": { "period": null } },
+  { "utterance": "what's due this week", "intent": "ListRemindersIntent", "slots": { "period": null } },
+  { "utterance": "what reminders do i have this week", "intent": "ListRemindersIntent", "slots": { "period": null } },
+  { "utterance": "what do i need to do tomorrow", "intent": "ListRemindersIntent", "slots": { "period": null } },
+  { "utterance": "what are my reminders for next week", "intent": "ListRemindersIntent", "slots": { "period": null } },
 
   { "utterance": "tick off buy milk", "intent": "CompleteReminderIntent", "slots": { "title": "buy milk" } },
   { "utterance": "mark the bins as done", "intent": "CompleteReminderIntent", "slots": { "title": "the bins" } },

@@ -65,7 +65,9 @@
         },
         {
           "name": "ListRemindersIntent",
-          "slots": [],
+          "slots": [
+            { "name": "period", "type": "AMAZON.DATE" }
+          ],
           "samples": [
             "what's due today",
             "what is due today",
@@ -76,7 +78,19 @@
             "what do i have to do today",
             "read my reminders",
             "list my reminders",
-            "tell me my reminders"
+            "tell me my reminders",
+            "what's due {period}",
+            "what is due {period}",
+            "what's due on {period}",
+            "what are my reminders for {period}",
+            "what reminders do i have {period}",
+            "what reminders do i have for {period}",
+            "what reminders are there for {period}",
+            "what do i need to do {period}",
+            "what do i have to do {period}",
+            "read my reminders for {period}",
+            "list my reminders for {period}",
+            "tell me my reminders for {period}"
           ]
         },
         {
