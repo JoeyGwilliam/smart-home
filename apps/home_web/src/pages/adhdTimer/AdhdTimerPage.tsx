@@ -30,7 +30,10 @@ export function AdhdTimerPage() {
     <main className="mx-auto grid w-full max-w-6xl items-start gap-6 px-4 pb-10 sm:pb-14 lg:grid-cols-[minmax(0,6fr)_minmax(0,5fr)]">
       <header className="lg:col-span-2">
         <p className="text-sm font-extrabold tracking-[0.2em] text-primary-text uppercase">{format(now, 'EEEE d MMMM')}</p>
-        <h1 className="mt-1 text-4xl leading-[1.05] font-semibold tracking-tight sm:text-6xl">ADHD timer</h1>
+        <div className="mt-1 flex flex-wrap items-baseline justify-between gap-x-6 gap-y-1">
+          <h1 className="text-4xl leading-[1.05] font-semibold tracking-tight sm:text-6xl">ADHD timer</h1>
+          <CurrentTime />
+        </div>
         <div className="mt-3 flex min-h-7 items-center">
           {/* Only shown beside a timer, since the message below explains the problem when there is none. */}
           <AnimatePresence>
@@ -56,6 +59,18 @@ export function AdhdTimerPage() {
         </section>
       )}
     </main>
+  )
+}
+
+/** The time now, in hours and minutes, so it can be compared with the times on the dial at a glance. */
+function CurrentTime() {
+  // A clock showing minutes needs to change within a second of the minute changing.
+  const now = useNow(1000)
+
+  return (
+    <p className="font-heading text-4xl leading-[1.05] font-semibold tracking-tight tabular-nums sm:text-6xl" aria-label="Current time">
+      {format(now, 'HH:mm')}
+    </p>
   )
 }
 

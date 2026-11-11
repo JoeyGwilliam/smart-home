@@ -106,6 +106,14 @@ afterEach(() => {
   vi.unstubAllGlobals()
 })
 
+test('shows the current time at the top of the page when the page is open', async () => {
+  setClock(14, 5)
+
+  await renderPage()
+
+  expect(screen.getByLabelText('Current time')).toHaveTextContent('14:05')
+})
+
 test('shows when each task has to start when the tasks are stacked back from the end time', async () => {
   await renderPage()
 
