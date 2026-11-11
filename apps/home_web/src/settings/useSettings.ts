@@ -1,16 +1,23 @@
 import { useSyncExternalStore } from 'react'
 
 import type { SceneWeather, TimeOfDay } from '@/scene/scene'
+import type { ClaudeEffort, ClaudeModel } from '@/siteEditor/claudeSettings'
 
-/** Choices about how this screen looks. They belong to the device showing the page, not to the reminders. */
+/**
+ * Choices about how this screen looks and behaves. They belong to the device showing the page, not to the home.
+ */
 export interface Settings {
   /** The time of day that the backdrop shows. "live" follows the real sunrise and sunset. */
   sceneTime: TimeOfDay | 'live'
   /** The weather that the backdrop shows. "live" follows the forecast. */
   sceneWeather: SceneWeather | 'live'
+  /** The model that works on the messages this device sends from the site editor. */
+  claudeModel: ClaudeModel
+  /** How hard Claude thinks about the messages this device sends from the site editor. */
+  claudeEffort: ClaudeEffort
 }
 
-const DEFAULT_SETTINGS: Settings = { sceneTime: 'live', sceneWeather: 'live' }
+const DEFAULT_SETTINGS: Settings = { sceneTime: 'live', sceneWeather: 'live', claudeModel: 'default', claudeEffort: 'default' }
 
 const STORAGE_KEY = 'kiosk-viewer-settings'
 

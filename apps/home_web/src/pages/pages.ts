@@ -1,9 +1,10 @@
-import { Languages, LayoutDashboard, ListTodo, Timer, type LucideIcon } from 'lucide-react'
+import { Languages, LayoutDashboard, ListTodo, Timer, WandSparkles, type LucideIcon } from 'lucide-react'
 import type { JSX } from 'react'
 
 import { AdhdTimerPage } from '@/pages/adhdTimer/AdhdTimerPage'
 import { DashboardPage } from '@/pages/dashboard/DashboardPage'
 import { RemindersPage } from '@/pages/reminders/RemindersPage'
+import { SiteEditorPage } from '@/pages/siteEditor/SiteEditorPage'
 import { WordOfTheDayPage } from '@/pages/wordOfTheDay/WordOfTheDayPage'
 
 /** A screen that can be shown, and how to find it. */
@@ -26,4 +27,5 @@ export const PAGES: Page[] = [
   { path: '/reminders', title: 'Reminders', icon: ListTodo, component: RemindersPage },
   { path: '/adhd-timer', title: 'ADHD timer', icon: Timer, component: AdhdTimerPage },
   { path: '/word-of-the-day', title: 'Word of the day', icon: Languages, component: WordOfTheDayPage },
+  { path: '/site-editor', title: 'Site editor', icon: WandSparkles, component: SiteEditorPage },
 ]

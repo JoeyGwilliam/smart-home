@@ -47,6 +47,11 @@ services:
       # Like the APIs, the pages have no login, so the same advice applies. Set KIOSK_VIEWER_BIND_ADDRESS to let other
       # devices reach them.
       - "${KIOSK_VIEWER_BIND_ADDRESS:-127.0.0.1}:8080:8080"
+    extra_hosts:
+      # nginx forwards the site editor page's calls to the site editor API, which runs on this machine rather than in
+      # a container (see start_site_editor.bat). Docker Desktop defines this name by itself; naming it here makes it
+      # work on plain Docker too, and nginx won't start if it can't look the name up.
+      - "host.docker.internal:host-gateway"
 
   # Makes the pages reachable from outside the home, through a Cloudflare Tunnel. It connects out to Cloudflare, so no
   # router ports need opening, and it reaches home-web over this file's network, so the port above can stay private.
