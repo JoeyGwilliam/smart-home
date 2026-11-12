@@ -116,7 +116,7 @@ export function PixelBackdrop({ scene }: { scene: Scene }) {
           <PixelSprite sprite={sunOrMoon} pixelSize={SUN_PIXEL_SIZE} />
         </div>
       )}
-      {timeOfDay === 'night' && weather === 'clear' && <TwinklingStars />}
+      {timeOfDay === 'night' && weather === 'clear' && <BrightStars />}
       {CLOUDS.slice(0, CLOUD_COUNTS[weather]).map((cloud) => (
         <PixelCloud key={cloud.className} cloud={cloud} />
       ))}
@@ -138,25 +138,16 @@ export function PixelBackdrop({ scene }: { scene: Scene }) {
   )
 }
 
-const SPARKLE: Sprite = { rows: ['.o.', 'ooo', '.o.'], palette: { o: CREAM } }
+const BRIGHT_STAR: Sprite = { rows: ['.o.', 'ooo', '.o.'], palette: { o: CREAM } }
 
-/** Where the brighter stars sit, clear of the moon, and how they twinkle out of step with each other. */
-const SPARKLES = [
-  { className: 'top-[6%] left-[38%]', twinkleDuration: '2.6s', twinkleDelay: '0s' },
-  { className: 'top-[16%] left-[62%]', twinkleDuration: '3.4s', twinkleDelay: '-1.2s' },
-  { className: 'top-[9%] left-[84%]', twinkleDuration: '2.9s', twinkleDelay: '-2s' },
-  { className: 'top-[28%] left-[50%]', twinkleDuration: '3.8s', twinkleDelay: '-0.6s' },
-]
+/** Where the brighter stars sit, clear of the moon. */
+const BRIGHT_STAR_CLASS_NAMES = ['top-[6%] left-[38%]', 'top-[16%] left-[62%]', 'top-[9%] left-[84%]', 'top-[28%] left-[50%]']
 
-/** A few brighter stars that twinkle, among the fainter ones that index.css scatters over a clear night sky. */
-function TwinklingStars() {
-  return SPARKLES.map((sparkle) => (
-    <div
-      key={sparkle.className}
-      className={`animate-twinkle absolute ${sparkle.className}`}
-      style={{ '--twinkle-duration': sparkle.twinkleDuration, '--twinkle-delay': sparkle.twinkleDelay } as CSSProperties}
-    >
-      <PixelSprite sprite={SPARKLE} pixelSize={SCENE_PIXEL_SIZE} />
+/** A few brighter stars, shining steadily among the fainter ones that index.css scatters over a clear night sky. */
+function BrightStars() {
+  return BRIGHT_STAR_CLASS_NAMES.map((className) => (
+    <div key={className} className={`absolute ${className}`}>
+      <PixelSprite sprite={BRIGHT_STAR} pixelSize={SCENE_PIXEL_SIZE} />
     </div>
   ))
 }

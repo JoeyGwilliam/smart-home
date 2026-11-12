@@ -376,16 +376,6 @@
     animation: wander var(--wander-duration, 10s) steps(40) infinite;
 }
 
-/* A bright star dimming and brightening again. */
-@keyframes twinkle {
-    0%, 100% { opacity: 1; }
-    50% { opacity: 0.3; }
-}
-
-@utility animate-twinkle {
-    animation: twinkle var(--twinkle-duration, 3s) steps(1) var(--twinkle-delay, 0s) infinite;
-}
-
 @media (prefers-reduced-motion: reduce) {
     .animate-drift, .animate-hop, .animate-fall, .animate-flutter, .animate-wander {
         animation-play-state: paused;
@@ -393,7 +383,7 @@
 
     /* These would freeze at a moment when they are faint, or mid-jump, so they are shown at rest instead. The Zzzs
        then sit on top of each other, as a single z. */
-    .animate-lightning, .animate-startle, .animate-float-away, .animate-flap, .animate-glow, .animate-twinkle {
+    .animate-lightning, .animate-startle, .animate-float-away, .animate-flap, .animate-glow {
         animation: none;
     }
 }
