@@ -43,12 +43,12 @@ def test_asks_question_and_keeps_conversation_open_when_person_starts_reminder()
         "version": "1.0",
         "sessionAttributes": {
             "new_reminder_title": "Buy milk",
-            "question": "When is it due? You can say a day, a time, or no time.",
+            "question": "When is it due?",
         },
         "response": {
-            "outputSpeech": {"type": "PlainText", "text": "When is it due? You can say a day, a time, or no time."},
+            "outputSpeech": {"type": "PlainText", "text": "When is it due?"},
             "reprompt": {
-                "outputSpeech": {"type": "PlainText", "text": "When is it due? You can say a day, a time, or no time."},
+                "outputSpeech": {"type": "PlainText", "text": "When is it due?"},
             },
             "shouldEndSession": False,
         },
@@ -77,11 +77,11 @@ def test_asks_who_it_is_for_when_person_answers_with_due_time() -> None:
         "sessionAttributes": {
             "new_reminder_title": "Buy milk",
             "new_reminder_due_at": "2030-01-01T09:00:00+00:00",
-            "question": "Who is it for? You can say Joey, Georgie, or nobody.",
+            "question": "Who is it for?",
         },
         "response": {
-            "outputSpeech": {"type": "PlainText", "text": "Who is it for? You can say Joey, Georgie, or nobody."},
-            "reprompt": {"outputSpeech": {"type": "PlainText", "text": "Who is it for? You can say Joey, Georgie, or nobody."}},
+            "outputSpeech": {"type": "PlainText", "text": "Who is it for?"},
+            "reprompt": {"outputSpeech": {"type": "PlainText", "text": "Who is it for?"}},
             "shouldEndSession": False,
         },
     }

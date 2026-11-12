@@ -16,3 +16,4 @@ call ask deploy
 if errorlevel 1 exit /b 1
 
 python check_utterances.py
+pause

@@ -6,9 +6,24 @@
         {
           "name": "AddReminderIntent",
           "slots": [
-            { "name": "title", "type": "AMAZON.SearchQuery" }
+            {
+              "name": "title",
+              "type": "AMAZON.SearchQuery",
+              "samples": ["{title}", "to {title}", "about {title}", "remind me to {title}", "remind me about {title}", "i need to {title}"]
+            }
           ],
           "samples": [
+            "add a reminder",
+            "add reminder",
+            "add a new reminder",
+            "new reminder",
+            "create a reminder",
+            "set a reminder",
+            "make a reminder",
+            "i want to add a reminder",
+            "can you add a reminder",
+            "remind me",
+            "remind me something",
             "remind me to {title}",
             "remind me about {title}",
             "remind me that {title}",
@@ -18,7 +33,24 @@
             "set a reminder to {title}",
             "make a reminder to {title}",
             "i need to {title}",
-            "don't let me forget to {title}"
+            "don't let me forget to {title}",
+            "remind us to {title}",
+            "remind me i need to {title}",
+            "add a reminder for {title}",
+            "create a reminder about {title}",
+            "set a reminder for {title}",
+            "set a reminder about {title}",
+            "make a reminder about {title}",
+            "new reminder to {title}",
+            "add {title} to my reminders",
+            "add {title} to the reminders",
+            "put {title} on my reminders",
+            "make a note to {title}",
+            "don't let me forget {title}",
+            "i have to {title}",
+            "we need to {title}",
+            "i must {title}",
+            "i mustn't forget to {title}"
           ]
         },
         {
@@ -44,7 +76,28 @@
             "due {date} at {time}",
             "it's due {date}",
             "it's due at {time}",
-            "it's due {date} at {time}"
+            "it's due {date} at {time}",
+            "at {time} on {date}",
+            "{time} on {date}",
+            "on {date} {time}",
+            "by {date} at {time}",
+            "before {date}",
+            "before {time}",
+            "due on {date}",
+            "due at {time}",
+            "it's due on {date}",
+            "it's due by {date}",
+            "it is due {date}",
+            "it is due at {time}",
+            "make it {date}",
+            "make it {time}",
+            "make it {date} at {time}",
+            "make it due {date}",
+            "it needs doing {date}",
+            "it needs doing by {date}",
+            "it needs to be done {date}",
+            "it needs to be done by {date}",
+            "it needs to be done by {time}"
           ]
         },
         {
@@ -60,7 +113,22 @@
             "any time",
             "none",
             "it has no due time",
-            "it isn't due"
+            "it isn't due",
+            "no due date",
+            "no deadline",
+            "no particular time",
+            "there's no rush",
+            "there's no due time",
+            "there isn't a due time",
+            "it has no deadline",
+            "it doesn't have a due time",
+            "anytime",
+            "sometime",
+            "at some point",
+            "skip the due time",
+            "skip the time",
+            "leave the time blank",
+            "not yet"
           ]
         },
         {
@@ -75,7 +143,14 @@
             "it is for {person}",
             "assign it to {person}",
             "give it to {person}",
-            "it's {person}'s"
+            "assign {person}",
+            "assign to {person}",
+            "assign it for {person}",
+            "it's for {person} to do",
+            "{person} is doing it",
+            "{person} will do it",
+            "{person} can do it",
+            "put it on {person}"
           ]
         },
         {
@@ -93,7 +168,19 @@
             "it's for no one",
             "it's for anyone",
             "assign it to nobody",
-            "assign it to no one"
+            "assign it to no one",
+            "nobody in particular",
+            "no one in particular",
+            "it's not for anyone",
+            "it isn't for anyone",
+            "it's for anybody",
+            "it's for whoever",
+            "whoever",
+            "either of us",
+            "anyone can do it",
+            "don't assign it",
+            "don't assign it to anyone",
+            "leave it unassigned"
           ]
         },
         {
@@ -123,7 +210,33 @@
             "what do i have to do {period}",
             "read my reminders for {period}",
             "list my reminders for {period}",
-            "tell me my reminders for {period}"
+            "tell me my reminders for {period}",
+            "what reminders do i have",
+            "do i have any reminders",
+            "have i got any reminders",
+            "any reminders",
+            "what's on my list",
+            "what's on my to do list",
+            "what have i got today",
+            "what have i got on today",
+            "what are today's reminders",
+            "what's coming up",
+            "what's overdue",
+            "is anything due",
+            "what needs doing",
+            "what needs doing today",
+            "what do we need to do today",
+            "what is due on {period}",
+            "what have i got {period}",
+            "what have i got on {period}",
+            "do i have any reminders {period}",
+            "do i have any reminders for {period}",
+            "have i got any reminders {period}",
+            "is anything due {period}",
+            "what's coming up {period}",
+            "what needs doing {period}",
+            "what do we need to do {period}",
+            "what's on my list for {period}"
           ]
         },
         {
@@ -140,7 +253,20 @@
             "i've done {title}",
             "i have done {title}",
             "i've finished {title}",
-            "i finished {title}"
+            "i finished {title}",
+            "tick {title} off",
+            "check {title} off",
+            "cross off {title}",
+            "cross {title} off",
+            "mark off {title}",
+            "mark {title} done",
+            "mark {title} as finished",
+            "tick off the reminder {title}",
+            "i did {title}",
+            "i've completed {title}",
+            "i'm done with {title}",
+            "we've done {title}",
+            "that's {title} done"
           ]
         },
         {
@@ -155,7 +281,21 @@
             "move the reminder {title}",
             "move {title}",
             "reschedule {title}",
-            "postpone {title}"
+            "postpone {title}",
+            "change the due date of {title}",
+            "change the date of {title}",
+            "change the time for {title}",
+            "move the due time of {title}",
+            "set a new time for {title}",
+            "set a different time for {title}",
+            "reschedule the reminder {title}",
+            "postpone the reminder {title}",
+            "push back {title}",
+            "push {title} back",
+            "put off {title}",
+            "put {title} off",
+            "delay {title}",
+            "snooze {title}"
           ]
         },
         {
@@ -169,7 +309,19 @@
             "remove the reminder {title}",
             "remove {title}",
             "cancel the reminder {title}",
-            "forget about {title}"
+            "forget about {title}",
+            "delete the reminder about {title}",
+            "delete the reminder to {title}",
+            "remove the reminder about {title}",
+            "remove the reminder to {title}",
+            "cancel the reminder to {title}",
+            "cancel the reminder about {title}",
+            "get rid of {title}",
+            "get rid of the reminder {title}",
+            "scrap {title}",
+            "erase {title}",
+            "forget {title}",
+            "i don't need to {title} anymore"
           ]
         },
         {
@@ -184,7 +336,20 @@
             "run the {preset} timer",
             "load the {preset} timer",
             "start the timer for {preset}",
-            "start the preset {preset}"
+            "start the preset {preset}",
+            "start a {preset} timer",
+            "begin my {preset} timer",
+            "run my {preset} timer",
+            "load my {preset} timer",
+            "use the {preset} timer",
+            "put on the {preset} timer",
+            "put the {preset} timer on",
+            "set the timer for {preset}",
+            "start the timer for the {preset}",
+            "start the {preset} preset",
+            "start my {preset} preset",
+            "load the {preset} preset",
+            "load the preset {preset}"
           ]
         },
         {
@@ -195,7 +360,17 @@
             "start timer",
             "begin the timer",
             "restart the timer",
-            "start the countdown"
+            "start the countdown",
+            "begin timer",
+            "restart timer",
+            "start the timer again",
+            "start the timer over",
+            "start the timer from now",
+            "begin the countdown",
+            "turn on the timer",
+            "turn the timer on",
+            "get the timer going",
+            "kick off the timer"
           ]
         },
         {
@@ -206,7 +381,16 @@
             "stop timer",
             "end the timer",
             "cancel the timer",
-            "turn off the timer"
+            "turn off the timer",
+            "end timer",
+            "cancel timer",
+            "end the countdown",
+            "stop the countdown",
+            "cancel the countdown",
+            "turn the timer off",
+            "switch off the timer",
+            "switch the timer off",
+            "finish the timer"
           ]
         },
         {
@@ -256,7 +440,20 @@
             "when do i need to be ready",
             "tell me about the timer",
             "read the timer",
-            "read out the timer"
+            "read out the timer",
+            "how long is left",
+            "how long's left",
+            "how much time is left",
+            "how much time do i have",
+            "how much time have i got",
+            "how much time have i got left",
+            "what's left on the timer",
+            "what should i be doing now",
+            "what am i doing now",
+            "what do i do next",
+            "what's next",
+            "when do i have to be ready",
+            "when should i be ready"
           ]
         },
         {
@@ -268,7 +465,17 @@
             "what timers are saved",
             "what presets do i have",
             "list my timers",
-            "read my saved timers"
+            "read my saved timers",
+            "what timer presets do i have",
+            "what saved timers do i have",
+            "which timers do i have",
+            "what timers are there",
+            "what are my presets",
+            "list my presets",
+            "list the timers",
+            "list the saved timers",
+            "read out my timers",
+            "tell me my timers"
           ]
         },
         {
@@ -285,7 +492,18 @@
             "tell the site editor to {request}",
             "ask claude to {request}",
             "request a change to {request}",
-            "request a feature to {request}"
+            "request a feature to {request}",
+            "change the site so that {request}",
+            "change the website so that {request}",
+            "update the website to {request}",
+            "edit the website to {request}",
+            "make a change to the site to {request}",
+            "ask the site editor for {request}",
+            "tell claude to {request}",
+            "ask claude for {request}",
+            "request a site change to {request}",
+            "suggest a change to {request}",
+            "i want the site to {request}"
           ]
         },
         {
@@ -299,7 +517,21 @@
             "is the site change ready",
             "is the change ready",
             "has claude finished",
-            "check on the site editor"
+            "check on the site editor",
+            "how's the change going",
+            "how's the site change going",
+            "how is the website change going",
+            "is the site change done",
+            "is the change done",
+            "is the change finished",
+            "is the website change ready",
+            "is the site editor finished",
+            "is claude done",
+            "has claude finished yet",
+            "what is claude doing",
+            "what's claude doing",
+            "check on the change",
+            "check on the site change"
           ]
         },
         { "name": "AMAZON.YesIntent", "samples": [] },
@@ -319,6 +551,35 @@
           ]
         }
       ]
-    }
+    },
+    "dialog": {
+      "delegationStrategy": "SKILL_RESPONSE",
+      "intents": [
+        {
+          "name": "AddReminderIntent",
+          "delegationStrategy": "ALWAYS",
+          "confirmationRequired": false,
+          "prompts": {},
+          "slots": [
+            {
+              "name": "title",
+              "type": "AMAZON.SearchQuery",
+              "elicitationRequired": true,
+              "confirmationRequired": false,
+              "prompts": { "elicitation": "Elicit.Slot.AddReminderIntent.title" }
+            }
+          ]
+        }
+      ]
+    },
+    "prompts": [
+      {
+        "id": "Elicit.Slot.AddReminderIntent.title",
+        "variations": [
+          { "type": "PlainText", "value": "What should I remind you about?" },
+          { "type": "PlainText", "value": "What's the reminder?" }
+        ]
+      }
+    ]
   }
 }

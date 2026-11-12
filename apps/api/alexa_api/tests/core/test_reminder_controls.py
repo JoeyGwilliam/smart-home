@@ -31,11 +31,11 @@ def test_asks_for_due_time_and_remembers_capitalised_title_when_reminder_is_star
     reply = _respond(held_reminders, SkillRequest("AddReminderIntent", _WEDNESDAY_NOON, slots={"title": "buy milk"}))
 
     assert reply == SkillReply(
-        "When is it due? You can say a day, a time, or no time.",
-        reprompt="When is it due? You can say a day, a time, or no time.",
+        "When is it due?",
+        reprompt="When is it due?",
         conversation_memory={
             "new_reminder_title": "Buy milk",
-            "question": "When is it due? You can say a day, a time, or no time.",
+            "question": "When is it due?",
         },
     )
     assert held_reminders == []
@@ -62,12 +62,12 @@ def test_asks_who_it_is_for_and_remembers_due_time_when_due_time_is_said_for_new
     ))
 
     assert reply == SkillReply(
-        "Who is it for? You can say Joey, Georgie, or nobody.",
-        reprompt="Who is it for? You can say Joey, Georgie, or nobody.",
+        "Who is it for?",
+        reprompt="Who is it for?",
         conversation_memory={
             "new_reminder_title": "Buy milk",
             "new_reminder_due_at": "2026-11-12T17:00:00+00:00",
-            "question": "Who is it for? You can say Joey, Georgie, or nobody.",
+            "question": "Who is it for?",
         },
     )
     assert held_reminders == []
@@ -125,7 +125,7 @@ def test_asks_who_it_is_for_and_remembers_no_due_time_when_person_declines_to_gi
         conversation_memory={"new_reminder_title": "Buy milk", "question": "When is it due?"},
     ))
 
-    assert reply.speech == "Who is it for? You can say Joey, Georgie, or nobody."
+    assert reply.speech == "Who is it for?"
     assert reply.conversation_memory["new_reminder_due_at"] == ""
     assert held_reminders == []
 
@@ -183,13 +183,13 @@ def test_adds_unassigned_reminder_when_person_says_nobody(intent_name: str) -> N
 
 def test_asks_same_question_again_and_adds_nothing_when_person_is_not_one_of_the_two() -> None:
     held_reminders: list[dict[str, Any]] = []
-    memory = {"new_reminder_title": "Buy milk", "new_reminder_due_at": "", "question": "Who is it for? You can say Joey, Georgie, or nobody."}
+    memory = {"new_reminder_title": "Buy milk", "new_reminder_due_at": "", "question": "Who is it for?"}
 
     reply = _respond(held_reminders, SkillRequest("SetAssigneeIntent", _WEDNESDAY_NOON, slots={"person": "sam"}, conversation_memory=memory))
 
     assert reply == SkillReply(
-        "Sorry, I didn't catch who. Who is it for? You can say Joey, Georgie, or nobody.",
-        reprompt="Who is it for? You can say Joey, Georgie, or nobody.",
+        "Sorry, I didn't catch who. Who is it for?",
+        reprompt="Who is it for?",
         conversation_memory=memory,
     )
     assert held_reminders == []
@@ -383,7 +383,7 @@ def test_asks_when_matching_reminder_is_due_when_due_time_change_is_started() ->
 
     reply = _respond(held_reminders, SkillRequest("ChangeDueTimeIntent", _WEDNESDAY_NOON, slots={"title": "the bins"}))
 
-    question = "When is Take out the bins due? You can say a day, a time, or no time."
+    question = "When is Take out the bins due?"
     assert reply == SkillReply(
         question,
         reprompt=question,

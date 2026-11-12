@@ -13,8 +13,8 @@ def check_utterances() -> bool:
     """ Checks that the deployed skill understands each phrase in `utterance-checks.json` as expected.
 
     Each check there has the `utterance` to try and the `intent` that Alexa must pick for it. It may also have
-    `slots`: the value that Alexa must pick out for each slot name, or null to accept any value, which suits days
-    and times that depend on when the check runs.
+    `slots`: the value that Alexa must pick out for each slot name, ignoring case, or null to accept any value,
+    which suits days and times that depend on when the check runs.
 
     This asks Amazon how the deployed interaction model resolves each phrase. It doesn't send anything to the
     home's server, so it is safe to run at any time.
@@ -44,8 +44,10 @@ def _find_failure(skill_id: str, check: dict[str, Any]) -> str | None:
     selected_intent = json.loads(completed.stdout).get("selectedIntent") or {}
     understood_slots = {name: slot.get("value") for name, slot in (selected_intent.get("slots") or {}).items()}
     expected_slots = check.get("slots", {})
+    # Alexa capitalises some values, such as names it knows, but the skill ignores case, so the checks do too.
     are_slots_as_expected = all(
-        understood_slots.get(name) is not None and expected_value in (None, understood_slots[name])
+        understood_slots.get(name) is not None
+        and (expected_value is None or expected_value.casefold() == understood_slots[name].casefold())
         for name, expected_value in expected_slots.items()
     )
     if selected_intent.get("name") == check["intent"] and are_slots_as_expected:

@@ -15,7 +15,7 @@
         {
           "intent": "AddReminderIntent",
           "title": "Add a reminder",
-          "description": "Starts a new reminder for the reminders page. Home hub then asks when it is due, and who it is for."
+          "description": "Starts a new reminder for the reminders page. If you just say \"add a reminder\", Home hub first asks what the reminder is. It then asks when it is due, and who it is for."
         },
         {
           "intent": "ListRemindersIntent",

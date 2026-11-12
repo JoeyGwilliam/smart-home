@@ -19,9 +19,7 @@ _NEW_DUE_AT_MEMORY_KEY = "new_reminder_due_at"
 _RESCHEDULED_ID_MEMORY_KEY = "rescheduled_reminder_id"
 _DELETED_ID_MEMORY_KEY = "deleted_reminder_id"
 
-_WAYS_TO_ANSWER_DUE_TIME = "You can say a day, a time, or no time."
 _ASSIGNEES = ("Joey", "Georgie")
-_WAYS_TO_ANSWER_ASSIGNEE = "You can say Joey, Georgie, or nobody."
 _HOW_TO_START_REMINDER = "Say, remind me to, and then the reminder."
 
 
@@ -74,7 +72,7 @@ class ReminderControls:
 
         # Alexa gives what it heard in lower case, which looks out of place next to reminders typed on the site.
         title = title[0].upper() + title[1:]
-        return ask(f"When is it due? {_WAYS_TO_ANSWER_DUE_TIME}", {_NEW_TITLE_MEMORY_KEY: title})
+        return ask("When is it due?", {_NEW_TITLE_MEMORY_KEY: title})
 
     def _list_reminders_due(self, request: SkillRequest) -> SkillReply:
         now = self._convert_to_home_time(request.received_at)
@@ -118,8 +116,7 @@ class ReminderControls:
         if reminder is None:
             return self._say_reminder_was_not_found(request)
 
-        question = f"When is {reminder.title} due? {_WAYS_TO_ANSWER_DUE_TIME}"
-        return ask(question, {_RESCHEDULED_ID_MEMORY_KEY: reminder.id})
+        return ask(f"When is {reminder.title} due?", {_RESCHEDULED_ID_MEMORY_KEY: reminder.id})
 
     def _start_deletion(self, request: SkillRequest) -> SkillReply:
         reminder = self._find_spoken_reminder(request)
@@ -174,7 +171,7 @@ class ReminderControls:
 
     def _ask_who_new_reminder_is_for(self, title: str, due_at: datetime | None) -> SkillReply:
         memory = {_NEW_TITLE_MEMORY_KEY: title, _NEW_DUE_AT_MEMORY_KEY: "" if due_at is None else due_at.isoformat()}
-        return ask(f"Who is it for? {_WAYS_TO_ANSWER_ASSIGNEE}", memory)
+        return ask("Who is it for?", memory)
 
     def _add_new_reminder(self, memory: dict[str, str], assignee: str | None, now: datetime) -> SkillReply:
         title = memory[_NEW_TITLE_MEMORY_KEY]
