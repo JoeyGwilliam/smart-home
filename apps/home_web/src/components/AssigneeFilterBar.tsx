@@ -3,8 +3,9 @@ import { ASSIGNEES } from '@/reminders/reminder'
 import { cn } from 'cn'
 
 const CHOICES: { filter: AssigneeFilter; label: string }[] = [
-  { filter: 'everyone', label: 'Everyone' },
+  { filter: 'everyone', label: 'All reminders' },
   ...ASSIGNEES.map((assignee) => ({ filter: assignee, label: assignee })),
+  { filter: 'nobody', label: 'Both' },
 ]
 
 interface AssigneeFilterBarProps {
