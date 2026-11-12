@@ -60,6 +60,11 @@ def test_raises_value_error_when_reminder_repeats_without_due_time() -> None:
         Reminder(title="Take out bins", repeats=Repeat.WEEKLY)
 
 
+def test_raises_value_error_when_reminder_is_all_day_without_due_time() -> None:
+    with pytest.raises(ValueError, match="due_at"):
+        Reminder(title="Bin day", is_all_day=True)
+
+
 def test_creates_uncompleted_copy_due_one_repeat_later_when_creating_next_occurrence() -> None:
     reminder = Reminder(
         title="Take out bins",
@@ -90,6 +95,22 @@ def test_keeps_assignee_when_creating_next_occurrence() -> None:
     next_reminder = reminder.create_next_occurrence(ZoneInfo("Europe/London"))
 
     assert next_reminder.assigned_to == Assignee.JOEY
+
+
+def test_keeps_all_day_reminder_at_start_of_day_when_creating_next_occurrence() -> None:
+    start_of_day_in_london_summer = datetime(2026, 10, 24, 23, 0, tzinfo=UTC)
+    reminder = Reminder(
+        title="Bin day",
+        due_at=start_of_day_in_london_summer,
+        is_all_day=True,
+        completed_at=datetime(2026, 10, 25, 15, 0, tzinfo=UTC),
+        repeats=Repeat.DAILY,
+    )
+
+    next_reminder = reminder.create_next_occurrence(ZoneInfo("Europe/London"))
+
+    assert next_reminder.due_at == datetime(2026, 10, 26, 0, 0, tzinfo=UTC)
+    assert next_reminder.is_all_day
 
 
 def test_skips_missed_repeats_when_reminder_was_completed_long_after_it_was_due() -> None:

@@ -7,6 +7,8 @@ export interface ReminderDraft {
   /** Empty when there are no notes. */
   notes: string
   dueAt: Date | null
+  /** Kept while the due time is removed, like the repeat, so that adding a due time back brings it back too. */
+  isAllDay: boolean
   /** Kept while the due time is removed, so that adding a due time back brings the repeat back too. */
   repeats: Repeat | null
   /** The person the reminder is for, or null if it is for nobody in particular. */
@@ -24,6 +26,7 @@ export function createDraft(content?: ReminderContent): ReminderDraft {
     title: content?.title ?? '',
     notes: content?.notes ?? '',
     dueAt: content?.dueAt ?? null,
+    isAllDay: content?.isAllDay ?? false,
     repeats: content?.repeats ?? null,
     assignedTo: content?.assignedTo ?? null,
   }
@@ -41,13 +44,14 @@ export function isDraftComplete(draft: ReminderDraft): boolean {
  * Converts a draft into the content of a reminder, tidying away surrounding whitespace.
  *
  * @param draft The draft.
- * @returns The content, with blank notes treated as no notes, and no repeat if there is no due time to repeat from.
+ * @returns The content, with blank notes treated as no notes, and neither a repeat nor all day if there is no due time.
  */
 export function toReminderContent(draft: ReminderDraft): ReminderContent {
   return {
     title: draft.title.trim(),
     notes: draft.notes.trim() || null,
     dueAt: draft.dueAt,
+    isAllDay: draft.dueAt ? draft.isAllDay : false,
     repeats: draft.dueAt ? draft.repeats : null,
     assignedTo: draft.assignedTo,
   }

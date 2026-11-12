@@ -3,7 +3,7 @@ import type { Reminder } from '@/reminders/reminder'
 
 // Vitest runs in Europe/London (see vite.config.ts), and these dates are in winter, so local time is UTC.
 function createReminder(overrides: Partial<Reminder>): Reminder {
-  return { id: '1', title: 'Water the plants', notes: null, dueAt: null, completedAt: null, repeats: null, assignedTo: null, ...overrides }
+  return { id: '1', title: 'Water the plants', notes: null, dueAt: null, isAllDay: false, completedAt: null, repeats: null, assignedTo: null, ...overrides }
 }
 
 test('describes no due time when the reminder has none', () => {
@@ -92,4 +92,39 @@ test('counts days ago when overdue from an earlier day', () => {
   const description = describeReminder(reminder, new Date('2026-11-09T10:00:00Z'))
 
   expect(description.countdown).toEqual({ value: '3', caption: 'days ago' })
+})
+
+test('labels the due day as all day when the reminder is all day', () => {
+  const reminder = createReminder({ dueAt: new Date('2026-11-12T00:00:00Z'), isAllDay: true })
+
+  const description = describeReminder(reminder, new Date('2026-11-09T10:00:00Z'))
+
+  expect(description.dueLabel).toEqual({ date: 'Thu 12 Nov', time: 'all day' })
+})
+
+test('is due today, counting down to today, for the whole of the day when the reminder is all day', () => {
+  const reminder = createReminder({ dueAt: new Date('2026-11-09T00:00:00Z'), isAllDay: true })
+
+  const description = describeReminder(reminder, new Date('2026-11-09T23:30:00Z'))
+
+  expect(description.urgency).toBe('dueToday')
+  expect(description.countdown).toEqual({ value: 'Today', caption: 'all day' })
+})
+
+test('is overdue by days once the day has ended when the reminder is all day', () => {
+  const reminder = createReminder({ dueAt: new Date('2026-11-08T00:00:00Z'), isAllDay: true })
+
+  const description = describeReminder(reminder, new Date('2026-11-09T00:30:00Z'))
+
+  expect(description.urgency).toBe('overdue')
+  expect(description.countdown).toEqual({ value: '1', caption: 'day ago' })
+})
+
+test('counts days until an all-day reminder that is due on a later day', () => {
+  const reminder = createReminder({ dueAt: new Date('2026-11-12T00:00:00Z'), isAllDay: true })
+
+  const description = describeReminder(reminder, new Date('2026-11-09T10:00:00Z'))
+
+  expect(description.urgency).toBe('upcoming')
+  expect(description.countdown).toEqual({ value: '3', caption: 'days' })
 })

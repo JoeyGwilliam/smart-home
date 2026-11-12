@@ -21,7 +21,11 @@ class Reminder:
         notes:
             Optional longer details.
         due_at:
-            Timezone-aware due time, or None if there is no due time.
+            Timezone-aware due time, or None if there is no due time. For an all-day reminder, the start of the day it
+            is due.
+        is_all_day:
+            Whether the reminder is due at any time on the day of due_at, rather than at a particular time. Only a
+            reminder with a due time can be all day.
         completed_at:
             Timezone-aware completion time, or None if not completed.
         repeats:
@@ -34,13 +38,14 @@ class Reminder:
             creation time.
 
     Raises:
-        ValueError: If the title is blank, if due_at or completed_at has no time zone, or if the reminder repeats
-            without a due time.
+        ValueError: If the title is blank, if due_at or completed_at has no time zone, or if the reminder repeats or
+            is all day without a due time.
     """
 
     title: str
     notes: str | None = None
     due_at: datetime | None = None
+    is_all_day: bool = False
     completed_at: datetime | None = None
     repeats: Repeat | None = None
     assigned_to: Assignee | None = None
@@ -57,6 +62,9 @@ class Reminder:
         if self.repeats is not None and self.due_at is None:
             raise ValueError("A reminder must have a due_at to repeat.")
 
+        if self.is_all_day and self.due_at is None:
+            raise ValueError("A reminder must have a due_at to be all day.")
+
     def create_next_occurrence(self, home_time_zone: ZoneInfo) -> Self:
         """ Creates the reminder for the next time that this repeating reminder comes round.
 
@@ -66,7 +74,8 @@ class Reminder:
                 clocks change.
 
         Returns:
-            A new, uncompleted reminder with its own id and the same title, notes, repeat and assignee. It is due at the first
+            A new, uncompleted reminder with its own id and the same title, notes, repeat, assignee and whether it is
+            all day. It is due at the first
             repeat that is after both this reminder's due time and its completion time, so ticking off a reminder that
             has been overdue for several repeats doesn't create one that is already overdue.
 

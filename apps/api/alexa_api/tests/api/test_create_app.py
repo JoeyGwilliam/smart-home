@@ -109,7 +109,7 @@ def test_adds_reminder_and_ends_conversation_when_person_answers_with_who_it_is_
     assert response.json()["response"]["outputSpeech"]["text"] == "I've added Buy milk, due on Tuesday 1 January at 9 AM, for Georgie."
     assert response.json()["response"]["shouldEndSession"] is True
     assert held_reminders == [
-        {"id": "new-reminder", "title": "Buy milk", "notes": None, "due_at": "2030-01-01T09:00:00+00:00", "completed_at": None, "repeats": None, "assigned_to": "Georgie"},
+        {"id": "new-reminder", "title": "Buy milk", "notes": None, "due_at": "2030-01-01T09:00:00+00:00", "is_all_day": False, "completed_at": None, "repeats": None, "assigned_to": "Georgie"},
     ]
 
 

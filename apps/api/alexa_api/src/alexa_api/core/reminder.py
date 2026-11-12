@@ -16,7 +16,11 @@ class Reminder:
         notes:
             Optional longer details. The skill never changes them, but has to send them back when saving.
         due_at:
-            Timezone-aware due time, or None if there is no due time.
+            Timezone-aware due time, or None if there is no due time. For an all-day reminder, the start of the day it
+            is due.
+        is_all_day:
+            Whether the reminder is due at any time on the day of due_at, rather than at a particular time. Only a
+            reminder with a due time can be all day.
         completed_at:
             Timezone-aware completion time, or None if not completed.
         repeats:
@@ -32,6 +36,7 @@ class Reminder:
     title: str
     notes: str | None = None
     due_at: datetime | None = None
+    is_all_day: bool = False
     completed_at: datetime | None = None
     repeats: str | None = None
     assigned_to: str | None = None

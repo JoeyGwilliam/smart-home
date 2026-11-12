@@ -20,6 +20,7 @@ def test_returns_all_fields_when_getting_saved_reminder(tmp_path: Path) -> None:
         title="Take out bins",
         notes="The blue one",
         due_at=datetime(2026, 11, 8, 9, 30, 15, 123456, tzinfo=UTC),
+        is_all_day=True,
         completed_at=datetime(2026, 11, 8, 10, 0, tzinfo=UTC),
         repeats=Repeat.WEEKLY,
         assigned_to=Assignee.GEORGIE,
@@ -146,6 +147,21 @@ def test_loads_existing_reminders_as_unassigned_when_database_predates_assignees
         connection.execute(
             "CREATE TABLE reminders (id CHAR(32) PRIMARY KEY, title VARCHAR NOT NULL, notes VARCHAR, due_at DATETIME, "
             "completed_at DATETIME, repeats VARCHAR)"
+        )
+        connection.execute("INSERT INTO reminders (id, title) VALUES (?, 'Take out bins')", (reminder_id.hex,))
+
+    store = ReminderStore(database_path)
+
+    assert store.list_all() == [Reminder(title="Take out bins", id=reminder_id)]
+
+
+def test_loads_existing_reminders_as_due_at_a_time_when_database_predates_all_day_reminders(tmp_path: Path) -> None:
+    database_path = tmp_path / "before_all_day.db"
+    reminder_id = uuid7()
+    with closing(sqlite3.connect(database_path)) as connection, connection:
+        connection.execute(
+            "CREATE TABLE reminders (id CHAR(32) PRIMARY KEY, title VARCHAR NOT NULL, notes VARCHAR, due_at DATETIME, "
+            "completed_at DATETIME, repeats VARCHAR, assigned_to VARCHAR)"
         )
         connection.execute("INSERT INTO reminders (id, title) VALUES (?, 'Take out bins')", (reminder_id.hex,))
 

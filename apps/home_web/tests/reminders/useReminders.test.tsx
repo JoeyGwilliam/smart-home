@@ -4,7 +4,7 @@ import type { ReactNode } from 'react'
 
 import { useReminderActions, useReminders } from '@/reminders/useReminders'
 
-const UNTICKED_REMINDER_JSON = { id: 'abc', title: 'Water the plants', notes: null, due_at: null, completed_at: null, repeats: null, assigned_to: null }
+const UNTICKED_REMINDER_JSON = { id: 'abc', title: 'Water the plants', notes: null, due_at: null, is_all_day: false, completed_at: null, repeats: null, assigned_to: null }
 
 /** Answers every list request with the reminder unticked, and holds every save until `finishSave` is called. */
 function stubApiWithSlowSave() {

@@ -25,7 +25,7 @@ export function ReminderDetailsFields({ draft, onChange }: ReminderDetailsFields
         className="min-h-0 resize-none rounded-2xl border-input bg-field px-4 py-2.5 text-base"
       />
       <div className="flex flex-wrap items-center gap-2">
-        <DueTimePicker value={draft.dueAt} onChange={(dueAt) => onChange({ ...draft, dueAt })} />
+        <DueTimePicker value={draft.dueAt} isAllDay={draft.isAllDay} onChange={(dueAt, isAllDay) => onChange({ ...draft, dueAt, isAllDay })} />
         {draft.dueAt && <RepeatPicker value={draft.repeats} onChange={(repeats) => onChange({ ...draft, repeats })} />}
         <AssigneePicker value={draft.assignedTo} onChange={(assignedTo) => onChange({ ...draft, assignedTo })} />
       </div>

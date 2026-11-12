@@ -9,7 +9,7 @@ from alexa_api.core.reminders_client import RemindersClient
 from alexa_api.core.skill_reply import QUESTION_MEMORY_KEY, SkillReply, ask
 from alexa_api.core.skill_request import SkillRequest
 from alexa_api.core.spoken_match import find_spoken_match
-from alexa_api.core.spoken_period import SpokenPeriod, resolve_spoken_period
+from alexa_api.core.spoken_period import SpokenPeriod, describe_day, resolve_spoken_period
 
 # What the skill remembers while it waits for an answer. Which of these is remembered says what the answer is for. A
 # new reminder is remembered by its title while its due time is asked, then also by its due time (empty if it has none)
@@ -100,13 +100,8 @@ class ReminderControls:
         if not reminders_due:
             return SkillReply(f"Nothing is due {period.describe(today)}.")
 
-        # When only today was asked about, saying "today" before every time would be needless.
         is_only_today = period == SpokenPeriod(today, today)
-        descriptions = [
-            f"{reminder.title}, at {describe_time_of_day(reminder.due_at)}" if is_only_today and reminder.due_at.date() == today
-            else f"{reminder.title}, due {describe_due_time(reminder.due_at, now)}"
-            for reminder in reminders_due
-        ]
+        descriptions = [f"{reminder.title}, {_describe_when_due(reminder, now, is_only_today)}" for reminder in reminders_due]
         count = "1 reminder" if len(descriptions) == 1 else f"{len(descriptions)} reminders"
         return SkillReply(f"You have {count} due. {'. '.join(descriptions)}.")
 
@@ -218,7 +213,8 @@ class ReminderControls:
         if reminder is None:
             return SkillReply("That reminder has already gone.")
 
-        self._reminders_client.save_reminder(replace(reminder, due_at=due_at))
+        # A spoken due time always has a time of day, so the reminder is no longer all day.
+        self._reminders_client.save_reminder(replace(reminder, due_at=due_at, is_all_day=False))
         if due_at is None:
             return SkillReply(f"{reminder.title} no longer has a due time.")
         return SkillReply(f"{reminder.title} is now due {describe_due_time(due_at, now)}.")
@@ -241,6 +237,16 @@ class ReminderControls:
 
     def _convert_to_home_time(self, moment: datetime) -> datetime:
         return moment.astimezone(self._home_time_zone)
+
+
+def _describe_when_due(reminder: Reminder, now: datetime, is_only_today: bool) -> str:
+    # When only today was asked about, saying "today" for each reminder due today would be needless.
+    is_due_today = reminder.due_at.date() == now.date()
+    if reminder.is_all_day:
+        return "all day" if is_only_today and is_due_today else f"due {describe_day(reminder.due_at.date(), now.date())}"
+    if is_only_today and is_due_today:
+        return f"at {describe_time_of_day(reminder.due_at)}"
+    return f"due {describe_due_time(reminder.due_at, now)}"
 
 
 def _find_assignee(spoken_name: str) -> str | None:

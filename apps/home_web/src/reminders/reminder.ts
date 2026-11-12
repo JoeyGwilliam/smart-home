@@ -15,8 +15,10 @@ export interface Reminder {
   title: string
   /** Optional longer details. */
   notes: string | null
-  /** When the reminder is due, or null if it has no due time. */
+  /** When the reminder is due, or null if it has no due time. For an all-day reminder, the start of the day it is due. */
   dueAt: Date | null
+  /** Whether the reminder is due at any time on the day of `dueAt`, rather than at a particular time. Only a reminder with a due time can be all day. */
+  isAllDay: boolean
   /** When the reminder was ticked off, or null if it hasn't been. */
   completedAt: Date | null
   /**
@@ -29,4 +31,4 @@ export interface Reminder {
 }
 
 /** The parts of a reminder that a person writes, as opposed to its identity and whether it is done. */
-export type ReminderContent = Pick<Reminder, 'title' | 'notes' | 'dueAt' | 'repeats' | 'assignedTo'>
+export type ReminderContent = Pick<Reminder, 'title' | 'notes' | 'dueAt' | 'isAllDay' | 'repeats' | 'assignedTo'>

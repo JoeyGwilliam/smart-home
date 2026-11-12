@@ -24,7 +24,10 @@ class ReminderSchema(BaseModel):
             Optional longer details.
         due_at:
             Due time, or None if there is no due time. Must include a time zone in a request, and is always UTC in a
-            response.
+            response. For an all-day reminder, the start of the day it is due, in the home's time zone.
+        is_all_day:
+            Whether the reminder is due at any time on its due day, rather than at a particular time. Only a reminder
+            with a due time can be all day.
         completed_at:
             Completion time, or None if not completed. Must include a time zone in a request, and is always UTC in a
             response.
@@ -42,6 +45,7 @@ class ReminderSchema(BaseModel):
     title: str
     notes: str | None = None
     due_at: _UtcDatetime | None = None
+    is_all_day: bool = False
     completed_at: _UtcDatetime | None = None
     repeats: Repeat | None = None
     assigned_to: Assignee | None = None

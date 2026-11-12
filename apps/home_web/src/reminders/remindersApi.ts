@@ -6,7 +6,7 @@ const REMINDERS_URL = '/api/reminders'
 /** The reminders API could not be reached, or failed to handle a request. */
 export class RemindersUnavailableError extends Error {}
 
-/** The reminders API rejected a reminder's content, which happens when its title is blank or it repeats without a due time. */
+/** The reminders API rejected a reminder's content, which happens when its title is blank or it repeats or is all day without a due time. */
 export class InvalidReminderError extends Error {}
 
 /** A reminder as the API sends and receives it. */
@@ -15,6 +15,7 @@ interface ReminderJson {
   title: string
   notes: string | null
   due_at: string | null
+  is_all_day: boolean
   completed_at: string | null
   repeats: Repeat | null
   assigned_to: Assignee | null
@@ -109,6 +110,7 @@ function parseReminder(reminderJson: ReminderJson): Reminder {
     title: reminderJson.title,
     notes: reminderJson.notes,
     dueAt: parseTime(reminderJson.due_at),
+    isAllDay: reminderJson.is_all_day,
     completedAt: parseTime(reminderJson.completed_at),
     repeats: reminderJson.repeats,
     assignedTo: reminderJson.assigned_to,
@@ -120,6 +122,7 @@ function formatReminder(reminder: Omit<Reminder, 'id'>): Omit<ReminderJson, 'id'
     title: reminder.title,
     notes: reminder.notes,
     due_at: formatTime(reminder.dueAt),
+    is_all_day: reminder.isAllDay,
     completed_at: formatTime(reminder.completedAt),
     repeats: reminder.repeats,
     assigned_to: reminder.assignedTo,

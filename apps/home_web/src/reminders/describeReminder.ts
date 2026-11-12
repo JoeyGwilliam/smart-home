@@ -1,12 +1,12 @@
-import { differenceInCalendarDays, format, isSameDay } from 'date-fns'
+import { differenceInCalendarDays, endOfDay, format, isSameDay } from 'date-fns'
 
 import type { Reminder } from '@/reminders/reminder'
 
 /**
  * How pressing a reminder is, which decides how it is highlighted.
  *
- * - `overdue`: due in the past and not completed.
- * - `dueToday`: due later today and not completed.
+ * - `overdue`: due in the past and not completed. An all-day reminder is only overdue once its day has ended.
+ * - `dueToday`: due later today, or all day today, and not completed.
  * - `upcoming`: due after today and not completed.
  * - `unscheduled`: has no due time and is not completed.
  * - `completed`: ticked off, whenever it was due.
@@ -15,7 +15,7 @@ export type Urgency = 'overdue' | 'dueToday' | 'upcoming' | 'unscheduled' | 'com
 
 /** How far away a due time is, split so that the number can be shown prominently. */
 export interface Countdown {
-  /** The prominent part, such as "3" or "<1". */
+  /** The prominent part, such as "3", "<1" or "Today". */
   value: string
   /** The part beneath it, such as "hours" or "days ago". */
   caption: string
@@ -25,7 +25,7 @@ export interface Countdown {
 export interface DueLabel {
   /** The date, such as "Mon 10 Nov". */
   date: string
-  /** The time of day, such as "12:00". */
+  /** The time of day, such as "12:00", or "all day" for an all-day reminder. */
   time: string
 }
 
@@ -49,22 +49,24 @@ export function describeReminder(reminder: Reminder, now: Date): ReminderDescrip
   const { dueAt } = reminder
   return {
     urgency: describeUrgency(reminder, now),
-    dueLabel: dueAt ? { date: format(dueAt, 'EEE d MMM'), time: format(dueAt, 'HH:mm') } : null,
-    countdown: dueAt ? describeTimeUntil(dueAt, now) : null,
+    dueLabel: dueAt ? { date: format(dueAt, 'EEE d MMM'), time: reminder.isAllDay ? 'all day' : format(dueAt, 'HH:mm') } : null,
+    countdown: dueAt ? describeTimeUntil(dueAt, reminder.isAllDay, now) : null,
   }
 }
 
 function describeUrgency(reminder: Reminder, now: Date): Urgency {
   if (reminder.completedAt) return 'completed'
   if (!reminder.dueAt) return 'unscheduled'
-  if (reminder.dueAt < now) return 'overdue'
+  const overdueAfter = reminder.isAllDay ? endOfDay(reminder.dueAt) : reminder.dueAt
+  if (overdueAfter < now) return 'overdue'
   if (isSameDay(reminder.dueAt, now)) return 'dueToday'
   return 'upcoming'
 }
 
-function describeTimeUntil(dueAt: Date, now: Date): Countdown {
+function describeTimeUntil(dueAt: Date, isAllDay: boolean, now: Date): Countdown {
   const isInFuture = dueAt > now
-  if (isSameDay(dueAt, now)) {
+  if (isAllDay && isSameDay(dueAt, now)) return { value: 'Today', caption: 'all day' }
+  if (!isAllDay && isSameDay(dueAt, now)) {
     const hours = Math.floor(Math.abs(dueAt.getTime() - now.getTime()) / 3_600_000)
     return createCountdown(hours, 'hour', isInFuture)
   }

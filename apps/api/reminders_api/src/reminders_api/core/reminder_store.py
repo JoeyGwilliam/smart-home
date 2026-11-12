@@ -79,15 +79,22 @@ class ReminderStore:
             session.execute(delete(_ReminderRow).where(_ReminderRow.id == reminder_id))
 
 
+# create_all only creates tables that don't exist, so a database made before reminders could repeat, be assigned or be
+# all day lacks those columns. Every existing reminder happens once, is for nobody in particular and is due at a
+# particular time, which is what each column's starting value means.
+_COLUMN_DEFINITIONS_ADDED_SINCE_FIRST_VERSION = {
+    "repeats": "VARCHAR",
+    "assigned_to": "VARCHAR",
+    "is_all_day": "BOOLEAN NOT NULL DEFAULT 0",
+}
+
+
 def _add_columns_missing_from_older_databases(engine: Engine) -> None:
-    # create_all only creates tables that don't exist, so a database made before reminders could repeat or be
-    # assigned lacks those columns. Every existing reminder happens once and is for nobody in particular, which is
-    # what an empty column means.
     column_names = {column["name"] for column in inspect(engine).get_columns(_ReminderRow.__tablename__)}
-    for new_column_name in ("repeats", "assigned_to"):
+    for new_column_name, column_definition in _COLUMN_DEFINITIONS_ADDED_SINCE_FIRST_VERSION.items():
         if new_column_name not in column_names:
             with engine.begin() as connection:
-                connection.execute(text(f"ALTER TABLE {_ReminderRow.__tablename__} ADD COLUMN {new_column_name} VARCHAR"))
+                connection.execute(text(f"ALTER TABLE {_ReminderRow.__tablename__} ADD COLUMN {new_column_name} {column_definition}"))
 
 
 class _UtcDateTime(TypeDecorator[datetime]):
@@ -114,6 +121,7 @@ class _ReminderRow(_ReminderDBBase):
     title: Mapped[str]
     notes: Mapped[str | None]
     due_at: Mapped[datetime | None] = mapped_column(_UtcDateTime)
+    is_all_day: Mapped[bool] = mapped_column(default=False)
     completed_at: Mapped[datetime | None] = mapped_column(_UtcDateTime)
     repeats: Mapped[str | None]
     assigned_to: Mapped[str | None]
@@ -123,6 +131,7 @@ class _ReminderRow(_ReminderDBBase):
             title=self.title,
             notes=self.notes,
             due_at=self.due_at,
+            is_all_day=self.is_all_day,
             completed_at=self.completed_at,
             repeats=Repeat(self.repeats) if self.repeats else None,
             assigned_to=Assignee(self.assigned_to) if self.assigned_to else None,

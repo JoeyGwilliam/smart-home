@@ -1,4 +1,4 @@
-import { addDays, format, isBefore, nextMonday, nextSaturday, set } from 'date-fns'
+import { addDays, format, isBefore, nextMonday, nextSaturday, set, startOfDay } from 'date-fns'
 import { CalendarHeart, X } from 'lucide-react'
 import { useState } from 'react'
 
@@ -6,19 +6,25 @@ import { Button } from '@/components/ui/button'
 import { Calendar } from '@/components/ui/calendar'
 import { Input } from '@/components/ui/input'
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
+import { Switch } from '@/components/ui/switch'
 
-// Choosing a day before a time needs some time to start from; the morning is the likeliest choice.
+// Choosing a day before a time, or turning off all day, needs some time to start from; the morning is the likeliest choice.
 const DEFAULT_HOURS = 9
 
 interface DueTimePickerProps {
-  /** The chosen due time, or null for none. */
+  /** The chosen due time, or null for none. For an all-day reminder, the start of the chosen day. */
   value: Date | null
-  /** Called with the new due time, or null when it is cleared. */
-  onChange: (dueAt: Date | null) => void
+  /** Whether the reminder is due all day rather than at a time. Kept while the due time is cleared. */
+  isAllDay: boolean
+  /** Called with the new due time, or null when it is cleared, and whether it is now all day. */
+  onChange: (dueAt: Date | null, isAllDay: boolean) => void
 }
 
-/** A button that opens a calendar, quick choices and a time field for choosing an optional due time. */
-export function DueTimePicker({ value, onChange }: DueTimePickerProps) {
+/**
+ * A button that opens a calendar, quick choices, an all-day switch and a time field for choosing an optional due time.
+ * While all day is on, only a day is chosen, and the time field is hidden.
+ */
+export function DueTimePicker({ value, isAllDay, onChange }: DueTimePickerProps) {
   const [isOpen, setIsOpen] = useState(false)
   // Presets are relative to the time the picker opens, so that "this evening" means this evening when it is chosen.
   const [presets, setPresets] = useState<Preset[]>([])
@@ -30,19 +36,28 @@ export function DueTimePicker({ value, onChange }: DueTimePickerProps) {
 
   const chooseDay = (day: Date | undefined) => {
     if (!day) return
+    if (isAllDay) {
+      onChange(startOfDay(day), true)
+      return
+    }
     const time = value ?? set(day, { hours: DEFAULT_HOURS, minutes: 0 })
-    onChange(set(day, { hours: time.getHours(), minutes: time.getMinutes(), seconds: 0, milliseconds: 0 }))
+    onChange(set(day, { hours: time.getHours(), minutes: time.getMinutes(), seconds: 0, milliseconds: 0 }), false)
+  }
+
+  const chooseIsAllDay = (isNowAllDay: boolean) => {
+    const day = value ?? new Date()
+    onChange(isNowAllDay ? startOfDay(day) : set(day, { hours: DEFAULT_HOURS, minutes: 0, seconds: 0, milliseconds: 0 }), isNowAllDay)
   }
 
   const chooseTime = (timeText: string) => {
     // A time field that has been emptied sends an empty string, which leaves the due time as it was.
     const [hours, minutes] = timeText.split(':').map(Number)
     if (Number.isNaN(hours) || Number.isNaN(minutes)) return
-    onChange(set(value ?? new Date(), { hours, minutes, seconds: 0, milliseconds: 0 }))
+    onChange(set(value ?? new Date(), { hours, minutes, seconds: 0, milliseconds: 0 }), false)
   }
 
   const choosePreset = (dueAt: Date) => {
-    onChange(dueAt)
+    onChange(dueAt, false)
     setIsOpen(false)
   }
 
@@ -56,7 +71,7 @@ export function DueTimePicker({ value, onChange }: DueTimePickerProps) {
             className="h-10 rounded-full border-input bg-field px-4 text-sm font-semibold text-foreground hover:bg-accent"
           >
             <CalendarHeart className="text-primary-text" />
-            {value ? format(value, 'EEE d MMM, HH:mm') : 'Add a due time'}
+            {value ? format(value, isAllDay ? "EEE d MMM, 'all day'" : 'EEE d MMM, HH:mm') : 'Add a due time'}
           </Button>
         </PopoverTrigger>
         <PopoverContent align="start" className="w-auto rounded-3xl border-border p-3 shadow-xl shadow-shade">
@@ -80,14 +95,20 @@ export function DueTimePicker({ value, onChange }: DueTimePickerProps) {
             weekStartsOn={1}
           />
           <label className="flex items-center justify-between gap-3 border-t border-border px-1 pt-3 text-sm font-semibold">
-            Time
-            <Input
-              type="time"
-              value={value ? format(value, 'HH:mm') : ''}
-              onChange={(event) => chooseTime(event.target.value)}
-              className="h-9 w-32 rounded-full bg-field text-center"
-            />
+            All day
+            <Switch checked={isAllDay} onCheckedChange={chooseIsAllDay} />
           </label>
+          {!isAllDay && (
+            <label className="flex items-center justify-between gap-3 px-1 pt-2 text-sm font-semibold">
+              Time
+              <Input
+                type="time"
+                value={value ? format(value, 'HH:mm') : ''}
+                onChange={(event) => chooseTime(event.target.value)}
+                className="h-9 w-32 rounded-full bg-field text-center"
+              />
+            </label>
+          )}
         </PopoverContent>
       </Popover>
       {value && (
@@ -96,7 +117,7 @@ export function DueTimePicker({ value, onChange }: DueTimePickerProps) {
           variant="ghost"
           size="icon"
           className="rounded-full text-muted-foreground hover:bg-accent"
-          onClick={() => onChange(null)}
+          onClick={() => onChange(null, isAllDay)}
           aria-label="Remove the due time"
         >
           <X />

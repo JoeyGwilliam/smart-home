@@ -54,6 +54,7 @@ class RemindersClient:
                 title=reminder["title"],
                 notes=reminder["notes"],
                 due_at=None if reminder["due_at"] is None else datetime.fromisoformat(reminder["due_at"]),
+                is_all_day=reminder["is_all_day"],
                 repeats=reminder["repeats"],
                 assigned_to=reminder["assigned_to"],
             )
@@ -72,6 +73,7 @@ class RemindersClient:
             "title": reminder.title,
             "notes": reminder.notes,
             "due_at": _represent_moment(reminder.due_at),
+            "is_all_day": reminder.is_all_day,
             "completed_at": _represent_moment(reminder.completed_at),
             "repeats": reminder.repeats,
             "assigned_to": reminder.assigned_to,

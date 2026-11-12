@@ -19,8 +19,8 @@ afterEach(() => {
 
 test('shows active and completed reminders when the API has both', async () => {
   vi.stubGlobal('fetch', vi.fn().mockResolvedValue(Response.json([
-    { id: '1', title: 'Water the plants', notes: null, due_at: null, completed_at: null, repeats: null, assigned_to: null },
-    { id: '2', title: 'Book the dentist', notes: null, due_at: null, completed_at: '2026-11-09T10:00:00Z', repeats: null, assigned_to: null },
+    { id: '1', title: 'Water the plants', notes: null, due_at: null, is_all_day: false, completed_at: null, repeats: null, assigned_to: null },
+    { id: '2', title: 'Book the dentist', notes: null, due_at: null, is_all_day: false, completed_at: '2026-11-09T10:00:00Z', repeats: null, assigned_to: null },
   ])))
 
   renderPage()
@@ -32,7 +32,7 @@ test('shows active and completed reminders when the API has both', async () => {
 
 test('shows the notes of a reminder when it has not been tapped', async () => {
   vi.stubGlobal('fetch', vi.fn().mockResolvedValue(Response.json([
-    { id: '1', title: 'Water the plants', notes: 'Not the cactus', due_at: null, completed_at: null, repeats: null, assigned_to: null },
+    { id: '1', title: 'Water the plants', notes: 'Not the cactus', due_at: null, is_all_day: false, completed_at: null, repeats: null, assigned_to: null },
   ])))
 
   renderPage()
@@ -59,7 +59,7 @@ test('explains the problem when the API cannot be reached', async () => {
 test('sends the new reminder to the API when one is added', async () => {
   const fetch = vi.fn().mockImplementation((_url: string, request?: RequestInit) =>
     Promise.resolve(request?.method === 'POST'
-      ? Response.json({ id: '1', title: 'Water the plants', notes: null, due_at: null, completed_at: null, repeats: null, assigned_to: null }, { status: 201 })
+      ? Response.json({ id: '1', title: 'Water the plants', notes: null, due_at: null, is_all_day: false, completed_at: null, repeats: null, assigned_to: null }, { status: 201 })
       : Response.json([])),
   )
   vi.stubGlobal('fetch', fetch)
@@ -69,12 +69,12 @@ test('sends the new reminder to the API when one is added', async () => {
   await userEvent.click(screen.getByRole('button', { name: 'Add' }))
 
   const postRequest = fetch.mock.calls.find(([, request]) => request?.method === 'POST')?.[1]
-  expect(JSON.parse(postRequest.body)).toEqual({ title: 'Water the plants', notes: null, due_at: null, completed_at: null, repeats: null, assigned_to: null })
+  expect(JSON.parse(postRequest.body)).toEqual({ title: 'Water the plants', notes: null, due_at: null, is_all_day: false, completed_at: null, repeats: null, assigned_to: null })
 })
 
 test('shows how often a reminder repeats when it repeats', async () => {
   vi.stubGlobal('fetch', vi.fn().mockResolvedValue(Response.json([
-    { id: '1', title: 'Take out the bins', notes: null, due_at: '2026-11-10T19:00:00Z', completed_at: null, repeats: 'weekly', assigned_to: null },
+    { id: '1', title: 'Take out the bins', notes: null, due_at: '2026-11-10T19:00:00Z', is_all_day: false, completed_at: null, repeats: 'weekly', assigned_to: null },
   ])))
 
   renderPage()
@@ -85,7 +85,7 @@ test('shows how often a reminder repeats when it repeats', async () => {
 test('sends the chosen repeat to the API when a repeating reminder is added', async () => {
   const fetch = vi.fn().mockImplementation((_url: string, request?: RequestInit) =>
     Promise.resolve(request?.method === 'POST'
-      ? Response.json({ id: '1', title: 'Take out the bins', notes: null, due_at: null, completed_at: null, repeats: null, assigned_to: null }, { status: 201 })
+      ? Response.json({ id: '1', title: 'Take out the bins', notes: null, due_at: null, is_all_day: false, completed_at: null, repeats: null, assigned_to: null }, { status: 201 })
       : Response.json([])),
   )
   vi.stubGlobal('fetch', fetch)

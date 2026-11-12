@@ -19,8 +19,10 @@ def _respond(held_reminders: list[dict[str, Any]], request: SkillRequest) -> Ski
     return controls.responders[request.name](request)
 
 
-def _hold_reminder(reminder_id: str, title: str, due_at: str | None = None, completed_at: str | None = None) -> dict[str, Any]:
-    return {"id": reminder_id, "title": title, "notes": None, "due_at": due_at, "completed_at": completed_at, "repeats": None, "assigned_to": None}
+def _hold_reminder(
+    reminder_id: str, title: str, due_at: str | None = None, completed_at: str | None = None, is_all_day: bool = False,
+) -> dict[str, Any]:
+    return {"id": reminder_id, "title": title, "notes": None, "due_at": due_at, "is_all_day": is_all_day, "completed_at": completed_at, "repeats": None, "assigned_to": None}
 
 
 def test_asks_for_due_time_and_remembers_capitalised_title_when_reminder_is_started() -> None:
@@ -144,7 +146,7 @@ def test_adds_reminder_assigned_to_person_and_ends_conversation_when_person_says
 
     assert reply == SkillReply("I've added Buy milk, due tomorrow at 5 PM, for Joey.")
     assert held_reminders == [
-        {"id": "new-reminder", "title": "Buy milk", "notes": None, "due_at": "2026-11-12T17:00:00+00:00", "completed_at": None, "repeats": None, "assigned_to": "Joey"},
+        {"id": "new-reminder", "title": "Buy milk", "notes": None, "due_at": "2026-11-12T17:00:00+00:00", "is_all_day": False, "completed_at": None, "repeats": None, "assigned_to": "Joey"},
     ]
 
 
@@ -175,7 +177,7 @@ def test_adds_unassigned_reminder_when_person_says_nobody(intent_name: str) -> N
 
     assert reply == SkillReply("I've added Buy milk.")
     assert held_reminders == [
-        {"id": "new-reminder", "title": "Buy milk", "notes": None, "due_at": None, "completed_at": None, "repeats": None, "assigned_to": None},
+        {"id": "new-reminder", "title": "Buy milk", "notes": None, "due_at": None, "is_all_day": False, "completed_at": None, "repeats": None, "assigned_to": None},
     ]
 
 
@@ -250,6 +252,35 @@ def test_uses_home_time_zone_to_decide_which_day_a_reminder_is_due_when_listing(
     reply = _respond(held_reminders, SkillRequest("ListRemindersIntent", summer_noon))
 
     assert reply == SkillReply("Nothing is due today.")
+
+
+def test_reads_out_all_day_reminders_without_time_when_listing() -> None:
+    held_reminders = [
+        _hold_reminder("milk", "Buy milk", due_at="2026-11-11T17:00:00Z"),
+        _hold_reminder("bins", "Bin day", due_at="2026-11-11T00:00:00Z", is_all_day=True),
+        _hold_reminder("dentist", "Call the dentist", due_at="2026-11-10T00:00:00Z", is_all_day=True),
+    ]
+
+    reply = _respond(held_reminders, SkillRequest("ListRemindersIntent", _WEDNESDAY_NOON))
+
+    assert reply == SkillReply("You have 3 reminders due. Call the dentist, due yesterday. Bin day, all day. Buy milk, at 5 PM.")
+
+
+def test_reads_out_day_of_all_day_reminder_without_time_when_listing_for_this_week() -> None:
+    held_reminders = [_hold_reminder("bins", "Bin day", due_at="2026-11-13T00:00:00Z", is_all_day=True)]
+
+    reply = _respond(held_reminders, SkillRequest("ListRemindersIntent", _WEDNESDAY_NOON, slots={"period": "2026-W46"}))
+
+    assert reply == SkillReply("You have 1 reminder due. Bin day, due on Friday.")
+
+
+def test_keeps_all_day_when_all_day_reminder_is_ticked_off() -> None:
+    held_reminders = [_hold_reminder("bins", "Bin day", due_at="2026-11-11T00:00:00Z", is_all_day=True)]
+
+    _respond(held_reminders, SkillRequest("CompleteReminderIntent", _WEDNESDAY_NOON, slots={"title": "bin day"}))
+
+    assert held_reminders[0]["is_all_day"] is True
+    assert held_reminders[0]["completed_at"] is not None
 
 
 def test_says_nothing_is_due_when_listing_with_no_reminders() -> None:
@@ -373,6 +404,19 @@ def test_moves_reminder_when_due_time_is_said_for_due_time_change() -> None:
 
     assert reply == SkillReply("Take out the bins is now due on Friday at 9 AM.")
     assert held_reminders == [_hold_reminder("bins", "Take out the bins", due_at="2026-11-13T09:00:00+00:00")]
+
+
+def test_gives_all_day_reminder_a_time_when_due_time_is_said_for_due_time_change() -> None:
+    held_reminders = [_hold_reminder("bins", "Bin day", due_at="2026-11-11T00:00:00Z", is_all_day=True)]
+
+    _respond(held_reminders, SkillRequest(
+        "SetDueTimeIntent",
+        _WEDNESDAY_NOON,
+        slots={"date": "2026-11-13", "time": "19:00"},
+        conversation_memory={"rescheduled_reminder_id": "bins", "question": "When is Bin day due?"},
+    ))
+
+    assert held_reminders == [_hold_reminder("bins", "Bin day", due_at="2026-11-13T19:00:00+00:00")]
 
 
 @pytest.mark.parametrize("intent_name", ["NoDueTimeIntent", "AMAZON.NoIntent"])

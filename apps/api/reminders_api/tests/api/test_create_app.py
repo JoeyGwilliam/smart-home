@@ -79,6 +79,7 @@ def test_overwrites_every_field_when_replacing_reminder(tmp_path: Path) -> None:
         "title": "Take out recycling",
         "notes": None,
         "due_at": None,
+        "is_all_day": False,
         "completed_at": None,
         "repeats": None,
         "assigned_to": None,
@@ -197,7 +198,7 @@ def test_marks_every_field_as_required_when_generating_openapi_response_schema(t
     openapi_schema = client.get("/openapi.json").json()
 
     response_schema = openapi_schema["components"]["schemas"]["ReminderSchema-Output"]
-    assert set(response_schema["required"]) == {"id", "title", "notes", "due_at", "completed_at", "repeats", "assigned_to"}
+    assert set(response_schema["required"]) == {"id", "title", "notes", "due_at", "is_all_day", "completed_at", "repeats", "assigned_to"}
 
 
 def test_uses_database_from_environment_when_variable_is_set(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
@@ -312,3 +313,23 @@ def test_assigns_next_reminder_to_same_person_when_repeating_reminder_is_ticked_
     completed_reminder, next_reminder = client.get("/reminders").json()
     assert completed_reminder["assigned_to"] == "Joey"
     assert next_reminder["assigned_to"] == "Joey"
+
+
+def test_returns_422_when_reminder_is_all_day_without_due_time(tmp_path: Path) -> None:
+    client = TestClient(create_app(tmp_path / "reminders.db", ZoneInfo("Europe/London")))
+
+    response = client.post("/reminders", json={"title": "Bin day", "is_all_day": True})
+
+    assert response.status_code == 422
+
+
+def test_keeps_next_reminder_all_day_when_all_day_repeating_reminder_is_ticked_off(tmp_path: Path) -> None:
+    client = TestClient(create_app(tmp_path / "reminders.db", ZoneInfo("Europe/London")))
+    bin_day = {"title": "Bin day", "due_at": "2026-11-10T00:00:00Z", "is_all_day": True, "repeats": "weekly"}
+    created_reminder = client.post("/reminders", json=bin_day).json()
+
+    client.put(f"/reminders/{created_reminder['id']}", json=bin_day | {"completed_at": "2026-11-10T08:00:00Z"})
+
+    next_reminder = next(reminder for reminder in client.get("/reminders").json() if reminder["completed_at"] is None)
+    assert next_reminder["due_at"] == "2026-11-17T00:00:00Z"
+    assert next_reminder["is_all_day"] is True
