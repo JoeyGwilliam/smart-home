@@ -17,6 +17,25 @@ test('sends the body as JSON when a body is given', async () => {
   })
 })
 
+test('sends a file as it is, with its own type, when the body is a file', async () => {
+  const fetch = vi.fn().mockResolvedValue(Response.json({}, { status: 201 }))
+  vi.stubGlobal('fetch', fetch)
+  const picture = new Blob(['photo'], { type: 'image/jpeg' })
+
+  await sendToHomeApi('recipes', 'POST', '/api/recipes/pictures', picture)
+
+  expect(fetch).toHaveBeenCalledWith('/api/recipes/pictures', { method: 'POST', headers: { 'Content-Type': 'image/jpeg' }, body: picture })
+})
+
+test('sends no body when none is given', async () => {
+  const fetch = vi.fn().mockResolvedValue(Response.json([]))
+  vi.stubGlobal('fetch', fetch)
+
+  await sendToHomeApi('reminders', 'GET', '/api/reminders')
+
+  expect(fetch).toHaveBeenCalledWith('/api/reminders', { method: 'GET' })
+})
+
 test('returns the response when the API answers with a success', async () => {
   vi.stubGlobal('fetch', vi.fn().mockResolvedValue(Response.json({ id: 'abc' }, { status: 201 })))
 
@@ -57,6 +76,14 @@ test('throws RequestRefusedError naming the request when the API lists faults in
 
   await expect(sending).rejects.toBeInstanceOf(RequestRefusedError)
   await expect(sending).rejects.toThrow('The reminders API refused POST /api/reminders.')
+})
+
+test('throws RequestRefusedError when the proxy refuses a body that is too big', async () => {
+  vi.stubGlobal('fetch', vi.fn().mockResolvedValue(new Response('Request Entity Too Large', { status: 413 })))
+
+  const sending = sendToHomeApi('recipes', 'POST', '/api/recipes/pictures', new Blob(['photo'], { type: 'image/jpeg' }))
+
+  await expect(sending).rejects.toBeInstanceOf(RequestRefusedError)
 })
 
 test('throws a plain error when the API answers with a status that no caller expects', async () => {

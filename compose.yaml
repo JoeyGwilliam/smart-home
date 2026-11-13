@@ -42,6 +42,19 @@ services:
       - default
       - alexa
 
+  # Holds the recipes for the recipes page, and their pictures, for any page that wants to use them.
+  recipes-api:
+    build: ./apps/api/recipes_api
+    restart: unless-stopped
+    environment:
+      RECIPES_DATABASE_PATH: /data/recipes.db
+    ports:
+      # Like the reminders API, this has no login, so the same advice applies. Set RECIPES_API_BIND_ADDRESS to let
+      # other devices reach it.
+      - "${RECIPES_API_BIND_ADDRESS:-127.0.0.1}:8003:8000"
+    volumes:
+      - recipes-data:/data
+
   # Every page for the home's screens: the reminders viewer, dashboards, and so on.
   home-web:
     build:
@@ -54,6 +67,8 @@ services:
       reminders-api:
         condition: service_healthy
       timers-api:
+        condition: service_healthy
+      recipes-api:
         condition: service_healthy
     ports:
       # Like the APIs, the pages have no login, so the same advice applies. Set HOME_WEB_BIND_ADDRESS to let other
@@ -129,3 +144,4 @@ networks:
 volumes:
   reminders-data:
   timers-data:
+  recipes-data:

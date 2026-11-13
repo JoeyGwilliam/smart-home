@@ -23,19 +23,16 @@ export type SaveOutcome = 'saved' | 'invalid' | 'unavailable'
  * @param apiName What to call the API in error messages, such as "reminders".
  * @param method The HTTP method, such as "GET".
  * @param url The address, such as "/api/reminders". nginx.conf and vite.config.ts forward it to the API.
- * @param body Sent as JSON. Left out to send no body.
+ * @param body Sent as JSON, or as it is if it is a file, such as a picture, with the file's own type. Left out to send
+ *   no body.
  * @returns The API's response, which is always a success.
  * @throws ApiUnavailableError If the API can't be reached, or fails.
  * @throws RequestRefusedError If the API refuses the request.
  */
-export async function sendToHomeApi(apiName: string, method: string, url: string, body?: object): Promise<Response> {
+export async function sendToHomeApi(apiName: string, method: string, url: string, body?: object | Blob): Promise<Response> {
   let response: Response
   try {
-    response = await fetch(url, {
-      method,
-      headers: body ? { 'Content-Type': 'application/json' } : undefined,
-      body: body ? JSON.stringify(body) : undefined,
-    })
+    response = await fetch(url, { method, ...formatBody(body) })
   } catch (error) {
     // fetch only throws when the request never got a response. Callers can't recover from that any differently from a
     // server failure, so both become the one error they document.
@@ -46,8 +43,9 @@ export async function sendToHomeApi(apiName: string, method: string, url: string
   if (response.status >= 500) {
     throw new ApiUnavailableError(`The ${apiName} API failed with status ${response.status}.`)
   }
-  // The APIs answer 422 to content that breaks their rules, and 409 to an action that isn't allowed at the moment.
-  if (response.status === 409 || response.status === 422) {
+  // The APIs answer 422 to content that breaks their rules, and 409 to an action that isn't allowed at the moment. nginx
+  // answers 413 to a body too big to forward, which breaks its rules in the same way.
+  if (response.status === 409 || response.status === 413 || response.status === 422) {
     throw new RequestRefusedError(await readRefusalReason(response, `The ${apiName} API refused ${method} ${url}.`))
   }
   if (!response.ok) {
@@ -75,6 +73,12 @@ export async function reportOutcome(change: Promise<unknown>): Promise<SaveOutco
     if (error instanceof ApiUnavailableError) return 'unavailable'
     throw error
   }
+}
+
+function formatBody(body: object | Blob | undefined): Pick<RequestInit, 'headers' | 'body'> {
+  if (body === undefined) return {}
+  if (body instanceof Blob) return { headers: { 'Content-Type': body.type }, body }
+  return { headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) }
 }
 
 async function readRefusalReason(response: Response, fallbackReason: string): Promise<string> {

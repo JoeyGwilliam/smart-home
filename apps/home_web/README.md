@@ -7,6 +7,8 @@ The pages for the home's screens, as one React + TypeScript app:
 - `/adhd-timer`: a timer for getting ready on time. Tasks are stacked back from the time to be ready by and drawn as a
   ring; once started, a hand follows the time around it and each task is read aloud as it begins. Every screen shows
   the same timer, so it can be started on a phone and followed on the kiosk.
+- `/recipes`: the recipes, each with its ingredients and, if it has them, a picture, instructions and how long it takes.
+  Recipes can be added, edited and deleted.
 - `/word-of-the-day`: an English idiom, a Spanish word and a Mandarin word, which change each day.
 - `/site-editor`: changes this site by asking Claude for what you want. Claude edits the code on the home server, and
   the site is rebuilt to show the change without saving it. It can then be kept, which commits and pushes it,
@@ -25,6 +27,8 @@ Moving between pages is animated with view transitions (see `src/index.css`).
 - `src/reminders/`: the reminders API client, and the rules for ordering and describing reminders.
 - `src/timers/`: the timers API client, the rules for scheduling a timer's tasks and following its progress, and the
   hooks that keep a screen in step with the presets and with the timer that every screen shares.
+- `src/recipes/`: the recipes API client, and the hooks that keep a screen in step with the recipes. Other pages that
+  want the recipes, such as for a shopping list, use these.
 - `src/weather/`: the forecast, fetched by the browser straight from [Open-Meteo](https://open-meteo.com), which needs
   no key.
 - `src/words/`: the idioms and words that take turns as the word of the day, and the rule for whose turn it is.
@@ -35,10 +39,11 @@ Moving between pages is animated with view transitions (see `src/index.css`).
 - `src/components/`: pieces that pages share, such as `ReminderList`. `src/components/ui/` holds components generated
   by shadcn/ui (`npx shadcn@latest add <name>`); they are ours to restyle.
 
-The app calls the APIs under `/api` on its own origin: the timers API under `/api/timers`, the site editor API under
-`/api/site-editor`, and the reminders API under everything else. In development Vite forwards those calls to
-`localhost:8001`, `localhost:8002` and `localhost:8000` (see `vite.config.ts`); in Docker, nginx forwards them to the
-`timers-api` and `reminders-api` services, and to the site editor API on the machine itself (see `nginx.conf`).
+The app calls the APIs under `/api` on its own origin: the timers API under `/api/timers`, the recipes API under
+`/api/recipes`, the site editor API under `/api/site-editor`, and the reminders API under everything else. In
+development Vite forwards those calls to `localhost:8001`, `localhost:8003`, `localhost:8002` and `localhost:8000` (see
+`vite.config.ts`); in Docker, nginx forwards them to the `timers-api`, `recipes-api` and `reminders-api` services, and to
+the site editor API on the machine itself (see `nginx.conf`).
 
 The site editor API is the only one that doesn't run in a container: it works on the server's checkout of this
 repository, rebuilds the containers, and uses the server's Claude Code login. `start_site_editor.bat`, in the
@@ -55,7 +60,8 @@ correctly.
 
 ## Development
 
-From this directory, with the reminders API running on port 8000 and the timers API on port 8001:
+From this directory, with the reminders API running on port 8000, the timers API on port 8001 and the recipes API on
+port 8003:
 
     npm install
     npm run dev
