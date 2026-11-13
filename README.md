@@ -5,11 +5,14 @@ The home's own website and the services behind it. Everything runs on the home s
 ## The parts
 
 - `apps/home_web`: every page for the home's screens, as one React app: the dashboard, clock, reminders, ADHD timer,
-  recipes, word of the day, Alexa controls and site editor. See its README for the pages and where their code lives.
+  recipes, shopping list, word of the day, Alexa controls and site editor. See its README for the pages and where their code lives.
 - `apps/api/reminders_api`: holds the reminders, and owns the rules for a valid reminder and for repeating ones.
 - `apps/api/timers_api`: holds the ADHD timer's saved presets, and the one timer that every screen shows.
 - `apps/api/recipes_api`: holds the recipes and their pictures, and owns the rules for a valid recipe, so that any page,
-  such as a future shopping list, can use them.
+  such as the shopping list, can use them.
+- `apps/api/shopping_api`: holds the home's one shopping basket, of recipes and items of its own, and works out from it
+  everything to buy. That list is meant for a shopper that fills an online supermarket basket, which is yet to be
+  built. The basket keeps its own copy of each recipe's ingredients, so it needs nothing from the recipes API.
 - `apps/api/alexa_api`: the home's Alexa skill, which lets people work the reminders, the timer and the site editor by
   talking to an Echo. It is the only part that the internet can reach without a login. `skill/` holds what the skill
   understands, which `update_alexa_skill.bat` sends to Amazon.
@@ -21,7 +24,7 @@ and `tests` mirrors `src`.
 
 ## How they fit together
 
-The browser only ever talks to `home_web`, which forwards `/api/...` to the reminders, timers, recipes and site editor APIs
+The browser only ever talks to `home_web`, which forwards `/api/...` to the reminders, timers, recipes, shopping and site editor APIs
 (see `apps/home_web/nginx.conf`). The Alexa skill uses those same three APIs rather than their data, so each API stays
 the one owner of its rules. It asks them for what it wants done, such as ticking off a reminder or starting the timer,
 and needs to know nothing else about what they hold.

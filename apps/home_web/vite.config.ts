@@ -22,8 +22,9 @@ function publishBuildId(): Plugin {
 const ALEXA_SKILL_DIRECTORY = fileURLToPath(new URL('../api/alexa_api/skill', import.meta.url))
 
 // The app calls the APIs under /api, on its own origin, so they need no CORS setup and can stay private: the timers API
-// under /api/timers, the recipes API under /api/recipes, the site editor API under /api/site-editor, and the reminders
-// API under everything else. In development this proxy forwards those calls; in production nginx.conf does the same job.
+// under /api/timers, the recipes API under /api/recipes, the shopping API under /api/shopping, the site editor API under
+// /api/site-editor, and the reminders API under everything else. In development this proxy forwards those calls; in
+// production nginx.conf does the same job.
 export default defineConfig({
   plugins: [react(), tailwindcss(), publishBuildId()],
   define: { __BUILD_ID__: JSON.stringify(BUILD_ID) },
@@ -42,6 +43,10 @@ export default defineConfig({
       '/api/recipes': {
         target: 'http://localhost:8003',
         rewrite: (path) => path.replace(/^\/api\/recipes/, ''),
+      },
+      '/api/shopping': {
+        target: 'http://localhost:8004',
+        rewrite: (path) => path.replace(/^\/api\/shopping/, ''),
       },
       '/api/site-editor': {
         target: 'http://localhost:8002',

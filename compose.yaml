@@ -55,6 +55,20 @@ services:
     volumes:
       - recipes-data:/data
 
+  # Holds the shopping basket that the shopping list page fills from the recipes and with items of its own, and works
+  # out from it everything to buy.
+  shopping-api:
+    build: ./apps/api/shopping_api
+    restart: unless-stopped
+    environment:
+      SHOPPING_DATABASE_PATH: /data/shopping.db
+    ports:
+      # Like the reminders API, this has no login, so the same advice applies. Set SHOPPING_API_BIND_ADDRESS to let
+      # other devices reach it.
+      - "${SHOPPING_API_BIND_ADDRESS:-127.0.0.1}:8004:8000"
+    volumes:
+      - shopping-data:/data
+
   # Every page for the home's screens: the reminders viewer, dashboards, and so on.
   home-web:
     build:
@@ -69,6 +83,8 @@ services:
       timers-api:
         condition: service_healthy
       recipes-api:
+        condition: service_healthy
+      shopping-api:
         condition: service_healthy
     ports:
       # Like the APIs, the pages have no login, so the same advice applies. Set HOME_WEB_BIND_ADDRESS to let other
@@ -145,3 +161,4 @@ volumes:
   reminders-data:
   timers-data:
   recipes-data:
+  shopping-data:

@@ -1,4 +1,4 @@
-import { Clock, CookingPot, Languages, LayoutDashboard, ListTodo, Mic, Timer, WandSparkles, type LucideIcon } from 'lucide-react'
+import { Clock, CookingPot, Languages, LayoutDashboard, ListTodo, Mic, ShoppingBasket, Timer, WandSparkles, type LucideIcon } from 'lucide-react'
 import type { JSX } from 'react'
 
 import { AlexaControlsPage } from '@/pages/alexaControls/AlexaControlsPage'
@@ -7,6 +7,7 @@ import { ClockPage } from '@/pages/clock/ClockPage'
 import { DashboardPage } from '@/pages/dashboard/DashboardPage'
 import { RecipesPage } from '@/pages/recipes/RecipesPage'
 import { RemindersPage } from '@/pages/reminders/RemindersPage'
+import { ShoppingListPage } from '@/pages/shoppingList/ShoppingListPage'
 import { SiteEditorPage } from '@/pages/siteEditor/SiteEditorPage'
 import { WordOfTheDayPage } from '@/pages/wordOfTheDay/WordOfTheDayPage'
 
@@ -31,6 +32,7 @@ export const PAGES: Page[] = [
   { path: '/reminders', title: 'Reminders', icon: ListTodo, component: RemindersPage },
   { path: '/adhd-timer', title: 'ADHD timer', icon: Timer, component: AdhdTimerPage },
   { path: '/recipes', title: 'Recipes', icon: CookingPot, component: RecipesPage },
+  { path: '/shopping-list', title: 'Shopping list', icon: ShoppingBasket, component: ShoppingListPage },
   { path: '/word-of-the-day', title: 'Word of the day', icon: Languages, component: WordOfTheDayPage },
   { path: '/alexa-controls', title: 'Alexa controls', icon: Mic, component: AlexaControlsPage },
   { path: '/site-editor', title: 'Site editor', icon: WandSparkles, component: SiteEditorPage },

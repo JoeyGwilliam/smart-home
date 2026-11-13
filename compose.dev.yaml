@@ -42,7 +42,16 @@ services:
       - ./apps/api/recipes_api/src:/app/src
       - ./.eggs/recipes_api:/data
 
+  shopping-api:
+    restart: "no"
+    command: uvicorn shopping_api.api.create_app:create_app_from_environment --factory --host 0.0.0.0 --port 8000 --reload --reload-dir /app/src
+    environment:
+      WATCHFILES_FORCE_POLLING: "true"
+    volumes:
+      - ./apps/api/shopping_api/src:/app/src
+      - ./.eggs/shopping_api:/data
+
   # This serves the pages as they were when it was built. To see changes to the pages as they are made, run
-  # "npm run dev" in apps/home_web instead (see its README), which uses the three APIs above.
+  # "npm run dev" in apps/home_web instead (see its README), which uses the four APIs above.
   home-web:
     restart: "no"
