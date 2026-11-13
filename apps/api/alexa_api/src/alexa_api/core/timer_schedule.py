@@ -70,7 +70,8 @@ def schedule_timer(tasks: tuple[TimerTask, ...], faff_multiplier: float, ends_at
     """ Works out when each task of a plan has to start, by stacking the tasks back from the moment to be ready by.
 
     Each task is given its minutes times the faff multiplier, rounded to a whole minute. This must give the same times
-    as the ADHD timer page (`home_web/src/timers/scheduleTimer.ts`), so that Alexa and the screens agree.
+    as the ADHD timer page (`home_web/src/timers/scheduleTimer.ts`), so that Alexa and the screens agree. Both are
+    tested against the examples in `timers_api/timer-schedule-examples.json`; a change to the rule belongs there first.
 
     Args:
         tasks:

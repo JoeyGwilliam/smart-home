@@ -350,7 +350,7 @@ def test_completes_matching_reminder_at_time_of_request_when_reminder_is_ticked_
     assert reply == SkillReply("I've ticked off Take out the bins.")
     assert held_reminders == [
         _hold_reminder("milk", "Buy milk"),
-        _hold_reminder("bins", "Take out the bins", due_at="2026-11-11T17:00:00+00:00", completed_at="2026-11-11T12:00:00+00:00"),
+        _hold_reminder("bins", "Take out the bins", due_at="2026-11-11T17:00:00Z", completed_at="2026-11-11T12:00:00+00:00"),
     ]
 
 

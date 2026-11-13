@@ -52,32 +52,35 @@ class RemindersClient:
             Reminder(
                 id=reminder["id"],
                 title=reminder["title"],
-                notes=reminder["notes"],
                 due_at=None if reminder["due_at"] is None else datetime.fromisoformat(reminder["due_at"]),
                 is_all_day=reminder["is_all_day"],
-                repeats=reminder["repeats"],
-                assigned_to=reminder["assigned_to"],
             )
             for reminder in self._api.send("GET", "/reminders").json()
             if reminder["completed_at"] is None
         ]
 
-    def save_reminder(self, reminder: Reminder) -> None:
-        """ Replaces the reminder that has the same id with this one.
+    def complete_reminder(self, reminder: Reminder, completed_at: datetime) -> None:
+        """ Ticks a reminder off. If it repeats, the reminders API adds the next one.
 
         Args:
             reminder:
-                The reminder as it should now be.
+                The reminder to tick off.
+            completed_at:
+                Timezone-aware moment that it was done.
         """
-        self._api.send("PUT", f"/reminders/{reminder.id}", json={
-            "title": reminder.title,
-            "notes": reminder.notes,
-            "due_at": _represent_moment(reminder.due_at),
-            "is_all_day": reminder.is_all_day,
-            "completed_at": _represent_moment(reminder.completed_at),
-            "repeats": reminder.repeats,
-            "assigned_to": reminder.assigned_to,
-        })
+        self._api.send("PATCH", f"/reminders/{reminder.id}", json={"completed_at": _represent_moment(completed_at)})
+
+    def move_reminder(self, reminder: Reminder, due_at: datetime | None) -> None:
+        """ Changes when a reminder is due. Everything else about it stays as it is, except that it is no longer all
+        day, because the new due time is a particular moment.
+
+        Args:
+            reminder:
+                The reminder to move.
+            due_at:
+                Timezone-aware moment that it is now due, or None to leave it with no due time.
+        """
+        self._api.send("PATCH", f"/reminders/{reminder.id}", json={"due_at": _represent_moment(due_at), "is_all_day": False})
 
     def delete_reminder(self, reminder: Reminder) -> None:
         """ Deletes a reminder for good. Does nothing if it has already been deleted.

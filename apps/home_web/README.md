@@ -21,6 +21,7 @@ Moving between pages is animated with view transitions (see `src/index.css`).
 
 ## Where things live
 
+- `src/homeApi/`: how every API client below sends its requests, and the two ways that all of the home's APIs fail.
 - `src/reminders/`: the reminders API client, and the rules for ordering and describing reminders.
 - `src/timers/`: the timers API client, the rules for scheduling a timer's tasks and following its progress, and the
   hooks that keep a screen in step with the presets and with the timer that every screen shares.

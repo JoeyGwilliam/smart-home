@@ -1,5 +1,6 @@
 from datetime import UTC
 from typing import Annotated, Self
+from uuid import UUID
 
 from pydantic import AfterValidator, AwareDatetime, BaseModel, ConfigDict
 
@@ -46,3 +47,18 @@ class ActiveTimerSchema(BaseModel):
             The active timer.
         """
         return ActiveTimer(plan=self.plan.to_plan(), started_at=self.started_at)
+
+
+class TimerStartSchema(BaseModel):
+    """ The JSON representation of a request to start the active timer.
+
+    Attributes:
+        started_at:
+            The moment that the timer counts from. Must include a time zone.
+        preset_id:
+            The preset whose plan the timer takes on, or None to start the plan that the timer already has.
+    """
+    model_config = ConfigDict(extra="forbid")
+
+    started_at: _UtcDatetime
+    preset_id: UUID | None = None

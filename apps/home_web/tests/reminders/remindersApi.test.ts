@@ -1,9 +1,8 @@
+import { ApiUnavailableError, RequestRefusedError } from '@/homeApi/homeApi'
 import {
   createReminder,
   deleteReminder,
-  InvalidReminderError,
   listReminders,
-  RemindersUnavailableError,
   saveReminder,
 } from '@/reminders/remindersApi'
 
@@ -67,26 +66,26 @@ test('sends a delete to the reminder\'s address when deleting it', async () => {
   expect(fetch).toHaveBeenCalledWith('/api/reminders/abc', expect.objectContaining({ method: 'DELETE' }))
 })
 
-test('throws InvalidReminderError when the API rejects the content', async () => {
+test('throws RequestRefusedError when the API rejects the content', async () => {
   vi.stubGlobal('fetch', vi.fn().mockResolvedValue(new Response(null, { status: 422 })))
 
   const creating = createReminder({ title: ' ', notes: null, dueAt: null, isAllDay: false, repeats: null, assignedTo: null })
 
-  await expect(creating).rejects.toBeInstanceOf(InvalidReminderError)
+  await expect(creating).rejects.toBeInstanceOf(RequestRefusedError)
 })
 
-test('throws RemindersUnavailableError when the API cannot be reached', async () => {
+test('throws ApiUnavailableError when the API cannot be reached', async () => {
   vi.stubGlobal('fetch', vi.fn().mockRejectedValue(new TypeError('Failed to fetch')))
 
   const listing = listReminders()
 
-  await expect(listing).rejects.toBeInstanceOf(RemindersUnavailableError)
+  await expect(listing).rejects.toBeInstanceOf(ApiUnavailableError)
 })
 
-test('throws RemindersUnavailableError when the proxy reports the API is down', async () => {
+test('throws ApiUnavailableError when the proxy reports the API is down', async () => {
   vi.stubGlobal('fetch', vi.fn().mockResolvedValue(new Response(null, { status: 502 })))
 
   const listing = listReminders()
 
-  await expect(listing).rejects.toBeInstanceOf(RemindersUnavailableError)
+  await expect(listing).rejects.toBeInstanceOf(ApiUnavailableError)
 })

@@ -11,7 +11,7 @@ def create_fake_reminders_api(reminders: list[dict[str, Any]]) -> httpx.MockTran
         reminders:
             The reminders that the API holds, in its JSON form, each with an `id`. The API's changes are made to
             this list: created reminders are appended with the id `new-reminder`, no notes, not all day, no
-            completion time, no repeat.
+            completion time, no repeat, and a changed reminder keeps every part that the change doesn't name.
 
     Returns:
         The transport.
@@ -24,8 +24,8 @@ def create_fake_reminders_api(reminders: list[dict[str, Any]]) -> httpx.MockTran
             return httpx.Response(201, json=reminders[-1])
         if request.method == "GET" and not reminder_id:
             return httpx.Response(200, json=reminders)
-        if request.method == "PUT" and position is not None:
-            reminders[position] = {"id": reminder_id} | json.loads(request.content)
+        if request.method == "PATCH" and position is not None:
+            reminders[position] |= json.loads(request.content)
             return httpx.Response(200, json=reminders[position])
         if request.method == "DELETE":
             if position is not None:
@@ -41,10 +41,10 @@ def create_fake_timers_api(presets: list[dict[str, Any]], active_timer: dict[str
 
     Args:
         presets:
-            The presets that the API holds, in its JSON form.
+            The presets that the API holds, in its JSON form, each with an `id`.
         active_timer:
-            The timer that every screen shows, in the API's JSON form. Saving the timer replaces this dict's
-            contents.
+            The timer that every screen shows, in the API's JSON form. Starting and stopping the timer change this
+            dict.
 
     Returns:
         The transport.
@@ -54,9 +54,15 @@ def create_fake_timers_api(presets: list[dict[str, Any]], active_timer: dict[str
             return httpx.Response(200, json=presets)
         if request.method == "GET" and request.url.path == "/active-timer":
             return httpx.Response(200, json=active_timer)
-        if request.method == "PUT" and request.url.path == "/active-timer":
-            active_timer.clear()
-            active_timer.update(json.loads(request.content))
+        if request.method == "POST" and request.url.path == "/active-timer/start":
+            start = json.loads(request.content)
+            preset = next((preset for preset in presets if preset["id"] == start["preset_id"]), None)
+            if start["preset_id"] is not None and preset is None:
+                return httpx.Response(404)
+            active_timer.update({"started_at": start["started_at"]} if preset is None else {"plan": preset["plan"], "started_at": start["started_at"]})
+            return httpx.Response(200, json=active_timer)
+        if request.method == "POST" and request.url.path == "/active-timer/stop":
+            active_timer["started_at"] = None
             return httpx.Response(200, json=active_timer)
         return httpx.Response(404)
 

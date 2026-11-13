@@ -1,3 +1,9 @@
+// Reading the shared examples below needs Node's own modules, which the app itself never uses.
+/// <reference types="node" />
+import { format } from 'date-fns'
+import { readFileSync } from 'node:fs'
+import { resolve } from 'node:path'
+
 import { findNextEndTime, scheduleTimer } from '@/timers/scheduleTimer'
 
 test('stacks the tasks back from the end when there are several', () => {
@@ -77,4 +83,47 @@ test('finds the end time on the next day when it is that time exactly', () => {
   const endsAt = findNextEndTime('17:00', fiveInTheEvening)
 
   expect(endsAt).toEqual(new Date(2026, 10, 12, 17, 0))
+})
+
+// The Alexa skill works out the same schedule in Python (apps/api/alexa_api/src/alexa_api/core/timer_schedule.py), and
+// Alexa and the screens must agree. Both are tested against these examples, which hold every moment as the time on
+// the clock, without a time zone.
+interface SharedExamples {
+  schedules: {
+    description: string
+    faff_multiplier: number
+    ends_at: string
+    tasks: { name: string; duration_minutes: number; starts_at: string; ends_at: string }[]
+    starts_at: string
+  }[]
+  next_end_times: { description: string; end_time: string; after: string; ends_at: string }[]
+}
+
+const SHARED_EXAMPLES_PATH = resolve(import.meta.dirname, '../../../api/timers_api/timer-schedule-examples.json')
+const SHARED_EXAMPLES: SharedExamples = JSON.parse(readFileSync(SHARED_EXAMPLES_PATH, 'utf-8'))
+
+function formatClockTime(moment: Date): string {
+  return format(moment, "yyyy-MM-dd'T'HH:mm:ss")
+}
+
+test.each(SHARED_EXAMPLES.schedules)('gives the times of the shared example that $description', (example) => {
+  const plan = {
+    name: 'Shared example',
+    endTime: '00:00',
+    faffMultiplier: example.faff_multiplier,
+    tasks: example.tasks.map((task, position) => ({ id: String(position), name: task.name, minutes: task.duration_minutes })),
+  }
+
+  const schedule = scheduleTimer(plan, new Date(example.ends_at))
+
+  expect(formatClockTime(schedule.startsAt)).toBe(example.starts_at)
+  expect(schedule.tasks.map((scheduledTask) => [formatClockTime(scheduledTask.startsAt), formatClockTime(scheduledTask.endsAt)])).toEqual(
+    example.tasks.map((task) => [task.starts_at, task.ends_at]),
+  )
+})
+
+test.each(SHARED_EXAMPLES.next_end_times)('gives the end time of the shared example that $description', (example) => {
+  const endsAt = findNextEndTime(example.end_time, new Date(example.after))
+
+  expect(formatClockTime(endsAt)).toBe(example.ends_at)
 })

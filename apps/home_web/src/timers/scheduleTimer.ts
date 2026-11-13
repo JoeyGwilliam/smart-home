@@ -25,6 +25,10 @@ export interface TimerSchedule {
  * is given its minutes times the faff multiplier, rounded to a whole minute so that every start time is one a clock
  * shows.
  *
+ * The Alexa skill works out the same schedule (alexa_api/core/timer_schedule.py), and must give the same times. Both
+ * are tested against the examples in apps/api/timers_api/timer-schedule-examples.json; a change to the rule belongs
+ * there first.
+ *
  * @param plan The plan to schedule. Its end time is ignored in favour of `endsAt`, which also says which day.
  * @param endsAt The moment to be ready by.
  * @returns The schedule.

@@ -52,43 +52,48 @@ def test_lists_only_reminders_without_completion_time_when_listing_unfinished_re
     reminders = client.list_unfinished_reminders()
 
     assert reminders == [
-        Reminder("milk", "Buy milk", notes="Semi-skimmed", due_at=datetime(2026, 11, 11, tzinfo=UTC), is_all_day=True, repeats="weekly"),
-        Reminder("plants", "Water the plants", assigned_to="Georgie"),
+        Reminder("milk", "Buy milk", due_at=datetime(2026, 11, 11, tzinfo=UTC), is_all_day=True),
+        Reminder("plants", "Water the plants"),
     ]
 
 
-def test_replaces_every_field_of_held_reminder_when_saving_reminder() -> None:
+def test_sets_only_completion_time_of_that_reminder_when_completing_reminder() -> None:
     held_reminders = [
-        {"id": "milk", "title": "Buy milk", "notes": "Semi-skimmed", "due_at": None, "is_all_day": False, "completed_at": None, "repeats": None, "assigned_to": None},
+        {"id": "milk", "title": "Buy milk", "notes": "Semi-skimmed", "due_at": "2026-11-11T00:00:00Z", "is_all_day": True, "completed_at": None, "repeats": "weekly", "assigned_to": "Joey"},
         {"id": "plants", "title": "Water the plants", "notes": None, "due_at": None, "is_all_day": False, "completed_at": None, "repeats": None, "assigned_to": None},
     ]
     client = RemindersClient("http://reminders-api", create_fake_reminders_api(held_reminders))
-    completed_reminder = Reminder(
-        "milk",
-        "Buy milk",
-        notes="Semi-skimmed",
-        due_at=datetime(2026, 11, 11, tzinfo=UTC),
-        is_all_day=True,
-        completed_at=datetime(2026, 11, 11, 12, 0, tzinfo=UTC),
-        repeats="weekly",
-        assigned_to="Joey",
-    )
 
-    client.save_reminder(completed_reminder)
+    client.complete_reminder(Reminder("milk", "Buy milk"), datetime(2026, 11, 11, 12, 0, tzinfo=UTC))
 
     assert held_reminders == [
-        {
-            "id": "milk",
-            "title": "Buy milk",
-            "notes": "Semi-skimmed",
-            "due_at": "2026-11-11T00:00:00+00:00",
-            "is_all_day": True,
-            "completed_at": "2026-11-11T12:00:00+00:00",
-            "repeats": "weekly",
-            "assigned_to": "Joey",
-        },
+        {"id": "milk", "title": "Buy milk", "notes": "Semi-skimmed", "due_at": "2026-11-11T00:00:00Z", "is_all_day": True, "completed_at": "2026-11-11T12:00:00+00:00", "repeats": "weekly", "assigned_to": "Joey"},
         {"id": "plants", "title": "Water the plants", "notes": None, "due_at": None, "is_all_day": False, "completed_at": None, "repeats": None, "assigned_to": None},
     ]
+
+
+def test_sets_due_time_and_clears_all_day_when_moving_reminder() -> None:
+    held_reminders = [
+        {"id": "milk", "title": "Buy milk", "notes": "Semi-skimmed", "due_at": "2026-11-11T00:00:00Z", "is_all_day": True, "completed_at": None, "repeats": "weekly", "assigned_to": "Joey"},
+    ]
+    client = RemindersClient("http://reminders-api", create_fake_reminders_api(held_reminders))
+
+    client.move_reminder(Reminder("milk", "Buy milk"), datetime(2026, 11, 13, 9, 0, tzinfo=UTC))
+
+    assert held_reminders == [
+        {"id": "milk", "title": "Buy milk", "notes": "Semi-skimmed", "due_at": "2026-11-13T09:00:00+00:00", "is_all_day": False, "completed_at": None, "repeats": "weekly", "assigned_to": "Joey"},
+    ]
+
+
+def test_clears_due_time_when_moving_reminder_to_no_due_time() -> None:
+    held_reminders = [
+        {"id": "milk", "title": "Buy milk", "notes": None, "due_at": "2026-11-11T17:00:00Z", "is_all_day": False, "completed_at": None, "repeats": None, "assigned_to": None},
+    ]
+    client = RemindersClient("http://reminders-api", create_fake_reminders_api(held_reminders))
+
+    client.move_reminder(Reminder("milk", "Buy milk"), due_at=None)
+
+    assert held_reminders[0]["due_at"] is None
 
 
 def test_removes_only_that_reminder_when_deleting_reminder() -> None:

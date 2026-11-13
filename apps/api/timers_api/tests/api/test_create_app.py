@@ -310,6 +310,56 @@ def test_returns_422_when_replacing_active_timer_with_invalid_started_at(tmp_pat
     assert response.status_code == 422
 
 
+def test_starts_timer_on_presets_plan_when_starting_with_preset_id(tmp_path: Path) -> None:
+    client = TestClient(create_app(tmp_path / "timers.db"))
+    preset = client.post("/presets", json={"plan": {"name": "School run", "end_time": "08:35:00"}}).json()
+
+    response = client.post("/active-timer/start", json={"started_at": "2026-11-11T07:45:00Z", "preset_id": preset["id"]})
+
+    assert response.status_code == 200
+    assert response.json() == {"plan": preset["plan"], "started_at": "2026-11-11T07:45:00Z"}
+    assert client.get("/active-timer").json() == response.json()
+
+
+def test_starts_timer_on_its_own_plan_when_starting_without_preset_id(tmp_path: Path) -> None:
+    client = TestClient(create_app(tmp_path / "timers.db"))
+    bedtime_timer = client.put("/active-timer", json={"plan": {"name": "Bedtime", "end_time": "20:00:00"}}).json()
+
+    response = client.post("/active-timer/start", json={"started_at": "2026-11-11T19:00:00Z"})
+
+    assert response.json() == {"plan": bedtime_timer["plan"], "started_at": "2026-11-11T19:00:00Z"}
+
+
+def test_returns_404_and_leaves_timer_alone_when_starting_with_missing_preset(tmp_path: Path) -> None:
+    client = TestClient(create_app(tmp_path / "timers.db"))
+    bedtime_timer = client.put("/active-timer", json={"plan": {"name": "Bedtime", "end_time": "20:00:00"}}).json()
+
+    response = client.post("/active-timer/start", json={"started_at": "2026-11-11T19:00:00Z", "preset_id": str(uuid7())})
+
+    assert response.status_code == 404
+    assert client.get("/active-timer").json() == bedtime_timer
+
+
+@pytest.mark.parametrize("invalid_start", [{}, {"started_at": "2026-11-11T09:00:00"}, {"started_at": "2026-11-11T09:00:00Z", "preset_id": "not-a-uuid"}])
+def test_returns_422_when_start_is_malformed(tmp_path: Path, invalid_start: dict[str, str]) -> None:
+    client = TestClient(create_app(tmp_path / "timers.db"))
+
+    response = client.post("/active-timer/start", json=invalid_start)
+
+    assert response.status_code == 422
+
+
+def test_keeps_plan_and_clears_start_when_stopping_timer(tmp_path: Path) -> None:
+    client = TestClient(create_app(tmp_path / "timers.db"))
+    bedtime_timer = client.put("/active-timer", json={"plan": {"name": "Bedtime", "end_time": "20:00:00"}, "started_at": "2026-11-11T19:00:00Z"}).json()
+
+    response = client.post("/active-timer/stop")
+
+    assert response.status_code == 200
+    assert response.json() == {"plan": bedtime_timer["plan"], "started_at": None}
+    assert client.get("/active-timer").json() == response.json()
+
+
 def test_uses_database_from_environment_when_variable_is_set(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
     database_path = tmp_path / "timers.db"
     monkeypatch.setenv("TIMERS_DATABASE_PATH", str(database_path))

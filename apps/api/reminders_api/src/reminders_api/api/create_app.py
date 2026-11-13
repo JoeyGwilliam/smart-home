@@ -7,7 +7,8 @@ from zoneinfo import ZoneInfo
 
 from fastapi import APIRouter, Depends, FastAPI, HTTPException, Request, status
 
-from reminders_api.api.reminder_schema import ReminderSchema
+from reminders_api.api.reminder_schema import ReminderChangesSchema, ReminderSchema
+from reminders_api.core.reminder import Reminder
 from reminders_api.core.reminder_store import ReminderStore
 
 
@@ -97,7 +98,45 @@ def save_reminder(
     brings back that one occurrence rather than starting a second series.
     """
     reminder = reminder_schema.to_reminder(reminder_id)
+    saved_reminder = _save_and_repeat(store, reminder, store.get(reminder_id), home_time_zone)
+    return ReminderSchema.from_reminder(saved_reminder)
+
+
+@_router.patch("/{reminder_id}")
+def change_reminder(
+    reminder_id: UUID,
+    changes_schema: ReminderChangesSchema,
+    store: _StoreDependency,
+    home_time_zone: _HomeTimeZoneDependency,
+) -> ReminderSchema:
+    """ Changes the parts of a reminder that the request names, and leaves the rest as they are.
+
+    This suits a client that only wants to tick a reminder off or move it, which then needs to know nothing about the
+    reminder's other parts. Ticking off a repeating reminder creates the next one, exactly as replacing it does.
+    """
     previous_reminder = store.get(reminder_id)
+    if previous_reminder is None:
+        raise HTTPException(status.HTTP_404_NOT_FOUND, f"No reminder has the id {reminder_id}.")
+
+    try:
+        reminder = changes_schema.apply_to(previous_reminder)
+    except ValueError as error:
+        # Reminder owns the rules for a valid reminder, and only the changed reminder as a whole can be checked
+        # against them. Breaking one is the client's mistake, like any other invalid request.
+        raise HTTPException(422, str(error)) from error
+
+    saved_reminder = _save_and_repeat(store, reminder, previous_reminder, home_time_zone)
+    return ReminderSchema.from_reminder(saved_reminder)
+
+
+def _save_and_repeat(
+    store: ReminderStore,
+    reminder: Reminder,
+    previous_reminder: Reminder | None,
+    home_time_zone: ZoneInfo,
+) -> Reminder:
+    """ Stores a reminder in place of the one it was before, and returns it as stored. If that ticks off a repeating
+    reminder, the next occurrence is stored too, and the stored reminder no longer repeats. """
     is_newly_completed = reminder.completed_at is not None and (previous_reminder is None or previous_reminder.completed_at is None)
 
     if reminder.repeats is not None and is_newly_completed:
@@ -105,7 +144,7 @@ def save_reminder(
         reminder = replace(reminder, repeats=None)
 
     store.save(reminder)
-    return ReminderSchema.from_reminder(reminder)
+    return reminder
 
 
 @_router.delete("/{reminder_id}", status_code=status.HTTP_204_NO_CONTENT)

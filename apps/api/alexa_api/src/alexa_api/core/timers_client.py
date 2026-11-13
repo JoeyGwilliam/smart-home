@@ -1,5 +1,4 @@
 from datetime import datetime, time
-from typing import Any
 
 import httpx
 
@@ -32,7 +31,7 @@ class TimersClient:
             The presets, oldest first.
         """
         return [
-            TimerPreset(name=preset["plan"]["name"], plan=preset["plan"])
+            TimerPreset(id=preset["id"], name=preset["plan"]["name"])
             for preset in self._api.send("GET", "/presets").json()
         ]
 
@@ -45,8 +44,8 @@ class TimersClient:
             preset:
                 The preset whose plan replaces the timer's plan. None to start the plan that the timer already has.
         """
-        plan = self._get_active_plan() if preset is None else preset.plan
-        self._api.send("PUT", "/active-timer", json={"plan": plan, "started_at": started_at.isoformat()})
+        preset_id = None if preset is None else preset.id
+        self._api.send("POST", "/active-timer/start", json={"started_at": started_at.isoformat(), "preset_id": preset_id})
 
     def get_active_timer(self) -> ActiveTimer:
         """ Finds the timer that every screen shows, as it is now.
@@ -67,7 +66,4 @@ class TimersClient:
 
     def stop_timer(self) -> None:
         """ Stops the timer that every screen shows, keeping its plan. Does nothing if it isn't running. """
-        self._api.send("PUT", "/active-timer", json={"plan": self._get_active_plan(), "started_at": None})
-
-    def _get_active_plan(self) -> dict[str, Any]:
-        return self._api.send("GET", "/active-timer").json()["plan"]
+        self._api.send("POST", "/active-timer/stop")

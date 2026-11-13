@@ -4,8 +4,9 @@ import { useState, type FormEvent } from 'react'
 import { ConfirmDeleteDialog } from '@/components/ConfirmDeleteDialog'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
+import type { SaveOutcome } from '@/homeApi/homeApi'
 import type { TimerPlan, TimerPreset } from '@/timers/timer'
-import { useTimerPresetActions, useTimerPresets, type SaveOutcome } from '@/timers/useTimerPresets'
+import { useTimerPresetActions, useTimerPresets } from '@/timers/useTimerPresets'
 
 const FAILURE_MESSAGES: Record<Exclude<SaveOutcome, 'saved'>, string> = {
   invalid: "That timer couldn't be saved. Check that it and each of its tasks has a name.",

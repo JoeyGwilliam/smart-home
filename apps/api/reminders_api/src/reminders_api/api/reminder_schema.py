@@ -1,4 +1,4 @@
-from dataclasses import asdict
+from dataclasses import asdict, replace
 from datetime import UTC
 from typing import Annotated, Self
 from uuid import UUID, uuid7
@@ -81,3 +81,52 @@ class ReminderSchema(BaseModel):
             The reminder.
         """
         return Reminder(**self.model_dump(exclude={"id"}), id=reminder_id)
+
+
+class ReminderChangesSchema(BaseModel):
+    """ The JSON representation of changes to some parts of a reminder. Parts that are left out stay as they are.
+
+    Each attribute means what it does in `ReminderSchema`. The defaults are never used: they only allow an attribute
+    to be left out. A part that can be None is cleared by sending null.
+
+    Attributes:
+        title:
+            The new title.
+        notes:
+            The new notes.
+        due_at:
+            The new due time. Must include a time zone.
+        is_all_day:
+            Whether the reminder is now all day.
+        completed_at:
+            The new completion time, which ticks the reminder off, or null to untick it. Must include a time zone.
+        repeats:
+            How often the reminder now repeats.
+        assigned_to:
+            The person the reminder is now for.
+    """
+    model_config = ConfigDict(extra="forbid")
+
+    title: str = ""
+    notes: str | None = None
+    due_at: _UtcDatetime | None = None
+    is_all_day: bool = False
+    completed_at: _UtcDatetime | None = None
+    repeats: Repeat | None = None
+    assigned_to: Assignee | None = None
+
+    def apply_to(self, reminder: Reminder) -> Reminder:
+        """ Makes these changes to a reminder.
+
+        Args:
+            reminder:
+                The reminder as it is now. Not modified.
+
+        Returns:
+            A reminder with the same id, changed in the parts that the request named.
+
+        Raises:
+            ValueError: If the changed reminder would break one of the rules for a valid reminder, such as repeating
+                without a due time.
+        """
+        return replace(reminder, **{name: getattr(self, name) for name in self.model_fields_set})

@@ -56,9 +56,9 @@ services:
       timers-api:
         condition: service_healthy
     ports:
-      # Like the APIs, the pages have no login, so the same advice applies. Set KIOSK_VIEWER_BIND_ADDRESS to let other
+      # Like the APIs, the pages have no login, so the same advice applies. Set HOME_WEB_BIND_ADDRESS to let other
       # devices reach them.
-      - "${KIOSK_VIEWER_BIND_ADDRESS:-127.0.0.1}:8080:8080"
+      - "${HOME_WEB_BIND_ADDRESS:-127.0.0.1}:8080:8080"
     extra_hosts:
       # nginx forwards the site editor page's calls to the site editor API, which runs on this machine rather than in
       # a container (see start_site_editor.bat). Docker Desktop defines this name by itself; naming it here makes it

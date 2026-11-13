@@ -333,3 +333,64 @@ def test_keeps_next_reminder_all_day_when_all_day_repeating_reminder_is_ticked_o
     next_reminder = next(reminder for reminder in client.get("/reminders").json() if reminder["completed_at"] is None)
     assert next_reminder["due_at"] == "2026-11-17T00:00:00Z"
     assert next_reminder["is_all_day"] is True
+
+
+def test_changes_only_named_parts_when_changing_reminder(tmp_path: Path) -> None:
+    client = TestClient(create_app(tmp_path / "reminders.db", ZoneInfo("Europe/London")))
+    created_reminder = client.post("/reminders", json={"title": "Take out bins", "notes": "The blue one", "assigned_to": "Joey"}).json()
+
+    response = client.patch(f"/reminders/{created_reminder['id']}", json={"due_at": "2026-11-13T09:00:00Z"})
+
+    assert response.status_code == 200
+    assert response.json() == created_reminder | {"due_at": "2026-11-13T09:00:00Z"}
+    assert client.get(f"/reminders/{created_reminder['id']}").json() == response.json()
+
+
+def test_clears_part_when_changing_reminder_with_null(tmp_path: Path) -> None:
+    client = TestClient(create_app(tmp_path / "reminders.db", ZoneInfo("Europe/London")))
+    created_reminder = client.post("/reminders", json={"title": "Take out bins", "due_at": "2026-11-13T09:00:00Z"}).json()
+
+    response = client.patch(f"/reminders/{created_reminder['id']}", json={"due_at": None})
+
+    assert response.json()["due_at"] is None
+
+
+def test_creates_next_reminder_when_repeating_reminder_is_ticked_off_by_changing_it(tmp_path: Path) -> None:
+    client = TestClient(create_app(tmp_path / "reminders.db", ZoneInfo("Europe/London")))
+    created_reminder = client.post("/reminders", json={"title": "Take out bins", "due_at": "2026-11-11T09:00:00Z", "repeats": "weekly"}).json()
+
+    response = client.patch(f"/reminders/{created_reminder['id']}", json={"completed_at": "2026-11-11T10:00:00Z"})
+
+    next_reminder = client.get("/reminders").json()[1]
+    assert response.json()["repeats"] is None
+    assert next_reminder["due_at"] == "2026-11-18T09:00:00Z"
+    assert next_reminder["completed_at"] is None
+    assert next_reminder["repeats"] == "weekly"
+
+
+def test_returns_404_when_changing_missing_reminder(tmp_path: Path) -> None:
+    client = TestClient(create_app(tmp_path / "reminders.db", ZoneInfo("Europe/London")))
+
+    response = client.patch(f"/reminders/{uuid7()}", json={"title": "Take out bins"})
+
+    assert response.status_code == 404
+
+
+def test_returns_422_and_changes_nothing_when_change_breaks_reminder_rule(tmp_path: Path) -> None:
+    client = TestClient(create_app(tmp_path / "reminders.db", ZoneInfo("Europe/London")))
+    created_reminder = client.post("/reminders", json={"title": "Take out bins", "due_at": "2026-11-11T09:00:00Z", "repeats": "weekly"}).json()
+
+    response = client.patch(f"/reminders/{created_reminder['id']}", json={"due_at": None})
+
+    assert response.status_code == 422
+    assert client.get(f"/reminders/{created_reminder['id']}").json() == created_reminder
+
+
+@pytest.mark.parametrize("invalid_changes", [{"title": None}, {"colour": "blue"}, {"due_at": "2026-11-11T09:00:00"}])
+def test_returns_422_when_changes_are_malformed(tmp_path: Path, invalid_changes: dict[str, str | None]) -> None:
+    client = TestClient(create_app(tmp_path / "reminders.db", ZoneInfo("Europe/London")))
+    created_reminder = client.post("/reminders", json={"title": "Take out bins"}).json()
+
+    response = client.patch(f"/reminders/{created_reminder['id']}", json=invalid_changes)
+
+    assert response.status_code == 422

@@ -1,18 +1,10 @@
 import { useMutation, useQuery, useQueryClient, type UseQueryResult } from '@tanstack/react-query'
 
+import { reportOutcome, type SaveOutcome } from '@/homeApi/homeApi'
 import type { TimerPlan, TimerPreset } from '@/timers/timer'
 import * as timersApi from '@/timers/timersApi'
 
 const PRESETS_QUERY_KEY = ['timerPresets']
-
-/**
- * What happened to a change that was sent to the timers API.
- *
- * - `saved`: the API holds the change.
- * - `invalid`: the API rejected the content, so the person needs to fix it.
- * - `unavailable`: the API couldn't be reached, so the person can try again later.
- */
-export type SaveOutcome = 'saved' | 'invalid' | 'unavailable'
 
 /** Changes to presets. None of them throw: each reports its outcome instead. */
 export interface TimerPresetActions {
@@ -68,18 +60,5 @@ export function useTimerPresetActions(): TimerPresetActions {
   return {
     savePlanAsPreset: (plan) => reportOutcome(saveMutation.mutateAsync(plan)),
     deletePreset: (presetId) => reportOutcome(deleteMutation.mutateAsync(presetId)),
-  }
-}
-
-async function reportOutcome(change: Promise<unknown>): Promise<SaveOutcome> {
-  try {
-    await change
-    return 'saved'
-  } catch (error) {
-    // Callers show the outcome to the person, so the expected failures become outcomes rather than errors that every
-    // caller would need to catch. Anything else is a bug, so it is left to crash.
-    if (error instanceof timersApi.InvalidTimerError) return 'invalid'
-    if (error instanceof timersApi.TimersUnavailableError) return 'unavailable'
-    throw error
   }
 }

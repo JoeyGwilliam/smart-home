@@ -1,5 +1,5 @@
 import type { Assignee, ReminderContent, Repeat } from '@/reminders/reminder'
-import type { SaveOutcome } from '@/reminders/useReminders'
+import type { SaveOutcome } from '@/homeApi/homeApi'
 
 /** A reminder's content while someone is writing it, in the form the fields hold it. */
 export interface ReminderDraft {

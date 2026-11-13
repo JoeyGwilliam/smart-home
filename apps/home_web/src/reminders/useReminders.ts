@@ -1,5 +1,6 @@
 import { useMutation, useQuery, useQueryClient, type UseQueryResult } from '@tanstack/react-query'
 
+import { reportOutcome, type SaveOutcome } from '@/homeApi/homeApi'
 import type { Reminder, ReminderContent } from '@/reminders/reminder'
 import * as remindersApi from '@/reminders/remindersApi'
 
@@ -11,15 +12,6 @@ const OPTIMISTIC_CHANGE_KEY = ['reminders', 'optimisticChange']
 // A kiosk is left on one screen, so it refreshes by itself to show changes made from other devices. Every second is
 // cheap: the list is small, the API is on the local network, and an unchanged list doesn't re-render anything.
 const REFRESH_INTERVAL_MILLISECONDS = 1000
-
-/**
- * What happened to a change that was sent to the reminders API.
- *
- * - `saved`: the API holds the change.
- * - `invalid`: the API rejected the content, so the person needs to fix it.
- * - `unavailable`: the API couldn't be reached, so the person can try again later.
- */
-export type SaveOutcome = 'saved' | 'invalid' | 'unavailable'
 
 /** Changes to reminders. None of them throw: each reports its outcome instead. */
 export interface ReminderActions {
@@ -102,18 +94,5 @@ export function useReminderActions(): ReminderActions {
     createReminder: (content) => reportOutcome(createMutation.mutateAsync(content)),
     saveReminder: (reminder) => reportOutcome(saveMutation.mutateAsync(reminder)),
     deleteReminder: (reminderId) => reportOutcome(deleteMutation.mutateAsync(reminderId)),
-  }
-}
-
-async function reportOutcome(change: Promise<unknown>): Promise<SaveOutcome> {
-  try {
-    await change
-    return 'saved'
-  } catch (error) {
-    // Callers show the outcome to the person, so the expected failures become outcomes rather than errors that every
-    // caller would need to catch. Anything else is a bug, so it is left to crash.
-    if (error instanceof remindersApi.InvalidReminderError) return 'invalid'
-    if (error instanceof remindersApi.RemindersUnavailableError) return 'unavailable'
-    throw error
   }
 }

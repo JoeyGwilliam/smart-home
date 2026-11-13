@@ -5,8 +5,9 @@ from uuid import UUID, uuid7
 
 from fastapi import APIRouter, Depends, FastAPI, HTTPException, Request, status
 
-from timers_api.api.active_timer_schema import ActiveTimerSchema
+from timers_api.api.active_timer_schema import ActiveTimerSchema, TimerStartSchema
 from timers_api.api.timer_preset_schema import TimerPresetSchema
+from timers_api.core.active_timer import ActiveTimer
 from timers_api.core.timer_store import TimerStore
 
 
@@ -94,5 +95,32 @@ def get_active_timer(store: _StoreDependency) -> ActiveTimerSchema:
 @_active_timer_router.put("")
 def save_active_timer(active_timer_schema: ActiveTimerSchema, store: _StoreDependency) -> ActiveTimerSchema:
     active_timer = active_timer_schema.to_active_timer()
+    store.save_active_timer(active_timer)
+    return ActiveTimerSchema.from_active_timer(active_timer)
+
+
+@_active_timer_router.post("/start")
+def start_active_timer(start_schema: TimerStartSchema, store: _StoreDependency) -> ActiveTimerSchema:
+    """ Starts the active timer, on a preset's plan or on the plan it already has. A running timer starts again.
+
+    This suits a client that only wants the timer started, which then needs to know nothing about what is in a plan.
+    """
+    if start_schema.preset_id is None:
+        plan = store.get_active_timer().plan
+    else:
+        preset = store.get_preset(start_schema.preset_id)
+        if preset is None:
+            raise HTTPException(status.HTTP_404_NOT_FOUND, f"No timer preset has the id {start_schema.preset_id}.")
+        plan = preset.plan
+
+    active_timer = ActiveTimer(plan=plan, started_at=start_schema.started_at)
+    store.save_active_timer(active_timer)
+    return ActiveTimerSchema.from_active_timer(active_timer)
+
+
+@_active_timer_router.post("/stop")
+def stop_active_timer(store: _StoreDependency) -> ActiveTimerSchema:
+    """ Stops the active timer, keeping its plan. Does nothing if it isn't running. """
+    active_timer = ActiveTimer(plan=store.get_active_timer().plan)
     store.save_active_timer(active_timer)
     return ActiveTimerSchema.from_active_timer(active_timer)

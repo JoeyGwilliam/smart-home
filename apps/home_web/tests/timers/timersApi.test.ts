@@ -1,12 +1,11 @@
+import { ApiUnavailableError, RequestRefusedError } from '@/homeApi/homeApi'
 import {
   createPreset,
   deletePreset,
   getActiveTimer,
-  InvalidTimerError,
   listPresets,
   saveActiveTimer,
   savePreset,
-  TimersUnavailableError,
 } from '@/timers/timersApi'
 
 afterEach(() => {
@@ -109,26 +108,26 @@ test('puts the active timer in the API format when saving it', async () => {
   })
 })
 
-test('throws InvalidTimerError when the API rejects the content', async () => {
+test('throws RequestRefusedError when the API rejects the content', async () => {
   vi.stubGlobal('fetch', vi.fn().mockResolvedValue(new Response(null, { status: 422 })))
 
   const creating = createPreset({ name: ' ', endTime: '08:35', faffMultiplier: 1, tasks: [] })
 
-  await expect(creating).rejects.toBeInstanceOf(InvalidTimerError)
+  await expect(creating).rejects.toBeInstanceOf(RequestRefusedError)
 })
 
-test('throws TimersUnavailableError when the API cannot be reached', async () => {
+test('throws ApiUnavailableError when the API cannot be reached', async () => {
   vi.stubGlobal('fetch', vi.fn().mockRejectedValue(new TypeError('Failed to fetch')))
 
   const listing = listPresets()
 
-  await expect(listing).rejects.toBeInstanceOf(TimersUnavailableError)
+  await expect(listing).rejects.toBeInstanceOf(ApiUnavailableError)
 })
 
-test('throws TimersUnavailableError when the proxy reports the API is down', async () => {
+test('throws ApiUnavailableError when the proxy reports the API is down', async () => {
   vi.stubGlobal('fetch', vi.fn().mockResolvedValue(new Response(null, { status: 502 })))
 
   const fetching = getActiveTimer()
 
-  await expect(fetching).rejects.toBeInstanceOf(TimersUnavailableError)
+  await expect(fetching).rejects.toBeInstanceOf(ApiUnavailableError)
 })

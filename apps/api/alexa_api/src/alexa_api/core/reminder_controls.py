@@ -108,7 +108,7 @@ class ReminderControls:
         if reminder is None:
             return self._say_reminder_was_not_found(request)
 
-        self._reminders_client.save_reminder(replace(reminder, completed_at=request.received_at))
+        self._reminders_client.complete_reminder(reminder, request.received_at)
         return SkillReply(f"I've ticked off {reminder.title}.")
 
     def _start_due_time_change(self, request: SkillRequest) -> SkillReply:
@@ -210,8 +210,7 @@ class ReminderControls:
         if reminder is None:
             return SkillReply("That reminder has already gone.")
 
-        # A spoken due time always has a time of day, so the reminder is no longer all day.
-        self._reminders_client.save_reminder(replace(reminder, due_at=due_at, is_all_day=False))
+        self._reminders_client.move_reminder(reminder, due_at)
         if due_at is None:
             return SkillReply(f"{reminder.title} no longer has a due time.")
         return SkillReply(f"{reminder.title} is now due {describe_due_time(due_at, now)}.")

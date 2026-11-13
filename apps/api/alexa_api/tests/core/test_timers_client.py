@@ -18,7 +18,7 @@ def test_lists_presets_by_plan_name_when_listing_presets() -> None:
 
     presets = client.list_presets()
 
-    assert presets == [TimerPreset("School run", school_run_plan), TimerPreset("Bedtime", bedtime_plan)]
+    assert presets == [TimerPreset("school-run", "School run"), TimerPreset("bedtime", "Bedtime")]
 
 
 def test_gives_plan_and_start_when_getting_active_timer() -> None:
@@ -52,9 +52,10 @@ def test_gives_no_start_when_getting_stopped_active_timer() -> None:
 def test_replaces_plan_and_sets_start_when_starting_timer_from_preset() -> None:
     school_run_plan = {"name": "School run", "end_time": "08:30:00", "tasks": [], "faff_multiplier": 1.5}
     active_timer: dict[str, Any] = {"plan": {"name": "Bedtime", "end_time": "20:00:00"}, "started_at": None}
-    client = TimersClient("http://timers-api", create_fake_timers_api([], active_timer))
+    held_presets = [{"id": "school-run", "plan": school_run_plan}]
+    client = TimersClient("http://timers-api", create_fake_timers_api(held_presets, active_timer))
 
-    client.start_timer(datetime(2026, 11, 11, 7, 45, tzinfo=UTC), TimerPreset("School run", school_run_plan))
+    client.start_timer(datetime(2026, 11, 11, 7, 45, tzinfo=UTC), TimerPreset("school-run", "School run"))
 
     assert active_timer == {"plan": school_run_plan, "started_at": "2026-11-11T07:45:00+00:00"}
 

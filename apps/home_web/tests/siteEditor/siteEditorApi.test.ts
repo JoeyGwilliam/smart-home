@@ -1,11 +1,10 @@
+import { ApiUnavailableError, RequestRefusedError } from '@/homeApi/homeApi'
 import {
-  ActionRefusedError,
   confirmChange,
   discardChange,
   getChange,
   listCommits,
   sendMessage,
-  SiteEditorUnavailableError,
   stopClaude,
 } from '@/siteEditor/siteEditorApi'
 
@@ -89,23 +88,23 @@ test('converts commits from the API format when listing them', async () => {
   ])
 })
 
-test('throws ActionRefusedError with the reason when the API answers 409', async () => {
+test('throws RequestRefusedError with the reason when the API answers 409', async () => {
   vi.stubGlobal('fetch', vi.fn().mockResolvedValue(Response.json({ detail: 'The site editor is busy. Wait for it to finish.' }, { status: 409 })))
 
   const sending = sendMessage('Make the clock bigger', { model: 'default', effort: 'default' })
 
-  await expect(sending).rejects.toThrow(ActionRefusedError)
+  await expect(sending).rejects.toThrow(RequestRefusedError)
   await expect(sending).rejects.toThrow('The site editor is busy. Wait for it to finish.')
 })
 
-test('throws SiteEditorUnavailableError when the API cannot be reached', async () => {
+test('throws ApiUnavailableError when the API cannot be reached', async () => {
   vi.stubGlobal('fetch', vi.fn().mockRejectedValue(new TypeError('Failed to fetch')))
 
-  await expect(getChange()).rejects.toThrow(SiteEditorUnavailableError)
+  await expect(getChange()).rejects.toThrow(ApiUnavailableError)
 })
 
-test('throws SiteEditorUnavailableError when the API is not running behind nginx', async () => {
+test('throws ApiUnavailableError when the API is not running behind nginx', async () => {
   vi.stubGlobal('fetch', vi.fn().mockResolvedValue(new Response(null, { status: 502 })))
 
-  await expect(getChange()).rejects.toThrow(SiteEditorUnavailableError)
+  await expect(getChange()).rejects.toThrow(ApiUnavailableError)
 })

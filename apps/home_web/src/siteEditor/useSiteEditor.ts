@@ -1,6 +1,7 @@
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { useState } from 'react'
 
+import { ApiUnavailableError, RequestRefusedError } from '@/homeApi/homeApi'
 import type { Change, Commit } from '@/siteEditor/change'
 import type { ClaudeSettings } from '@/siteEditor/claudeSettings'
 import * as siteEditorApi from '@/siteEditor/siteEditorApi'
@@ -71,8 +72,8 @@ export function useSiteEditor(): SiteEditor {
     } catch (error) {
       // Both documented errors leave the change as it was, so all there is to do is tell the person. Anything else is
       // a bug, which must not be hidden.
-      if (error instanceof siteEditorApi.ActionRefusedError) setRefusal(error.message)
-      else if (error instanceof siteEditorApi.SiteEditorUnavailableError) setRefusal("The site editor can't be reached. Try again in a moment.")
+      if (error instanceof RequestRefusedError) setRefusal(error.message)
+      else if (error instanceof ApiUnavailableError) setRefusal("The site editor can't be reached. Try again in a moment.")
       else throw error
       return false
     } finally {
