@@ -1,3 +1,4 @@
+from dataclasses import dataclass
 from datetime import date, datetime, time, timedelta
 
 from alexa_api.core.spoken_period import describe_day, resolve_spoken_period
@@ -5,14 +6,27 @@ from alexa_api.core.spoken_period import describe_day, resolve_spoken_period
 # Alexa turns "in the morning" and similar into these codes rather than a time of day.
 _TIMES_BY_PART_OF_DAY = {"MO": time(9), "AF": time(13), "EV": time(18), "NI": time(21)}
 
-# A day with no time is given a time early enough that the reminder is seen for most of the day.
-_TIME_WHEN_ONLY_DAY_IS_GIVEN = time(9)
+
+@dataclass(frozen=True)
+class DueTime:
+    """ When a reminder is due: either at a particular moment, or at any time on a day.
+
+    Attributes:
+        at:
+            Timezone-aware moment that the reminder is due. For an all-day reminder, the start of the day it is due, in
+            the time zone that the person means their days in.
+        is_all_day:
+            Whether the reminder is due at any time on the day of `at`, rather than at a particular time.
+    """
+
+    at: datetime
+    is_all_day: bool
 
 
-def resolve_due_time(spoken_date: str | None, spoken_time: str | None, now: datetime) -> datetime | None:
-    """ Works out the moment that a person meant when they said a day, a time, or both.
+def resolve_due_time(spoken_date: str | None, spoken_time: str | None, now: datetime) -> DueTime | None:
+    """ Works out when a person meant when they said a day, a time, or both.
 
-    A day by itself means 9 in the morning of that day. A time by itself means the next time the clock shows it.
+    A day by itself means all of that day. A time by itself means the next time the clock shows it.
 
     Args:
         spoken_date:
@@ -25,7 +39,8 @@ def resolve_due_time(spoken_date: str | None, spoken_time: str | None, now: date
             The current moment, in the time zone that the person means their days and times in.
 
     Returns:
-        The moment, in the time zone of `now`. None if neither was said, or if either couldn't be resolved.
+        When the reminder is due, in the time zone of `now`. None if neither was said, or if either couldn't be
+        resolved.
     """
     due_date = None if spoken_date is None else _parse_date(spoken_date)
     due_time = None if spoken_time is None else _parse_time(spoken_time)
@@ -33,27 +48,31 @@ def resolve_due_time(spoken_date: str | None, spoken_time: str | None, now: date
     if is_anything_unresolved or (due_date is None and due_time is None):
         return None
 
+    if due_time is None:
+        return DueTime(datetime.combine(due_date, time(0), tzinfo=now.tzinfo), is_all_day=True)
+
     if due_date is None:
         is_time_still_to_come_today = due_time > now.time()
         due_date = now.date() if is_time_still_to_come_today else now.date() + timedelta(days=1)
 
-    return datetime.combine(due_date, due_time or _TIME_WHEN_ONLY_DAY_IS_GIVEN, tzinfo=now.tzinfo)
+    return DueTime(datetime.combine(due_date, due_time, tzinfo=now.tzinfo), is_all_day=False)
 
 
-def describe_due_time(due_at: datetime, now: datetime) -> str:
-    """ Describes a moment the way a person would say it, relative to now.
+def describe_due_time(due_time: DueTime, now: datetime) -> str:
+    """ Describes when a reminder is due the way a person would say it, relative to now.
 
     Args:
-        due_at:
-            The moment to describe. Must be in the same time zone as `now`.
+        due_time:
+            When the reminder is due. Must be in the same time zone as `now`.
         now:
             The current moment.
 
     Returns:
         A phrase that completes "it is due ...", such as "today at 5 PM", "on Friday at 9:30 AM" or
-        "on Friday 20 November at 9 AM".
+        "on Friday 20 November at 9 AM". For an all-day reminder, only the day, such as "on Friday".
     """
-    return f"{describe_day(due_at.date(), now.date())} at {describe_time_of_day(due_at)}"
+    day = describe_day(due_time.at.date(), now.date())
+    return day if due_time.is_all_day else f"{day} at {describe_time_of_day(due_time.at)}"
 
 
 def describe_time_of_day(moment: datetime) -> str:

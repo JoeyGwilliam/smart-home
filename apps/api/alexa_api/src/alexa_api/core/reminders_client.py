@@ -2,6 +2,7 @@ from datetime import datetime
 
 import httpx
 
+from alexa_api.core.due_time import DueTime
 from alexa_api.core.home_api import HomeApi
 from alexa_api.core.reminder import Reminder
 
@@ -24,23 +25,19 @@ class RemindersClient:
         """
         self._api = HomeApi("reminders", reminders_api_url, transport)
 
-    def add_reminder(self, title: str, due_at: datetime | None, assigned_to: str | None = None) -> None:
+    def add_reminder(self, title: str, due_time: DueTime | None, assigned_to: str | None = None) -> None:
         """ Adds a reminder, which the site then shows.
 
         Args:
             title:
                 Short description of the reminder. Must contain non-whitespace text.
-            due_at:
-                Timezone-aware due time, or None if there is no due time.
+            due_time:
+                When the reminder is due, or None if there is no due time.
             assigned_to:
                 The name of the person the reminder is for, which the reminders API must know, or None if it is for
                 nobody in particular.
         """
-        self._api.send("POST", "/reminders", json={
-            "title": title,
-            "due_at": _represent_moment(due_at),
-            "assigned_to": assigned_to,
-        })
+        self._api.send("POST", "/reminders", json={"title": title, **_represent_due_time(due_time), "assigned_to": assigned_to})
 
     def list_unfinished_reminders(self) -> list[Reminder]:
         """ Lists every reminder that hasn't been completed.
@@ -70,17 +67,16 @@ class RemindersClient:
         """
         self._api.send("PATCH", f"/reminders/{reminder.id}", json={"completed_at": _represent_moment(completed_at)})
 
-    def move_reminder(self, reminder: Reminder, due_at: datetime | None) -> None:
-        """ Changes when a reminder is due. Everything else about it stays as it is, except that it is no longer all
-        day, because the new due time is a particular moment.
+    def move_reminder(self, reminder: Reminder, due_time: DueTime | None) -> None:
+        """ Changes when a reminder is due, including whether it is all day. Everything else about it stays as it is.
 
         Args:
             reminder:
                 The reminder to move.
-            due_at:
-                Timezone-aware moment that it is now due, or None to leave it with no due time.
+            due_time:
+                When it is now due, or None to leave it with no due time.
         """
-        self._api.send("PATCH", f"/reminders/{reminder.id}", json={"due_at": _represent_moment(due_at), "is_all_day": False})
+        self._api.send("PATCH", f"/reminders/{reminder.id}", json=_represent_due_time(due_time))
 
     def delete_reminder(self, reminder: Reminder) -> None:
         """ Deletes a reminder for good. Does nothing if it has already been deleted.
@@ -90,6 +86,13 @@ class RemindersClient:
                 The reminder to delete.
         """
         self._api.send("DELETE", f"/reminders/{reminder.id}")
+
+
+def _represent_due_time(due_time: DueTime | None) -> dict[str, str | bool | None]:
+    # Only a reminder with a due time can be all day, so a reminder with none is never all day.
+    if due_time is None:
+        return {"due_at": None, "is_all_day": False}
+    return {"due_at": _represent_moment(due_time.at), "is_all_day": due_time.is_all_day}
 
 
 def _represent_moment(moment: datetime | None) -> str | None:

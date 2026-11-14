@@ -4,6 +4,7 @@ from zoneinfo import ZoneInfo
 
 import pytest
 
+from alexa_api.core.due_time import DueTime
 from alexa_api.core.home_api import HomeApiUnavailableError
 from alexa_api.core.reminder import Reminder
 from alexa_api.core.reminders_client import RemindersClient
@@ -13,20 +14,31 @@ from tests.fake_home_apis import create_failing_api, create_fake_reminders_api
 def test_creates_reminder_with_due_time_and_time_zone_when_adding_reminder() -> None:
     held_reminders: list[dict[str, Any]] = []
     client = RemindersClient("http://reminders-api", create_fake_reminders_api(held_reminders))
-    due_at = datetime(2026, 6, 11, 17, 0, tzinfo=ZoneInfo("Europe/London"))
+    due_time = DueTime(datetime(2026, 6, 11, 17, 0, tzinfo=ZoneInfo("Europe/London")), is_all_day=False)
 
-    client.add_reminder("Buy milk", due_at)
+    client.add_reminder("Buy milk", due_time)
 
     assert held_reminders == [
         {"id": "new-reminder", "title": "Buy milk", "notes": None, "due_at": "2026-06-11T17:00:00+01:00", "is_all_day": False, "completed_at": None, "repeats": None, "assigned_to": None},
     ]
 
 
+def test_creates_all_day_reminder_when_adding_reminder_due_all_day() -> None:
+    held_reminders: list[dict[str, Any]] = []
+    client = RemindersClient("http://reminders-api", create_fake_reminders_api(held_reminders))
+    due_time = DueTime(datetime(2026, 6, 11, 0, 0, tzinfo=ZoneInfo("Europe/London")), is_all_day=True)
+
+    client.add_reminder("Bin day", due_time)
+
+    assert held_reminders[0]["due_at"] == "2026-06-11T00:00:00+01:00"
+    assert held_reminders[0]["is_all_day"] is True
+
+
 def test_creates_reminder_assigned_to_person_when_adding_reminder_for_them() -> None:
     held_reminders: list[dict[str, Any]] = []
     client = RemindersClient("http://reminders-api", create_fake_reminders_api(held_reminders))
 
-    client.add_reminder("Buy milk", due_at=None, assigned_to="Georgie")
+    client.add_reminder("Buy milk", due_time=None, assigned_to="Georgie")
 
     assert held_reminders[0]["assigned_to"] == "Georgie"
 
@@ -35,7 +47,7 @@ def test_creates_reminder_with_no_due_time_when_adding_reminder_without_one() ->
     held_reminders: list[dict[str, Any]] = []
     client = RemindersClient("http://reminders-api", create_fake_reminders_api(held_reminders))
 
-    client.add_reminder("Buy milk", due_at=None)
+    client.add_reminder("Buy milk", due_time=None)
 
     assert held_reminders[0]["title"] == "Buy milk"
     assert held_reminders[0]["due_at"] is None
@@ -78,11 +90,23 @@ def test_sets_due_time_and_clears_all_day_when_moving_reminder() -> None:
     ]
     client = RemindersClient("http://reminders-api", create_fake_reminders_api(held_reminders))
 
-    client.move_reminder(Reminder("milk", "Buy milk"), datetime(2026, 11, 13, 9, 0, tzinfo=UTC))
+    client.move_reminder(Reminder("milk", "Buy milk"), DueTime(datetime(2026, 11, 13, 9, 0, tzinfo=UTC), is_all_day=False))
 
     assert held_reminders == [
         {"id": "milk", "title": "Buy milk", "notes": "Semi-skimmed", "due_at": "2026-11-13T09:00:00+00:00", "is_all_day": False, "completed_at": None, "repeats": "weekly", "assigned_to": "Joey"},
     ]
+
+
+def test_sets_due_day_and_all_day_when_moving_reminder_to_all_day() -> None:
+    held_reminders = [
+        {"id": "milk", "title": "Buy milk", "notes": None, "due_at": "2026-11-11T17:00:00Z", "is_all_day": False, "completed_at": None, "repeats": None, "assigned_to": None},
+    ]
+    client = RemindersClient("http://reminders-api", create_fake_reminders_api(held_reminders))
+
+    client.move_reminder(Reminder("milk", "Buy milk"), DueTime(datetime(2026, 11, 13, 0, 0, tzinfo=UTC), is_all_day=True))
+
+    assert held_reminders[0]["due_at"] == "2026-11-13T00:00:00+00:00"
+    assert held_reminders[0]["is_all_day"] is True
 
 
 def test_clears_due_time_when_moving_reminder_to_no_due_time() -> None:
@@ -91,7 +115,7 @@ def test_clears_due_time_when_moving_reminder_to_no_due_time() -> None:
     ]
     client = RemindersClient("http://reminders-api", create_fake_reminders_api(held_reminders))
 
-    client.move_reminder(Reminder("milk", "Buy milk"), due_at=None)
+    client.move_reminder(Reminder("milk", "Buy milk"), due_time=None)
 
     assert held_reminders[0]["due_at"] is None
 
@@ -113,4 +137,4 @@ def test_raises_unavailable_error_when_reminders_api_fails(status_code: int | No
     client = RemindersClient("http://reminders-api", create_failing_api(status_code))
 
     with pytest.raises(HomeApiUnavailableError):
-        client.add_reminder("Buy milk", due_at=None)
+        client.add_reminder("Buy milk", due_time=None)

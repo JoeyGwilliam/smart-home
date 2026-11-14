@@ -76,7 +76,8 @@ def test_asks_who_it_is_for_when_person_answers_with_due_time() -> None:
         "version": "1.0",
         "sessionAttributes": {
             "new_reminder_title": "Buy milk",
-            "new_reminder_due_at": "2030-01-01T09:00:00+00:00",
+            "new_reminder_due_at": "2030-01-01T00:00:00+00:00",
+            "new_reminder_is_all_day": "yes",
             "question": "Who is it for?",
         },
         "response": {
@@ -99,17 +100,18 @@ def test_adds_reminder_and_ends_conversation_when_person_answers_with_who_it_is_
         },
         conversation_memory={
             "new_reminder_title": "Buy milk",
-            "new_reminder_due_at": "2030-01-01T09:00:00+00:00",
+            "new_reminder_due_at": "2030-01-01T00:00:00+00:00",
+            "new_reminder_is_all_day": "yes",
             "question": "Who is it for?",
         },
     )
 
     response = client.post("/", content=body, headers=alexa.create_headers(body))
 
-    assert response.json()["response"]["outputSpeech"]["text"] == "I've added Buy milk, due on Tuesday 1 January at 9 AM, for Georgie."
+    assert response.json()["response"]["outputSpeech"]["text"] == "I've added Buy milk, due on Tuesday 1 January, for Georgie."
     assert response.json()["response"]["shouldEndSession"] is True
     assert held_reminders == [
-        {"id": "new-reminder", "title": "Buy milk", "notes": None, "due_at": "2030-01-01T09:00:00+00:00", "is_all_day": False, "completed_at": None, "repeats": None, "assigned_to": "Georgie"},
+        {"id": "new-reminder", "title": "Buy milk", "notes": None, "due_at": "2030-01-01T00:00:00+00:00", "is_all_day": True, "completed_at": None, "repeats": None, "assigned_to": "Georgie"},
     ]
 
 

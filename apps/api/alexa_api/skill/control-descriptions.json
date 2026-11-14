@@ -40,7 +40,7 @@
         {
           "intent": "SetDueTimeIntent",
           "title": "Give a due time",
-          "description": "Sets the due time of the reminder you are adding or moving. A day by itself means 9 in the morning, and a time by itself means the next time the clock shows it.",
+          "description": "Sets the due time of the reminder you are adding or moving. A day by itself means all of that day, and a time by itself means the next time the clock shows it.",
           "answers": "When is it due?"
         },
         {

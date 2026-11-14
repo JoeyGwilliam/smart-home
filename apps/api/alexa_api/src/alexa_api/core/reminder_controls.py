@@ -3,19 +3,20 @@ from dataclasses import replace
 from datetime import datetime
 from zoneinfo import ZoneInfo
 
-from alexa_api.core.due_time import describe_due_time, describe_time_of_day, resolve_due_time
+from alexa_api.core.due_time import DueTime, describe_due_time, describe_time_of_day, resolve_due_time
 from alexa_api.core.reminder import Reminder
 from alexa_api.core.reminders_client import RemindersClient
 from alexa_api.core.skill_reply import QUESTION_MEMORY_KEY, SkillReply, ask
 from alexa_api.core.skill_request import SkillRequest
 from alexa_api.core.spoken_match import find_spoken_match
-from alexa_api.core.spoken_period import SpokenPeriod, describe_day, resolve_spoken_period
+from alexa_api.core.spoken_period import SpokenPeriod, resolve_spoken_period
 
 # What the skill remembers while it waits for an answer. Which of these is remembered says what the answer is for. A
 # new reminder is remembered by its title while its due time is asked, then also by its due time (empty if it has none)
-# while the person it is for is asked.
+# and whether it is all day ("yes", or empty if not) while the person it is for is asked.
 _NEW_TITLE_MEMORY_KEY = "new_reminder_title"
 _NEW_DUE_AT_MEMORY_KEY = "new_reminder_due_at"
+_NEW_IS_ALL_DAY_MEMORY_KEY = "new_reminder_is_all_day"
 _RESCHEDULED_ID_MEMORY_KEY = "rescheduled_reminder_id"
 _DELETED_ID_MEMORY_KEY = "deleted_reminder_id"
 
@@ -133,13 +134,13 @@ class ReminderControls:
             return SkillReply(f"First tell me what the reminder is. {_HOW_TO_START_REMINDER}", reprompt=_HOW_TO_START_REMINDER)
 
         now = self._convert_to_home_time(request.received_at)
-        due_at = resolve_due_time(request.slots.get("date"), request.slots.get("time"), now)
-        if due_at is None:
+        due_time = resolve_due_time(request.slots.get("date"), request.slots.get("time"), now)
+        if due_time is None:
             return ask(memory[QUESTION_MEMORY_KEY], memory, preamble="Sorry, I didn't catch when. ")
 
         if _NEW_TITLE_MEMORY_KEY in memory:
-            return self._ask_who_new_reminder_is_for(memory[_NEW_TITLE_MEMORY_KEY], due_at)
-        return self._change_due_time(memory[_RESCHEDULED_ID_MEMORY_KEY], due_at, now)
+            return self._ask_who_new_reminder_is_for(memory[_NEW_TITLE_MEMORY_KEY], due_time)
+        return self._change_due_time(memory[_RESCHEDULED_ID_MEMORY_KEY], due_time, now)
 
     def _answer_without_due_time(self, request: SkillRequest) -> SkillReply:
         memory = request.conversation_memory
@@ -147,7 +148,7 @@ class ReminderControls:
             # "None" or "no", to "Who is it for?", means nobody.
             return self._answer_with_nobody(request)
         if _NEW_TITLE_MEMORY_KEY in memory:
-            return self._ask_who_new_reminder_is_for(memory[_NEW_TITLE_MEMORY_KEY], due_at=None)
+            return self._ask_who_new_reminder_is_for(memory[_NEW_TITLE_MEMORY_KEY], due_time=None)
         if _RESCHEDULED_ID_MEMORY_KEY in memory:
             now = self._convert_to_home_time(request.received_at)
             return self._change_due_time(memory[_RESCHEDULED_ID_MEMORY_KEY], None, now)
@@ -169,18 +170,25 @@ class ReminderControls:
             return SkillReply("OK.")
         return self._add_new_reminder(memory, None, self._convert_to_home_time(request.received_at))
 
-    def _ask_who_new_reminder_is_for(self, title: str, due_at: datetime | None) -> SkillReply:
-        memory = {_NEW_TITLE_MEMORY_KEY: title, _NEW_DUE_AT_MEMORY_KEY: "" if due_at is None else due_at.isoformat()}
+    def _ask_who_new_reminder_is_for(self, title: str, due_time: DueTime | None) -> SkillReply:
+        memory = {
+            _NEW_TITLE_MEMORY_KEY: title,
+            _NEW_DUE_AT_MEMORY_KEY: "" if due_time is None else due_time.at.isoformat(),
+            _NEW_IS_ALL_DAY_MEMORY_KEY: "yes" if due_time is not None and due_time.is_all_day else "",
+        }
         return ask("Who is it for?", memory)
 
     def _add_new_reminder(self, memory: dict[str, str], assignee: str | None, now: datetime) -> SkillReply:
         title = memory[_NEW_TITLE_MEMORY_KEY]
-        due_at = datetime.fromisoformat(memory[_NEW_DUE_AT_MEMORY_KEY]) if memory[_NEW_DUE_AT_MEMORY_KEY] else None
-        self._reminders_client.add_reminder(title, due_at, assignee)
+        due_time = None
+        if memory[_NEW_DUE_AT_MEMORY_KEY]:
+            due_at = datetime.fromisoformat(memory[_NEW_DUE_AT_MEMORY_KEY])
+            due_time = DueTime(due_at, is_all_day=memory[_NEW_IS_ALL_DAY_MEMORY_KEY] == "yes")
+        self._reminders_client.add_reminder(title, due_time, assignee)
 
         description = f"I've added {title}"
-        if due_at is not None:
-            description += f", due {describe_due_time(due_at, now)}"
+        if due_time is not None:
+            description += f", due {describe_due_time(due_time, now)}"
         if assignee is not None:
             description += f", for {assignee}"
         return SkillReply(f"{description}.")
@@ -205,15 +213,15 @@ class ReminderControls:
         # To "When is it due?", a plain "no" means that there is no due time.
         return self._answer_without_due_time(request)
 
-    def _change_due_time(self, reminder_id: str, due_at: datetime | None, now: datetime) -> SkillReply:
+    def _change_due_time(self, reminder_id: str, due_time: DueTime | None, now: datetime) -> SkillReply:
         reminder = self._find_reminder_by_id(reminder_id)
         if reminder is None:
             return SkillReply("That reminder has already gone.")
 
-        self._reminders_client.move_reminder(reminder, due_at)
-        if due_at is None:
+        self._reminders_client.move_reminder(reminder, due_time)
+        if due_time is None:
             return SkillReply(f"{reminder.title} no longer has a due time.")
-        return SkillReply(f"{reminder.title} is now due {describe_due_time(due_at, now)}.")
+        return SkillReply(f"{reminder.title} is now due {describe_due_time(due_time, now)}.")
 
     def _find_spoken_reminder(self, request: SkillRequest) -> Reminder | None:
         reminders = self._reminders_client.list_unfinished_reminders()
@@ -237,12 +245,9 @@ class ReminderControls:
 
 def _describe_when_due(reminder: Reminder, now: datetime, is_only_today: bool) -> str:
     # When only today was asked about, saying "today" for each reminder due today would be needless.
-    is_due_today = reminder.due_at.date() == now.date()
-    if reminder.is_all_day:
-        return "all day" if is_only_today and is_due_today else f"due {describe_day(reminder.due_at.date(), now.date())}"
-    if is_only_today and is_due_today:
-        return f"at {describe_time_of_day(reminder.due_at)}"
-    return f"due {describe_due_time(reminder.due_at, now)}"
+    if is_only_today and reminder.due_at.date() == now.date():
+        return "all day" if reminder.is_all_day else f"at {describe_time_of_day(reminder.due_at)}"
+    return f"due {describe_due_time(DueTime(reminder.due_at, reminder.is_all_day), now)}"
 
 
 def _find_assignee(spoken_name: str) -> str | None:
