@@ -11,13 +11,19 @@ export interface Settings {
   sceneTime: TimeOfDay | 'live'
   /** The weather that the backdrop shows. "live" follows the forecast. */
   sceneWeather: SceneWeather | 'live'
+  /**
+   * The id of a scene for the backdrop to show instead of the one for the time of day and weather, or null to follow
+   * those. It can be one of the site's own scenes, such as "night-drizzle", or one of one's own. A scene that has since
+   * been deleted counts as null.
+   */
+  chosenSceneId: string | null
   /** The model that works on the messages this device sends from the site editor. */
   claudeModel: ClaudeModel
   /** How hard Claude thinks about the messages this device sends from the site editor. */
   claudeEffort: ClaudeEffort
 }
 
-const DEFAULT_SETTINGS: Settings = { sceneTime: 'live', sceneWeather: 'live', claudeModel: 'default', claudeEffort: 'default' }
+const DEFAULT_SETTINGS: Settings = { sceneTime: 'live', sceneWeather: 'live', chosenSceneId: null, claudeModel: 'default', claudeEffort: 'default' }
 
 const STORAGE_KEY = 'kiosk-viewer-settings'
 

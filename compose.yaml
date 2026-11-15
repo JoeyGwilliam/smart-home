@@ -69,6 +69,19 @@ services:
     volumes:
       - shopping-data:/data
 
+  # Holds the drawings, made on the pixel art editor page, that every screen shows in place of the site's own pictures.
+  pixel-art-api:
+    build: ./apps/api/pixel_art_api
+    restart: unless-stopped
+    environment:
+      PIXEL_ART_DATABASE_PATH: /data/pixel_art.db
+    ports:
+      # Like the reminders API, this has no login, so the same advice applies. Set PIXEL_ART_API_BIND_ADDRESS to let
+      # other devices reach it.
+      - "${PIXEL_ART_API_BIND_ADDRESS:-127.0.0.1}:8005:8000"
+    volumes:
+      - pixel-art-data:/data
+
   # Every page for the home's screens: the reminders viewer, dashboards, and so on.
   home-web:
     build:
@@ -85,6 +98,8 @@ services:
       recipes-api:
         condition: service_healthy
       shopping-api:
+        condition: service_healthy
+      pixel-art-api:
         condition: service_healthy
     ports:
       # Like the APIs, the pages have no login, so the same advice applies. Set HOME_WEB_BIND_ADDRESS to let other
@@ -162,3 +177,4 @@ volumes:
   timers-data:
   recipes-data:
   shopping-data:
+  pixel-art-data:

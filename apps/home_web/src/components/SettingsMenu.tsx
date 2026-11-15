@@ -1,6 +1,7 @@
 import {
   ChevronDown,
   Cloud,
+  Image,
   CloudDrizzle,
   CloudFog,
   CloudLightning,
@@ -31,6 +32,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
+import { useSceneDesigns } from '@/scenes/useSceneDesigns'
 import { useSettings, type Settings } from '@/settings/useSettings'
 import { cn } from 'cn'
 
@@ -60,12 +62,27 @@ const SCENE_WEATHER_CHOICES: Choice<Settings['sceneWeather']>[] = [
   { value: 'thunder', label: 'Thunder', icon: CloudLightning },
 ]
 
-/** The settings that the menu offers a list of choices for. */
-type ChoiceSetting = 'sceneTime' | 'sceneWeather'
+/** Stands for following the time of day and weather, among the choices of a scene. */
+const FOLLOW_TIME_AND_WEATHER = 'follow-time-and-weather'
 
-/** A gear button that opens this device's settings: the time of day and the weather that the backdrop shows. */
+/** The settings that the menu offers a list of choices for. */
+type ChoiceSetting = 'sceneTime' | 'sceneWeather' | 'chosenSceneId'
+
+/**
+ * A gear button that opens this device's settings: the time of day and the weather that the backdrop shows, or a
+ * scene to show instead: one of one's own, or whichever of the site's own was chosen on the pixel art page.
+ */
 export function SettingsMenu() {
   const [settings, changeSettings] = useSettings()
+  const { customScenes, designOf } = useSceneDesigns()
+  // A scene that has since been deleted shows the time and weather, so that is the choice to tick.
+  const chosenScene = settings.chosenSceneId === null ? undefined : designOf(settings.chosenSceneId)
+  const isChosenSceneCustom = customScenes.some((scene) => scene.id === settings.chosenSceneId)
+  const sceneChoices: Choice<string>[] = [
+    { value: FOLLOW_TIME_AND_WEATHER, label: 'Time and weather', icon: RefreshCw },
+    ...(chosenScene && !isChosenSceneCustom && settings.chosenSceneId !== null ? [{ value: settings.chosenSceneId, label: chosenScene.name, icon: Image }] : []),
+    ...customScenes.map((scene) => ({ value: scene.id, label: scene.design.name, icon: Image })),
+  ]
   const [isOpen, setIsOpen] = useState(false)
   // Only one setting's choices show at a time, which keeps the menu short enough to fit on a phone.
   const [expandedSetting, setExpandedSetting] = useState<ChoiceSetting | null>(null)
@@ -111,6 +128,17 @@ export function SettingsMenu() {
           isExpanded={expandedSetting === 'sceneWeather'}
           onToggleExpanded={() => toggleExpanded('sceneWeather')}
         />
+        {sceneChoices.length > 1 && (
+          <ChoiceList
+            title="Scene"
+            icon={Image}
+            choices={sceneChoices}
+            chosenValue={chosenScene && settings.chosenSceneId !== null ? settings.chosenSceneId : FOLLOW_TIME_AND_WEATHER}
+            onChoose={(sceneId) => changeSettings({ chosenSceneId: sceneId === FOLLOW_TIME_AND_WEATHER ? null : sceneId })}
+            isExpanded={expandedSetting === 'chosenSceneId'}
+            onToggleExpanded={() => toggleExpanded('chosenSceneId')}
+          />
+        )}
       </DropdownMenuContent>
     </DropdownMenu>
   )

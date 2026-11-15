@@ -6,7 +6,8 @@ export const CHARCOAL = '#3d302c'
 
 /**
  * A picture drawn as rows of pixels. Each character is one pixel, and stands for the colour that `palette` gives it.
- * A full stop is a transparent pixel. Every row must be the same length.
+ * A full stop is a transparent pixel. Every row must be the same length. A colour may be one that index.css changes
+ * with the scene, such as "var(--cloud)".
  */
 export interface Sprite {
   rows: string[]
@@ -20,11 +21,22 @@ export function PixelSprite({ sprite, pixelSize }: { sprite: Sprite; pixelSize: 
 
   return (
     <svg viewBox={`0 0 ${width} ${height}`} width={width * pixelSize} height={height * pixelSize} shapeRendering="crispEdges" className="block">
-      {sprite.rows.flatMap((row, y) =>
-        [...row].map((character, x) =>
-          character === '.' ? null : <rect key={`${x},${y}`} x={x} y={y} width="1" height="1" fill={sprite.palette[character]} />,
-        ),
-      )}
+      <SpritePixels sprite={sprite} />
     </svg>
+  )
+}
+
+/**
+ * Draws a sprite's pixels, one unit across each, inside an SVG that the caller sizes, such as one that stretches the
+ * sprite or repeats it as a pattern. The top-left pixel is at 0, 0.
+ */
+export function SpritePixels({ sprite }: { sprite: Sprite }) {
+  // Each run of same-coloured pixels along a row is drawn as one rectangle, which keeps a big drawing, such as a
+  // scene's sky, quick to draw.
+  return sprite.rows.flatMap((row, y) =>
+    [...row.matchAll(/([^.])\1*/g)].map((run) => (
+      // The colour is a style rather than a fill attribute, as only styles understand index.css's var() colours.
+      <rect key={`${run.index},${y}`} x={run.index} y={y} width={run[0].length} height="1" style={{ fill: sprite.palette[run[1]] }} />
+    )),
   )
 }

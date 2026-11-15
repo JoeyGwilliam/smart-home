@@ -41,9 +41,11 @@
 
 /*
  * Daytime on the farm, in pastels: cream panels framed in pink, under a pale blue sky. Pink is the accent throughout.
- * Text is a warm plum-brown rather than black, so that it sits softly on the cream.
+ * Text is a warm plum-brown rather than black, so that it sits softly on the cream. A scene drawn with the "light"
+ * class takes these colours even on a page that is dark, as the pixel art page's previews do (see SceneBackdrop).
  */
-:root {
+:root,
+.light {
     --background: oklch(0.84 0.075 228);
     --foreground: oklch(0.28 0.06 15);
     --card: oklch(0.975 0.03 75);
@@ -72,16 +74,14 @@
     /* The colour of the shadows beneath panels. */
     --shade: oklch(0.45 0.12 355 / 30%);
 
-    /* The backdrop (see PixelBackdrop). The sky is drawn in bands that lighten towards the horizon. */
+    /* The backdrop (see SceneBackdrop). The site's own sky is drawn in bands that lighten towards the background. */
     --sky-high: oklch(0.74 0.105 238);
     --sky-mid: oklch(0.79 0.09 233);
-    --sky-stars: none;
     --cloud: oklch(0.99 0.01 230);
     --cloud-shade: oklch(0.9 0.035 235);
     --grass: oklch(0.78 0.15 142);
     --grass-shade: oklch(0.69 0.15 145);
-    /* How much of the sky's colour heavy weather replaces with the grey of --overcast-tint. */
-    --overcast: 0%;
+    /* The grey veil that grey weather lays over the sky (see builtInLayers). */
     --overcast-tint: oklch(0.78 0.02 250);
     /* Translucent, so that rain reads as a soft shimmer rather than hard streaks. */
     --rain: oklch(0.6 0.1 245 / 50%);
@@ -130,8 +130,6 @@
 
     --sky-high: oklch(0.2 0.06 275);
     --sky-mid: oklch(0.25 0.065 272);
-    /* A tile of scattered stars, each a few pixels square. */
-    --sky-stars: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='240' height='240' fill='%23fff6d5'%3E%3Crect x='20' y='30' width='3' height='3'/%3E%3Crect x='130' y='12' width='2' height='2'/%3E%3Crect x='200' y='70' width='3' height='3'/%3E%3Crect x='80' y='110' width='2' height='2'/%3E%3Crect x='160' y='160' width='4' height='4'/%3E%3Crect x='40' y='190' width='2' height='2'/%3E%3Crect x='110' y='220' width='3' height='3'/%3E%3C/svg%3E");
     --cloud: oklch(0.42 0.06 270);
     --cloud-shade: oklch(0.35 0.06 270);
     --grass: oklch(0.42 0.1 145);
@@ -151,9 +149,10 @@
 }
 
 /*
- * The backdrop follows the scene (see src/scene), which RootLayout writes onto the root element: the "dark" class at
- * night, the time of day as data-time-of-day, and the weather as data-weather. Day and night use the palettes above.
- * Sunrise and sunset keep the daytime palette for everything but the sky, which stays light enough for dark text.
+ * The colours follow a scene's look, which RootLayout writes onto the root element for the pages, and SceneBackdrop
+ * onto each scene it draws: the "dark" class at night, the time of day as data-time-of-day, and the weather as
+ * data-weather. Day and night use the palettes above. Sunrise and sunset keep the daytime palette for everything but
+ * the sky, which stays light enough for dark text.
  */
 [data-time-of-day="sunrise"] {
     --background: oklch(0.9 0.075 60);
@@ -173,26 +172,19 @@
     --grass-shade: oklch(0.63 0.14 142);
 }
 
-/* Heavier weather greys the sky more, whatever the time of day. */
-[data-weather="drizzle"] { --overcast: 30%; }
-[data-weather="cloudy"], [data-weather="rain"] { --overcast: 50%; }
-[data-weather="snow"] { --overcast: 60%; }
-[data-weather="fog"] { --overcast: 70%; }
-[data-weather="thunder"] { --overcast: 85%; }
-
-/* By day, storm clouds are grey and a thunderstorm darkens the sky. At night everything is dark enough already. */
-:root:not(.dark)[data-weather="thunder"] {
+/* By day, storm clouds are grey and a thunderstorm's veil is darker. At night everything is dark enough already. */
+[data-weather="thunder"]:not(.dark) {
     --cloud: oklch(0.87 0.015 250);
     --cloud-shade: oklch(0.77 0.02 250);
 }
 
 /* Rain clouds are only a little greyer than fair-weather ones, which keeps a shower from looking gloomy. */
-:root:not(.dark)[data-weather="rain"] {
+[data-weather="rain"]:not(.dark) {
     --cloud: oklch(0.94 0.012 250);
     --cloud-shade: oklch(0.85 0.02 250);
 }
 
-:root:not(.dark)[data-weather="thunder"] {
+[data-weather="thunder"]:not(.dark) {
     --overcast-tint: oklch(0.64 0.03 260);
 }
 
@@ -205,11 +197,6 @@
 .dark[data-weather="snow"] {
     --grass: oklch(0.62 0.03 260);
     --grass-shade: oklch(0.52 0.035 262);
-}
-
-/* Stars only show through a clear night sky. */
-.dark:not([data-weather="clear"]) {
-    --sky-stars: none;
 }
 
 @layer base {
@@ -249,25 +236,13 @@
 }
 
 /*
- * The sky behind the page: two bands above the background colour, with any stars scattered on top. Each band is greyed
- * by as much as the weather is overcast.
+ * Carries a cloud from off the left edge of its scene to off the right. It moves in jumps, like a sprite. The distances
+ * are fractions of the scene's width, which is a container (see SceneBackdrop), so that a small preview of a scene
+ * drifts across itself rather than across the whole screen.
  */
-@utility pixel-sky {
-    background-color: color-mix(in oklch, var(--background), var(--overcast-tint) var(--overcast));
-    background-image:
-        var(--sky-stars),
-        linear-gradient(
-            to bottom,
-            color-mix(in oklch, var(--sky-high), var(--overcast-tint) var(--overcast)) 0 18%,
-            color-mix(in oklch, var(--sky-mid), var(--overcast-tint) var(--overcast)) 18% 40%,
-            transparent 40%
-        );
-}
-
-/* Carries a cloud from off the left edge of the screen to off the right. It moves in jumps, like a sprite. */
 @keyframes drift {
-    from { transform: translateX(-20vw); }
-    to { transform: translateX(110vw); }
+    from { transform: translateX(-20cqw); }
+    to { transform: translateX(110cqw); }
 }
 
 @utility animate-drift {
@@ -285,64 +260,8 @@
 }
 
 /*
- * Slides falling rain or snow from one row of its tiles to the next, which lands it exactly where it started (see
- * Precipitation in PixelBackdrop).
- */
-@keyframes fall {
-    to { transform: translate(var(--fall-drift, 0), var(--fall-distance)); }
-}
-
-@utility animate-fall {
-    animation: fall var(--fall-duration, 1s) linear infinite;
-}
-
-/* A double flash of lightning every so often. It is kept dim and brief, so that it is gentle on the eyes. */
-@keyframes lightning {
-    0%, 90%, 92.5%, 95%, 100% { opacity: 0; }
-    91% { opacity: 0.4; }
-    93.5% { opacity: 0.2; }
-}
-
-@utility animate-lightning {
-    animation: lightning 11s steps(1) infinite;
-}
-
-/*
- * A farm animal jumping in fright at the lightning. It shares the lightning's 11s cycle, and jumps on its first flash,
- * so the two stay in step as long as they start together, which they do, as both appear with the thunder.
- */
-@keyframes startle {
-    0%, 90.5%, 93%, 100% { transform: translateY(0); }
-    91% { transform: translateY(-10px); }
-}
-
-@utility animate-startle {
-    animation: startle 11s steps(1) infinite;
-}
-
-/* A word floating up and away from an animal, such as a sleeper's "z" or a yawn, fading in and then out. */
-@keyframes float-away {
-    0% { transform: translate(0, 0); opacity: 0; }
-    20% { opacity: 1; }
-    100% { transform: translate(20px, -72px); opacity: 0; }
-}
-
-@utility animate-float-away {
-    animation: float-away var(--float-duration, 6s) steps(16) var(--float-delay, 0s) infinite;
-}
-
-/* A butterfly's wingbeat: its wings fold to half their width and open again. */
-@keyframes flap {
-    50% { transform: scaleX(0.4); }
-}
-
-@utility animate-flap {
-    animation: flap 0.5s steps(1) infinite;
-}
-
-/*
  * A butterfly's lazy loop over the grass. It moves with "translate" rather than "transform", so that it doesn't
- * fight the wingbeat, which is a transform.
+ * fight a hop, which is a transform.
  */
 @keyframes flutter {
     0%, 100% { translate: 0 0; }
@@ -353,16 +272,6 @@
 
 @utility animate-flutter {
     animation: flutter var(--flutter-duration, 14s) steps(70) var(--flutter-delay, 0s) infinite;
-}
-
-/* A firefly's slow blink. */
-@keyframes glow {
-    0%, 100% { opacity: 0; }
-    40%, 60% { opacity: 1; }
-}
-
-@utility animate-glow {
-    animation: glow var(--glow-duration, 3s) ease-in-out var(--glow-delay, 0s) infinite;
 }
 
 /* A firefly's aimless hovering. */
@@ -377,13 +286,13 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-    .animate-drift, .animate-hop, .animate-fall, .animate-flutter, .animate-wander {
+    /* The pictures' own frames hold still too (see useCurrentFrame). */
+    .animate-drift, .animate-flutter, .animate-wander {
         animation-play-state: paused;
     }
 
-    /* These would freeze at a moment when they are faint, or mid-jump, so they are shown at rest instead. The Zzzs
-       then sit on top of each other, as a single z. */
-    .animate-lightning, .animate-startle, .animate-float-away, .animate-flap, .animate-glow {
+    /* A hop would freeze mid-jump, so it is shown at rest instead. */
+    .animate-hop {
         animation: none;
     }
 }
