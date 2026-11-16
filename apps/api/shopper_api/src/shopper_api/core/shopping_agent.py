@@ -26,6 +26,9 @@ Shop for exactly the shopping list you are given, and nothing else:
   the best value. Most items come from recipes' ingredients, so buy enough to cover what is written, not one pack each.
 - Choose by price per unit unless the item names a brand or a kind. Prefer a product with an offer when it is a fair
   match, and make the most of multi-buy offers, checking `offer_progress` in the trolley.
+- The household may give its preferences, such as brands it likes or things it avoids. Follow them when choosing, ahead
+  of the rules above, and say in an item's note when one decided what you chose. They never add anything to the list
+  or take anything off it.
 - If nothing is a fair match, add nothing for that item and say so, rather than guessing. If what was asked for is out
   of stock, choose a close substitute and say that it is one. Skip only what a shop doesn't sell, such as water.
 - Finish by checking the trolley with `view_trolley`, then give your report: one entry for each item on the list, in
@@ -150,7 +153,7 @@ class ShoppingAgent:
         time_limit.start()
         try:
             # The list goes in through stdin rather than as an argument, so that no quoting rules can mangle it.
-            process.stdin.write(_describe_shopping_list(shopping_list))
+            process.stdin.write(_describe_shop(shopping_list, settings.preferences))
             process.stdin.close()
             return self._follow_claude(process, record_progress)
         finally:
@@ -227,12 +230,16 @@ class ShoppingAgent:
         return _read_report(final_record)
 
 
-def _describe_shopping_list(shopping_list: Sequence[ShoppingListItem]) -> str:
+def _describe_shop(shopping_list: Sequence[ShoppingListItem], preferences: str) -> str:
+    """ Writes the message that tells Claude what to buy, followed by how the household likes to shop, if it has said. """
     lines = []
     for item in shopping_list:
         recipes = f" (for {', '.join(item.needed_for)})" if item.needed_for else ""
         lines.append(f"- {item.quantity} × {item.name}{recipes}")
-    return "Shop for this shopping list:\n" + "\n".join(lines)
+    message = "Shop for this shopping list:\n" + "\n".join(lines)
+    if preferences:
+        message += f"\n\nThe household's preferences:\n{preferences}"
+    return message
 
 
 def _read_report(final_record: dict[str, Any]) -> ShoppingReport:

@@ -3,10 +3,12 @@ import { CircleStop, CloudOff, LoaderCircle, LogIn, LogOut, ShoppingCart, Sparkl
 import { ChoiceField } from '@/components/ChoiceField'
 import { Pill } from '@/components/Pill'
 import { Button } from '@/components/ui/button'
+import { Textarea } from '@/components/ui/textarea'
 import { DraftOrderReview } from '@/pages/shoppingList/DraftOrderReview'
 import { useSettings } from '@/settings/useSettings'
 import {
   isShopperBusy,
+  MAXIMUM_SHOPPER_PREFERENCES_LENGTH,
   SHOPPER_EFFORT_CHOICES,
   SHOPPER_MODEL_CHOICES,
   type ShopperEffort,
@@ -26,7 +28,7 @@ interface MorrisonsOrderPanelProps {
 
 /**
  * Has Claude fill the Morrisons trolley from everything the basket adds up to buying, with the choice of model and
- * effort, and shows how it is going and then what it chose. Nothing is ordered: a person checks out at Morrisons.
+ * effort and the household's preferences, which are remembered, and shows how it is going and then what it chose. Nothing is ordered: a person checks out at Morrisons.
  * Also logs in to Morrisons, so that the trolley is the household's own rather than a guest's on the home server.
  */
 export function MorrisonsOrderPanel({ hasThingsToBuy }: MorrisonsOrderPanelProps) {
@@ -64,6 +66,17 @@ export function MorrisonsOrderPanel({ hasThingsToBuy }: MorrisonsOrderPanelProps
 
       {status && (
         <div className="grid gap-2">
+          <label className="grid gap-1 text-sm font-bold text-muted-foreground">
+            Preferences
+            <Textarea
+              value={settings.shopperPreferences}
+              onChange={(event) => changeSettings({ shopperPreferences: event.target.value })}
+              disabled={isShopperBusy(status.state)}
+              maxLength={MAXIMUM_SHOPPER_PREFERENCES_LENGTH}
+              placeholder="Anything Claude should know when choosing, such as: free-range eggs only, no own-brand cereal, prefer organic fruit."
+              className="rounded-2xl bg-field px-4 py-2.5 text-base font-normal text-foreground"
+            />
+          </label>
           <div className="flex flex-wrap items-end gap-3">
             <ChoiceField
               label="Model"
@@ -86,7 +99,11 @@ export function MorrisonsOrderPanel({ hasThingsToBuy }: MorrisonsOrderPanelProps
               </Button>
             ) : (
               <Button
-                onClick={() => shopper.generateOrder({ model: settings.shopperModel, effort: settings.shopperEffort })}
+                onClick={() => shopper.generateOrder({
+                    model: settings.shopperModel,
+                    effort: settings.shopperEffort,
+                    preferences: settings.shopperPreferences,
+                  })}
                 disabled={isShopperBusy(status.state) || !hasThingsToBuy}
                 className="ml-auto h-11 rounded-full px-5 text-base font-bold shadow-md shadow-shade"
               >

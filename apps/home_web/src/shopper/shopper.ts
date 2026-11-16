@@ -10,10 +10,18 @@ export type ShopperModel = Exclude<ClaudeModel, 'default'>
 /** How hard Claude thinks while it shops. The shopper always names one, so there is no "default". */
 export type ShopperEffort = Exclude<ClaudeEffort, 'default'>
 
+/** The longest that the household's shopping preferences can be, in characters. The shopper API allows the same. */
+export const MAXIMUM_SHOPPER_PREFERENCES_LENGTH = 2000
+
 /** How Claude should shop. */
 export interface ShopperSettings {
   model: ShopperModel
   effort: ShopperEffort
+  /**
+   * How the household likes to shop, in its own words, such as "Free-range eggs only", which Claude follows when it
+   * chooses products. Empty if it has none.
+   */
+  preferences: string
 }
 
 /** Every model that can shop, most capable first, with the name to show for it. */

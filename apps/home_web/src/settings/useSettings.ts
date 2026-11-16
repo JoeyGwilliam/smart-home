@@ -26,6 +26,8 @@ export interface Settings {
   shopperModel: ShopperModel
   /** How hard Claude thinks while it shops for the Morrisons orders this device generates. */
   shopperEffort: ShopperEffort
+  /** How the household likes to shop, which Claude follows for the Morrisons orders this device generates. */
+  shopperPreferences: string
 }
 
 const DEFAULT_SETTINGS: Settings = {
@@ -36,6 +38,7 @@ const DEFAULT_SETTINGS: Settings = {
   claudeEffort: 'default',
   shopperModel: 'sonnet',
   shopperEffort: 'medium',
+  shopperPreferences: '',
 }
 
 const STORAGE_KEY = 'kiosk-viewer-settings'

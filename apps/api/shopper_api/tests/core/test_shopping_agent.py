@@ -119,3 +119,12 @@ def test_asks_for_model_and_effort_when_settings_name_them(tmp_path: Path) -> No
     [call] = read_fake_claude_calls(tmp_path)
     assert call["arguments"][call["arguments"].index("--model") + 1] == "opus"
     assert call["arguments"][call["arguments"].index("--effort") + 1] == "high"
+
+
+def test_gives_claude_preferences_after_shopping_list_when_settings_have_them(tmp_path: Path) -> None:
+    agent = ShoppingAgent(tmp_path, claude_command=create_fake_claude(tmp_path, [FINISHED_WITH_MILK_REPORT]))
+
+    agent.shop([MILK], ClaudeSettings(preferences="Organic milk only."), lambda event: None)
+
+    [call] = read_fake_claude_calls(tmp_path)
+    assert call["message"].endswith("- 1 × Milk\n\nThe household's preferences:\nOrganic milk only.")

@@ -12,7 +12,8 @@ The pages for the home's screens, as one React + TypeScript app:
 - `/shopping-list`: fills the home's shopping basket, like a kiosk. Each recipe is a tile that adds one more of it each
   time it is pressed, and items of one's own, such as milk, can be added too. The basket shows how much of each is in
   it, and everything that it adds up to buying. Every screen shares the one basket. Below it, "Generate order" has
-  Claude, with the model and effort chosen beside it, fill the Morrisons trolley with all of that, and then shows what
+  Claude, with the model and effort chosen beside it, and following the household's preferences written above them,
+  which this device remembers, fill the Morrisons trolley with all of that, and then shows what
   it chose for each item, what the trolley comes to, and how to check it out. Nothing is ordered: a person does that at
   Morrisons. "Log in" opens a window on the home server's screen for logging in to Morrisons, so that the trolley is the
   household's own, which can be checked out from any device, rather than a guest's that only exists on the server.

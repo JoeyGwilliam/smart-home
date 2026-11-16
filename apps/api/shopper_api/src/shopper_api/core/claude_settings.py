@@ -31,7 +31,11 @@ class ClaudeSettings:
             The model that does the shopping.
         effort:
             How hard the model thinks.
+        preferences:
+            How the household likes to shop, in its own words, such as "Free-range eggs only", for Claude to follow
+            when choosing products. Empty if it has none.
     """
 
     model: ClaudeModel = ClaudeModel.SONNET
     effort: ClaudeEffort = ClaudeEffort.MEDIUM
+    preferences: str = ""

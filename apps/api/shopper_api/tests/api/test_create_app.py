@@ -61,6 +61,14 @@ def test_shops_with_sonnet_at_medium_effort_when_trip_names_neither(tmp_path: Pa
     assert (trip["model"], trip["effort"]) == ("sonnet", "medium")
 
 
+def test_returns_422_when_preferences_are_too_long(tmp_path: Path) -> None:
+    client = create_client(tmp_path)
+
+    response = client.post("/trip", json={"preferences": "x" * 2001})
+
+    assert response.status_code == 422
+
+
 def test_returns_422_when_model_is_unknown(tmp_path: Path) -> None:
     client = create_client(tmp_path)
 

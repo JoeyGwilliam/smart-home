@@ -1,5 +1,5 @@
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
-import { act, render, renderHook, screen } from '@testing-library/react'
+import { act, cleanup, render, renderHook, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 
 import { MorrisonsOrderPanel } from '@/pages/shoppingList/MorrisonsOrderPanel'
@@ -53,9 +53,9 @@ function findPost(fetch: ReturnType<typeof stubApi>) {
 
 afterEach(() => {
   vi.unstubAllGlobals()
-  // The chosen model and effort are remembered between tests, by the settings module and by the browser.
+  // The chosen model, effort and preferences are remembered between tests, by the settings module and by the browser.
   const { result } = renderHook(() => useSettings())
-  act(() => result.current[1]({ shopperModel: 'sonnet', shopperEffort: 'medium' }))
+  act(() => result.current[1]({ shopperModel: 'sonnet', shopperEffort: 'medium', shopperPreferences: '' }))
   localStorage.clear()
 })
 
@@ -67,7 +67,7 @@ test('generates the order with Sonnet at medium effort when nothing else has bee
 
   const [url, request] = findPost(fetch)!
   expect(url).toBe('/api/shopper/trip')
-  expect(JSON.parse(request.body)).toEqual({ model: 'sonnet', effort: 'medium' })
+  expect(JSON.parse(request.body)).toEqual({ model: 'sonnet', effort: 'medium', preferences: '' })
 })
 
 test('generates the order with the chosen model and effort when they have been changed', async () => {
@@ -78,7 +78,28 @@ test('generates the order with the chosen model and effort when they have been c
   await userEvent.selectOptions(screen.getByLabelText('Effort'), 'High')
   await userEvent.click(screen.getByRole('button', { name: 'Generate order' }))
 
-  expect(JSON.parse(findPost(fetch)![1].body)).toEqual({ model: 'opus', effort: 'high' })
+  expect(JSON.parse(findPost(fetch)![1].body)).toEqual({ model: 'opus', effort: 'high', preferences: '' })
+})
+
+test('generates the order with the preferences that were written when there are some', async () => {
+  const fetch = stubApi(NEVER_SHOPPED)
+  renderPanel()
+
+  await userEvent.type(await screen.findByLabelText('Preferences'), 'Free-range eggs only')
+  await userEvent.click(screen.getByRole('button', { name: 'Generate order' }))
+
+  expect(JSON.parse(findPost(fetch)![1].body)).toMatchObject({ preferences: 'Free-range eggs only' })
+})
+
+test('remembers the preferences when the page is opened again', async () => {
+  stubApi(NEVER_SHOPPED)
+  renderPanel()
+  await userEvent.type(await screen.findByLabelText('Preferences'), 'No own-brand cereal')
+  cleanup()
+
+  renderPanel()
+
+  expect(await screen.findByLabelText('Preferences')).toHaveValue('No own-brand cereal')
 })
 
 test('cannot generate an order when the basket has nothing to buy', async () => {
