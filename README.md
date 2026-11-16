@@ -13,6 +13,9 @@ The home's own website and the services behind it. Everything runs on the home s
 - `apps/api/shopping_api`: holds the home's one shopping basket, of recipes and items of its own, and works out from it
   everything to buy. That list is meant for a shopper that fills an online supermarket basket, which is yet to be
   built. The basket keeps its own copy of each recipe's ingredients, so it needs nothing from the recipes API.
+- `apps/mcp/morrisons_mcp`: an MCP server that lets a Claude agent shop at groceries.morrisons.com by searching,
+  reading offers and filling a trolley, for the shopper that the shopping list is meant for. It can't order anything:
+  a person checks out. See its README for how it works, and its PLAN.md for how the shopping list page will use it.
 - `apps/api/pixel_art_api`: holds what the pixel art page makes for every screen's backdrop: pictures, each with
   variants made of frames; layers, each a group of placed pictures; scenes, each a stack of layers; and presets, saved
   copies of all of those to put back later, starting with an empty one that shows the site's own design. Each picture,
