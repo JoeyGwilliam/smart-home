@@ -63,9 +63,26 @@ test("lets only the layer's own pictures be pressed, however much the other laye
   expect(preview.querySelector('[data-placement-id="cow"]')).toBeNull()
 })
 
-test('moves the picture across by as far as it is dragged', async () => {
+test('moves the picture across by as far as it is dragged, counted against the width of a portrait screen to begin with', async () => {
   const fetch = stubApi()
   const user = await renderEditorOn('umbrellas')
+  const preview = screen.getByRole('img', { name: 'Preview' })
+
+  // The preview starts at half size, so 36 screen pixels across it is 72 across the 720-pixel screen it shows: 10%.
+  fireEvent.pointerDown(preview.querySelector('[data-placement-id="umbrella-cow"]')!, { clientX: 100, clientY: 100, pointerId: 1 })
+  fireEvent.pointerMove(preview, { clientX: 136, clientY: 100, pointerId: 1 })
+  fireEvent.pointerUp(preview, { pointerId: 1 })
+  await user.click(screen.getByRole('button', { name: 'Show on the site' }))
+
+  const { url, layer } = findSaved(fetch)
+  expect(url).toBe('/api/pixel-art/layers/umbrellas')
+  expect(layer.placements.find((placement: { id: string }) => placement.id === 'umbrella-cow').x).toBe(20)
+})
+
+test('moves the picture across by as far as it is dragged, counted against the width of a landscape screen when that is chosen', async () => {
+  const fetch = stubApi()
+  const user = await renderEditorOn('umbrellas')
+  await user.click(screen.getByRole('button', { name: 'landscape' }))
   const preview = screen.getByRole('img', { name: 'Preview' })
 
   // The preview starts at half size, so 32 screen pixels across it is 64 across the 1280-pixel screen it shows: 5%.
@@ -74,9 +91,17 @@ test('moves the picture across by as far as it is dragged', async () => {
   fireEvent.pointerUp(preview, { pointerId: 1 })
   await user.click(screen.getByRole('button', { name: 'Show on the site' }))
 
-  const { url, layer } = findSaved(fetch)
-  expect(url).toBe('/api/pixel-art/layers/umbrellas')
+  const { layer } = findSaved(fetch)
   expect(layer.placements.find((placement: { id: string }) => placement.id === 'umbrella-cow').x).toBe(15)
+})
+
+test('starts the preview in portrait', async () => {
+  stubApi()
+
+  await renderEditorOn('umbrellas')
+
+  expect(screen.getByRole('button', { name: 'portrait' })).toHaveAttribute('aria-pressed', 'true')
+  expect(screen.getByRole('button', { name: 'landscape' })).toHaveAttribute('aria-pressed', 'false')
 })
 
 test('saves the added picture for every scene with the layer when a picture is added', async () => {

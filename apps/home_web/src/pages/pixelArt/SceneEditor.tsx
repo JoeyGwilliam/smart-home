@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { DesignList } from '@/pages/pixelArt/DesignList'
 import { SaveOutcomeMessage, type LatestSave } from '@/pages/pixelArt/SaveOutcomeMessage'
-import { ScenePreview } from '@/pages/pixelArt/ScenePreview'
+import { ScenePreview, usePreviewOrientation } from '@/pages/pixelArt/ScenePreview'
 import { useDrafts } from '@/pages/pixelArt/useDrafts'
 import type { SceneWeather, TimeOfDay } from '@/scene/scene'
 import { useScene } from '@/scene/useScene'
@@ -37,6 +37,7 @@ export function SceneEditor({ onEditLayer }: SceneEditorProps) {
   const shownScene = useShownScene()
   const [settings, changeSettings] = useSettings()
   const drafts = useDrafts<SceneDesign>()
+  const [orientation, setOrientation] = usePreviewOrientation()
   const [chosenSceneId, setChosenSceneId] = useState(() => getBuiltInSceneId(liveScene.timeOfDay, liveScene.weather))
   const [latestSave, setLatestSave] = useState<LatestSave | null>(null)
   const [isConfirmingDelete, setIsConfirmingDelete] = useState(false)
@@ -154,7 +155,13 @@ export function SceneEditor({ onEditLayer }: SceneEditorProps) {
           </div>
         )}
 
-        <ScenePreview look={scene.look} layers={stackLayers(scene, designs.layerOf)} moonPhase={liveScene.moonPhase} />
+        <ScenePreview
+          look={scene.look}
+          layers={stackLayers(scene, designs.layerOf)}
+          moonPhase={liveScene.moonPhase}
+          orientation={orientation}
+          onOrientationChange={setOrientation}
+        />
 
         <section aria-label="Layers" className="grid gap-2 rounded-2xl bg-field/70 p-4">
           <h3 className="text-lg font-semibold">Layers, front first</h3>

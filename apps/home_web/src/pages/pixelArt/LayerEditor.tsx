@@ -8,7 +8,7 @@ import { DesignList } from '@/pages/pixelArt/DesignList'
 import { PictureSelect } from '@/pages/pixelArt/PictureSelect'
 import { PlacementInspector } from '@/pages/pixelArt/PlacementInspector'
 import { SaveOutcomeMessage, type LatestSave } from '@/pages/pixelArt/SaveOutcomeMessage'
-import { PREVIEW_SCREEN_HEIGHT, ScenePreview } from '@/pages/pixelArt/ScenePreview'
+import { getPreviewScreenHeight, ScenePreview, usePreviewOrientation } from '@/pages/pixelArt/ScenePreview'
 import { useDrafts } from '@/pages/pixelArt/useDrafts'
 import { findVariant, getFrameSprite, type PixelArt } from '@/pixelArt/pixelArt'
 import { usePictures } from '@/pixelArt/usePictures'
@@ -39,6 +39,7 @@ export function LayerEditor({ chosenLayerId, onChooseLayer }: LayerEditorProps) 
   const { pictureOf } = usePictures()
   const liveScene = useScene()
   const drafts = useDrafts<LayerDesign>()
+  const [orientation, setOrientation] = usePreviewOrientation()
   // The scene that the layer is shown in, or "" to show the layer on its own.
   const [previewSceneId, setPreviewSceneId] = useState(() => getBuiltInSceneId(liveScene.timeOfDay, liveScene.weather))
   const [selectedPlacementId, setSelectedPlacementId] = useState<string | null>(null)
@@ -134,6 +135,8 @@ export function LayerEditor({ chosenLayerId, onChooseLayer }: LayerEditorProps) 
           look={previewLook}
           layers={previewLayers}
           moonPhase={liveScene.moonPhase}
+          orientation={orientation}
+          onOrientationChange={setOrientation}
           arranging={{
             layerId,
             selectedPlacementId,
@@ -204,7 +207,7 @@ export function LayerEditor({ chosenLayerId, onChooseLayer }: LayerEditorProps) 
             key={selectedPlacement.id}
             placement={selectedPlacement}
             onChange={(changes, group) => edit((draft) => changePlacement(draft, selectedPlacement.id, changes), group)}
-            onChangeAnchor={(anchor) => edit((draft) => changeAnchor(draft, selectedPlacement.id, anchor, PREVIEW_SCREEN_HEIGHT, pictureHeight(selectedPlacement)))}
+            onChangeAnchor={(anchor) => edit((draft) => changeAnchor(draft, selectedPlacement.id, anchor, getPreviewScreenHeight(orientation), pictureHeight(selectedPlacement)))}
           />
         ) : (
           layer.placements.length > 0 && (
