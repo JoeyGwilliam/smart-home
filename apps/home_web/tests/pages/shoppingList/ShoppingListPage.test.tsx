@@ -6,10 +6,14 @@ import { ShoppingListPage } from '@/pages/shoppingList/ShoppingListPage'
 
 const CHILLI_JSON = { id: 'chilli', name: 'Chilli', ingredients: ['Beans', 'Rice'], instructions: null, time_minutes: 45, picture_id: null }
 
-/** Answers the recipes API with the given recipes, getting the basket with the given basket, and every change to the basket with an empty one. */
+/**
+ * Answers the recipes API with the given recipes, getting the basket with the given basket, every change to the basket
+ * with an empty one, and the shopper with one that has never shopped.
+ */
 function stubApi({ recipesJson, basketJson }: { recipesJson: object[]; basketJson: object }) {
   const fetch = vi.fn().mockImplementation((url: string, request?: RequestInit) => {
     if (url.startsWith('/api/recipes')) return Promise.resolve(Response.json(recipesJson))
+    if (url.startsWith('/api/shopper')) return Promise.resolve(Response.json({ state: 'idle', is_logged_in: false, login_failure: null, trip: null }))
     if (request?.method === 'GET') return Promise.resolve(Response.json(basketJson))
     return Promise.resolve(Response.json({ lines: [], shopping_list: [] }))
   })

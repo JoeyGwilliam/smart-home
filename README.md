@@ -11,11 +11,16 @@ The home's own website and the services behind it. Everything runs on the home s
 - `apps/api/recipes_api`: holds the recipes and their pictures, and owns the rules for a valid recipe, so that any page,
   such as the shopping list, can use them.
 - `apps/api/shopping_api`: holds the home's one shopping basket, of recipes and items of its own, and works out from it
-  everything to buy. That list is meant for a shopper that fills an online supermarket basket, which is yet to be
-  built. The basket keeps its own copy of each recipe's ingredients, so it needs nothing from the recipes API.
+  everything to buy, which the shopper buys. The basket keeps its own copy of each recipe's ingredients, so it needs
+  nothing from the recipes API.
 - `apps/mcp/morrisons_mcp`: an MCP server that lets a Claude agent shop at groceries.morrisons.com by searching,
-  reading offers and filling a trolley, for the shopper that the shopping list is meant for. It can't order anything:
-  a person checks out. See its README for how it works, and its PLAN.md for how the shopping list page will use it.
+  reading offers and filling a trolley. It can't order anything: a person checks out. See its README for how it works,
+  and its PLAN.md for how it came to be used as it is.
+- `apps/api/shopper_api`: generates a Morrisons order for the shopping list page. It reads everything to buy from the
+  shopping API, has Claude fill the Morrisons trolley with nothing but the Morrisons MCP server's tools, and reads the
+  trolley back for a person to check and order themselves. It also opens a window on the home server for a person to
+  log in to Morrisons, so that the trolley is their own account's rather than a guest's. Like the site editor API, it
+  runs outside Docker, because it uses the server's Claude Code login and a browser.
 - `apps/api/pixel_art_api`: holds what the pixel art page makes for every screen's backdrop: pictures, each with
   variants made of frames; layers, each a group of placed pictures; scenes, each a stack of layers; and presets, saved
   copies of all of those to put back later, starting with an empty one that shows the site's own design. Each picture,
@@ -32,7 +37,7 @@ and `tests` mirrors `src`.
 
 ## How they fit together
 
-The browser only ever talks to `home_web`, which forwards `/api/...` to the reminders, timers, recipes, shopping, pixel art and site editor APIs
+The browser only ever talks to `home_web`, which forwards `/api/...` to the reminders, timers, recipes, shopping, pixel art, site editor and shopper APIs
 (see `apps/home_web/nginx.conf`). The Alexa skill uses those same three APIs rather than their data, so each API stays
 the one owner of its rules. It asks them for what it wants done, such as ticking off a reminder or starting the timer,
 and needs to know nothing else about what they hold.
@@ -43,8 +48,8 @@ TypeScript and in Python. Both are tested against the same examples, in
 
 ## Running it
 
-- On the home server: `docker compose up -d --build` (see `compose.yaml`), and `start_site_editor.bat` for the site
-  editor. `update_server.bat` does the first of these from another machine.
+- On the home server: `docker compose up -d --build` (see `compose.yaml`), `start_site_editor.bat` for the site
+  editor, and `start_shopper.bat` for the shopper. `update_server.bat` does the first of these from another machine.
 - For development: see `compose.dev.yaml` for the APIs, and `apps/home_web/README.md` for the pages.
 - Settings that belong to one machine, such as `HOME_WEB_BIND_ADDRESS` and the Cloudflare tunnel's token, go in a
   git-ignored `.env` file beside `compose.yaml`, which explains each of them.

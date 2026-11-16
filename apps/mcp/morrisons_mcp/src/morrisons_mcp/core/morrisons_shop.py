@@ -6,7 +6,7 @@ from urllib.parse import quote_plus
 from playwright.async_api import Locator, Page
 from playwright.async_api import TimeoutError as PlaywrightTimeoutError
 
-from .morrisons_browser import SHOP_URL, MorrisonsBrowser
+from .morrisons_browser import DELIVERY_BUTTON, SHOP_URL, MorrisonsBrowser
 from .morrisons_error import MorrisonsError
 from .product import Product
 from .product_card import (
@@ -21,6 +21,7 @@ from .trolley import Trolley
 
 _PRODUCT_ID_PATTERN = re.compile(r"[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}")
 _OFFER_PATH_PATTERN = re.compile(r"/offers/[\w-]+/[\w-]+")
+_LOG_IN_PATTERN = re.compile(r"^\s*log in\s*$", re.IGNORECASE)
 
 # Results appear as the page is scrolled, so reading them all takes a few scrolls. This stops it for pages that never
 # run out.
@@ -164,6 +165,22 @@ class MorrisonsShop:
         """
         async with self._page_in_use:
             return await self._read_trolley(await self._browser.open_page())
+
+    async def is_logged_in(self) -> bool:
+        """ Finds out whether the shop is being used with a Morrisons account, rather than as a guest. A person logs in
+        with `MorrisonsBrowser.let_person_log_in`.
+
+        Returns:
+            True if a person has logged in and the shop still accepts that login.
+        """
+        async with self._page_in_use:
+            page = await self._browser.open_page()
+            await page.goto(SHOP_URL, wait_until="domcontentloaded")
+            # A guest is offered a button that says just "Log in". The header is drawn after the page loads, so it is
+            # waited for by the delivery button that it always has.
+            await page.locator(DELIVERY_BUTTON).wait_for()
+            log_in_button = page.locator('[data-test="login-dropdown-button"]', has_text=_LOG_IN_PATTERN)
+            return await log_in_button.count() == 0
 
     async def _list_products_on(self, url: str, limit: int) -> tuple[Product, ...]:
         async with self._page_in_use:

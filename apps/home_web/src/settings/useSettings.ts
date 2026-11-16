@@ -1,7 +1,8 @@
 import { useSyncExternalStore } from 'react'
 
 import type { SceneWeather, TimeOfDay } from '@/scene/scene'
-import type { ClaudeEffort, ClaudeModel } from '@/siteEditor/claudeSettings'
+import type { ShopperEffort, ShopperModel } from '@/shopper/shopper'
+import type { ClaudeEffort, ClaudeModel } from '@/claude/claudeSettings'
 
 /**
  * Choices about how this screen looks and behaves. They belong to the device showing the page, not to the home.
@@ -21,9 +22,21 @@ export interface Settings {
   claudeModel: ClaudeModel
   /** How hard Claude thinks about the messages this device sends from the site editor. */
   claudeEffort: ClaudeEffort
+  /** The model that shops for the Morrisons orders this device generates from the shopping list. */
+  shopperModel: ShopperModel
+  /** How hard Claude thinks while it shops for the Morrisons orders this device generates. */
+  shopperEffort: ShopperEffort
 }
 
-const DEFAULT_SETTINGS: Settings = { sceneTime: 'live', sceneWeather: 'live', chosenSceneId: null, claudeModel: 'default', claudeEffort: 'default' }
+const DEFAULT_SETTINGS: Settings = {
+  sceneTime: 'live',
+  sceneWeather: 'live',
+  chosenSceneId: null,
+  claudeModel: 'default',
+  claudeEffort: 'default',
+  shopperModel: 'sonnet',
+  shopperEffort: 'medium',
+}
 
 const STORAGE_KEY = 'kiosk-viewer-settings'
 

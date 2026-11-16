@@ -1,0 +1,21 @@
+[project]
+name = "shopper-api"
+version = "0.1.0"
+requires-python = ">=3.14"
+dependencies = [
+    "fastapi[standard]>=0.162.2",
+    "morrisons-mcp",
+]
+
+[tool.uv.sources]
+# The shopper reads and empties the trolley itself, with the same code that the Morrisons MCP server gives Claude.
+morrisons-mcp = { path = "../../mcp/morrisons_mcp", editable = true }
+
+[build-system]
+requires = ["uv_build>=0.13.7,<0.14"]
+build-backend = "uv_build"
+
+[dependency-groups]
+dev = [
+    "pytest>=9.2.0",
+]

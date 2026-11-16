@@ -54,17 +54,22 @@ def is_request_allowed(method: str, url: str, body: str | None = None) -> bool:
     parts = urlsplit(url)
     if parts.hostname != SHOP_HOST:
         return True
-
-    path = parts.path.rstrip("/")
-    if _ORDERING_PATH_PARTS.intersection(path.lower().split("/")):
+    if _is_about_ordering(url):
         return False
 
+    path = parts.path.rstrip("/")
     method = method.upper()
     if method in _READ_ONLY_METHODS:
         return True
     if (method, path) == ("POST", _GRAPHQL_PATH):
         return _is_graphql_query(body)
     return (method, path) in _ALLOWED_NON_READ_ONLY_REQUESTS
+
+
+def _is_about_ordering(url: str) -> bool:
+    """ Whether a request is to the shop, and has a part of its path that belongs to checking out or paying. """
+    parts = urlsplit(url)
+    return parts.hostname == SHOP_HOST and bool(_ORDERING_PATH_PARTS.intersection(parts.path.lower().split("/")))
 
 
 def _is_graphql_query(body: str | None) -> bool:

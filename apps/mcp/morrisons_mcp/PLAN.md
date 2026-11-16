@@ -4,10 +4,22 @@ From pressing the button on the Shopping list page to a trolley that is ready fo
 
 ## Where things stand
 
-The hard, uncertain part is done: `morrisons_mcp` (this folder) lets an agent search, read offers, and fill and empty a
-trolley at groceries.morrisons.com, and cannot order. A real Claude agent has used it to do a small shop and then say
-that it couldn't order. What is left is everything around it: a service that runs the agent, a page to start and review
-it, and getting the trolley in front of a person.
+M0 to M2 are built, and the login part of M3. `apps/api/shopper_api` runs the agent and the Shopping list page has a
+"Generate order" button, with a choice of model and effort (Sonnet at medium effort to start), live progress and a
+review of what was chosen. Its "Log in" button opens a visible window on the home server, as planned below. What it
+built differs from this plan in a few ways, each for simplicity:
+
+- The page follows the run by asking for its status every second, as the site editor page does, rather than by
+  server-sent events.
+- The shopper's own code empties the trolley before the agent starts, and reads it back once it has finished, using
+  this package directly. The agent's report is shown beside the trolley as read, rather than checked against it.
+- Every order empties the trolley first, logged in or not. The page says so beside the button, rather than refusing
+  to start on a non-empty trolley (risk 3).
+- There is no time limit set by the page, and no ceiling on the trolley's total yet: the shopper stops a run after 30
+  minutes or $5 of Claude usage.
+
+Still to do: the read-only tools for favourites and past orders, preferences, M4, and trying the login and a logged-in
+shop for real.
 
 ## The flow, end to end
 

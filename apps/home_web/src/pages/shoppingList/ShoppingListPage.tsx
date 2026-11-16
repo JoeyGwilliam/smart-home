@@ -16,6 +16,7 @@ import {
 import { Button } from '@/components/ui/button'
 import type { SaveOutcome } from '@/homeApi/homeApi'
 import { BasketPanel } from '@/pages/shoppingList/BasketPanel'
+import { MorrisonsOrderPanel } from '@/pages/shoppingList/MorrisonsOrderPanel'
 import { RecipeTile } from '@/pages/shoppingList/RecipeTile'
 import type { Recipe } from '@/recipes/recipe'
 import { useRecipes } from '@/recipes/useRecipes'
@@ -24,7 +25,8 @@ import { useBasket, useBasketActions } from '@/shopping/useBasket'
 
 /**
  * Fills the home's shopping basket, like a kiosk: every recipe is a tile that adds one of it each time it is pressed,
- * and the basket beside them takes items of one's own too, and shows everything that it adds up to buying.
+ * and the basket beside them takes items of one's own too, and shows everything that it adds up to buying. Below them,
+ * Claude can fill a Morrisons trolley with all of that, for a person to check out.
  */
 export function ShoppingListPage() {
   const recipesQuery = useRecipes()
@@ -90,6 +92,8 @@ export function ShoppingListPage() {
           )}
         </div>
       </div>
+
+      <MorrisonsOrderPanel hasThingsToBuy={(basket?.shoppingList.length ?? 0) > 0} />
 
       <AlertDialog open={isConfirmingEmpty} onOpenChange={setIsConfirmingEmpty}>
         <AlertDialogContent className="rounded-4xl border-[3px] border-panel-edge bg-popover/95 p-6 shadow-2xl shadow-shade">

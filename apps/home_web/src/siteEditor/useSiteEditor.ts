@@ -3,7 +3,7 @@ import { useState } from 'react'
 
 import { ApiUnavailableError, RequestRefusedError } from '@/homeApi/homeApi'
 import type { Change, Commit } from '@/siteEditor/change'
-import type { ClaudeSettings } from '@/siteEditor/claudeSettings'
+import type { ClaudeSettings } from '@/claude/claudeSettings'
 import * as siteEditorApi from '@/siteEditor/siteEditorApi'
 
 const CHANGE_QUERY_KEY = ['siteEditor', 'change']

@@ -11,7 +11,11 @@ The pages for the home's screens, as one React + TypeScript app:
   Recipes can be added, edited and deleted.
 - `/shopping-list`: fills the home's shopping basket, like a kiosk. Each recipe is a tile that adds one more of it each
   time it is pressed, and items of one's own, such as milk, can be added too. The basket shows how much of each is in
-  it, and everything that it adds up to buying. Every screen shares the one basket.
+  it, and everything that it adds up to buying. Every screen shares the one basket. Below it, "Generate order" has
+  Claude, with the model and effort chosen beside it, fill the Morrisons trolley with all of that, and then shows what
+  it chose for each item, what the trolley comes to, and how to check it out. Nothing is ordered: a person does that at
+  Morrisons. "Log in" opens a window on the home server's screen for logging in to Morrisons, so that the trolley is the
+  household's own, which can be checked out from any device, rather than a guest's that only exists on the server.
 - `/word-of-the-day`: an English idiom, a Spanish word and a Mandarin word, which change each day.
 - `/pixel-art`: designs the backdrop, built up in levels. Its Scenes tab stacks layers into scenes: one for each time
   of day in each weather, which the backdrop shows automatically, and scenes of one's own. Any scene can be chosen to
@@ -49,6 +53,9 @@ Moving between pages is animated with view transitions (see `src/index.css`).
   no key.
 - `src/words/`: the idioms and words that take turns as the word of the day, and the rule for whose turn it is.
 - `src/siteEditor/`: the site editor API client, and the hook that keeps a screen in step with the change being made.
+- `src/shopper/`: the shopper API client, and the hook that keeps a screen in step with the Morrisons order being
+  generated, which every screen shares.
+- `src/claude/`: the Claude models and efforts that the site editor and the shopper can be asked to work with.
 - `src/scene/`: the time of day and the weather, either live or as chosen in the settings, which pick the scene for
   the backdrop.
 - `src/scenes/`: what scenes and layers are made of (`sceneDesign.ts`), the site's own as it designs them
@@ -61,16 +68,21 @@ Moving between pages is animated with view transitions (see `src/index.css`).
 
 The app calls the APIs under `/api` on its own origin: the timers API under `/api/timers`, the recipes API under
 `/api/recipes`, the shopping API under `/api/shopping`, the pixel art API under `/api/pixel-art`, the site editor API
-under `/api/site-editor`, and the reminders API under everything else. In development Vite forwards those calls to
-`localhost:8001`, `localhost:8003`, `localhost:8004`, `localhost:8005`, `localhost:8002` and `localhost:8000` (see
-`vite.config.ts`); in Docker, nginx forwards them to the `timers-api`, `recipes-api`, `shopping-api`, `pixel-art-api`
-and `reminders-api` services, and to the site editor API on the machine itself (see `nginx.conf`).
+under `/api/site-editor`, the shopper API under `/api/shopper`, and the reminders API under everything else. In
+development Vite forwards those calls to `localhost:8001`, `localhost:8003`, `localhost:8004`, `localhost:8005`,
+`localhost:8002`, `localhost:8006` and `localhost:8000` (see `vite.config.ts`); in Docker, nginx forwards them to the
+`timers-api`, `recipes-api`, `shopping-api`, `pixel-art-api` and `reminders-api` services, and to the site editor and
+shopper APIs on the machine itself (see `nginx.conf`).
 
 The site editor API is the only one that doesn't run in a container: it works on the server's checkout of this
 repository, rebuilds the containers, and uses the server's Claude Code login. `start_site_editor.bat`, in the
 repository's root, starts it. Every screen shares the one change being made, like the timer. While a change is being
 previewed, the whole site shows it. If a change breaks the site so badly that the editor page can't be used, it can
 still be discarded at `/api/site-editor/rescue`.
+
+The shopper API doesn't run in a container either, for the same reasons: it uses the server's Claude Code login, and
+a browser for Morrisons, whose login window has to appear on the server's screen. `start_shopper.bat` starts it. The
+rest of the shopping list page works without it.
 
 The ADHD timer reads tasks aloud with the browser's own speech, on every screen that has the page open. Most browsers
 only allow speech once something on the page has been pressed, so a screen stays silent if nobody has touched it since

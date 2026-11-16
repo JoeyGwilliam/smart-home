@@ -7,7 +7,7 @@ export type ClaudeModel = 'default' | 'fable' | 'opus' | 'sonnet' | 'haiku'
 /** How hard Claude thinks before it acts. "default" leaves the choice to the model. */
 export type ClaudeEffort = 'default' | 'low' | 'medium' | 'high' | 'xhigh' | 'max'
 
-/** How Claude should work on a message. */
+/** How Claude should work on a message, or on a task such as a shop. */
 export interface ClaudeSettings {
   model: ClaudeModel
   effort: ClaudeEffort

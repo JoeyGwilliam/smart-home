@@ -1,6 +1,6 @@
 import { sendToHomeApi } from '@/homeApi/homeApi'
 import type { Change, ChangeState, Commit, ProgressEvent } from '@/siteEditor/change'
-import type { ClaudeSettings } from '@/siteEditor/claudeSettings'
+import type { ClaudeSettings } from '@/claude/claudeSettings'
 
 // nginx.conf and vite.config.ts forward these to the site editor API.
 const CHANGE_URL = '/api/site-editor/change'

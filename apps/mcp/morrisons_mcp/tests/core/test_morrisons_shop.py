@@ -42,3 +42,7 @@ async def test_trolley_holds_the_product_when_adding_then_is_empty_after_emptyin
 
     assert [(line.product_id, line.quantity) for line in trolley_with_product.lines] == [(product.id, 2)]
     assert emptied_trolley.lines == ()
+
+
+async def test_is_not_logged_in_when_nobody_has_logged_in(shop: MorrisonsShop) -> None:
+    assert not await shop.is_logged_in()
