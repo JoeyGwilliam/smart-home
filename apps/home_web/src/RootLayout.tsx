@@ -1,16 +1,18 @@
-import { Outlet, useRouterState } from '@tanstack/react-router'
+import { Link, Outlet, useRouterState } from '@tanstack/react-router'
+import { Clock } from 'lucide-react'
 import { useEffect, useLayoutEffect } from 'react'
 
 import { PageMenu } from '@/components/PageMenu'
 import { SceneBackdrop } from '@/components/SceneBackdrop'
 import { SettingsMenu } from '@/components/SettingsMenu'
+import { Button } from '@/components/ui/button'
 import { useReloadOnNewBuild } from '@/deploy/useReloadOnNewBuild'
 import { PAGES } from '@/pages/pages'
 import { useShownScene } from '@/scenes/useShownScene'
 
 /**
  * What every page sits inside: the pixel-art backdrop, showing the current scene, and the pages and settings menus in
- * the top right corner.
+ * the top right corner, beside a button that goes straight to the clock.
  */
 export function RootLayout() {
   const pathname = useRouterState({ select: (state) => state.location.pathname })
@@ -38,6 +40,16 @@ export function RootLayout() {
       <SceneBackdrop look={scene.look} layers={layers} moonPhase={moonPhase} className="pointer-events-none fixed inset-0 -z-10" />
       {/* Named so that page transitions leave the menus where they are (see index.css). */}
       <div className="fixed top-4 right-4 z-40 flex gap-2 [view-transition-name:page-controls]">
+        <Button
+          asChild
+          variant="ghost"
+          size="icon-lg"
+          className="panel rounded-full text-muted-foreground shadow-md shadow-shade hover:bg-accent hover:text-foreground"
+        >
+          <Link to="/clock" aria-label="Clock">
+            <Clock className="size-5" />
+          </Link>
+        </Button>
         <PageMenu />
         <SettingsMenu />
       </div>
