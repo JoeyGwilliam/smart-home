@@ -141,7 +141,7 @@ class Shopper:
 
     def start_trip(self, claude_settings: ClaudeSettings) -> None:
         """ Starts a shop for the shopping list as it is now, in the background. Whatever is in the trolley is taken
-        out first. Once it has finished, the trip has a draft order.
+        out first, unless the settings say to start from it. Once it has finished, the trip has a draft order.
 
         Args:
             claude_settings:
@@ -210,8 +210,11 @@ class Shopper:
 
         purchase_history = self._read_purchase_history(claude_settings.past_order_count)
 
-        self._record_unless_stopped("Emptying the Morrisons trolley")
-        self._account.empty_trolley()
+        if claude_settings.starts_from_current_trolley:
+            self._record_unless_stopped("Keeping what is already in the Morrisons trolley")
+        else:
+            self._record_unless_stopped("Emptying the Morrisons trolley")
+            self._account.empty_trolley()
 
         self._record_unless_stopped("Claude is shopping")
         report = self._agent.shop(shopping_list, claude_settings, purchase_history, self._record)

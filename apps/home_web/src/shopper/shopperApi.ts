@@ -63,8 +63,8 @@ export async function getShopperStatus(): Promise<ShopperStatus> {
 }
 
 /**
- * Has Claude fill the Morrisons trolley from the shopping list as it is now, replacing whatever the trolley holds.
- * Nothing is ordered. `getShopperStatus` shows the progress.
+ * Has Claude fill the Morrisons trolley from the shopping list as it is now, replacing whatever the trolley holds
+ * unless the settings say to start from it. Nothing is ordered. `getShopperStatus` shows the progress.
  *
  * @param settings How Claude should shop.
  * @throws RequestRefusedError If the shopper is busy.
@@ -76,6 +76,7 @@ export async function generateOrder(settings: ShopperSettings): Promise<void> {
     effort: settings.effort,
     preferences: settings.preferences,
     past_order_count: settings.pastOrderCount,
+    starts_from_current_trolley: settings.startsFromCurrentTrolley,
   }
   await sendToHomeApi('shopper', 'POST', `${SHOPPER_URL}/trip`, tripRequest)
 }

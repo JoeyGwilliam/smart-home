@@ -177,6 +177,15 @@ def test_does_not_read_past_orders_when_asked_to_learn_from_none(tmp_path: Path)
     assert account.calls == ["empty_trolley", "shop", "view"]
 
 
+def test_does_not_empty_trolley_when_starting_from_current_trolley(tmp_path: Path) -> None:
+    shopper, account = create_shopper(tmp_path)
+
+    shopper.start_trip(ClaudeSettings(past_order_count=0, starts_from_current_trolley=True))
+
+    wait_until_idle(shopper)
+    assert account.calls == ["shop", "view"]
+
+
 def test_shops_without_past_orders_and_says_why_when_they_cannot_be_read(tmp_path: Path) -> None:
     account = FakeAccount(purchase_history_failure="The website may have changed.")
     agent = FakeAgent(account)

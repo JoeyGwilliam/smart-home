@@ -21,6 +21,9 @@ class TripRequestSchema(BaseModel):
             it has none.
         past_order_count:
             How many of the household's latest Morrisons orders Claude should learn from. Zero for none.
+        starts_from_current_trolley:
+            Whether Claude should keep what the trolley already holds and only add what is missing, rather than the
+            trolley being emptied first.
     """
     model_config = ConfigDict(extra="forbid")
 
@@ -28,6 +31,7 @@ class TripRequestSchema(BaseModel):
     effort: ClaudeEffort = ClaudeEffort.MEDIUM
     preferences: str = Field(default="", max_length=_MAXIMUM_PREFERENCES_LENGTH)
     past_order_count: int = Field(default=DEFAULT_PAST_ORDER_COUNT, ge=0, le=MAXIMUM_ORDER_COUNT)
+    starts_from_current_trolley: bool = False
 
     def to_claude_settings(self) -> ClaudeSettings:
         """ Gathers how Claude should shop.
@@ -40,4 +44,5 @@ class TripRequestSchema(BaseModel):
             effort=self.effort,
             preferences=self.preferences.strip(),
             past_order_count=self.past_order_count,
+            starts_from_current_trolley=self.starts_from_current_trolley,
         )

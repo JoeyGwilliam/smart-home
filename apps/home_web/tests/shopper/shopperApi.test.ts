@@ -56,7 +56,13 @@ test('posts the chosen model, effort, preferences and number of past orders when
   const fetch = vi.fn().mockResolvedValue(Response.json(null, { status: 202 }))
   vi.stubGlobal('fetch', fetch)
 
-  await generateOrder({ model: 'opus', effort: 'high', preferences: 'Organic milk', pastOrderCount: 10 })
+  await generateOrder({
+    model: 'opus',
+    effort: 'high',
+    preferences: 'Organic milk',
+    pastOrderCount: 10,
+    startsFromCurrentTrolley: true,
+  })
 
   const [url, request] = fetch.mock.calls[0]
   expect(url).toBe('/api/shopper/trip')
@@ -66,6 +72,7 @@ test('posts the chosen model, effort, preferences and number of past orders when
     effort: 'high',
     preferences: 'Organic milk',
     past_order_count: 10,
+    starts_from_current_trolley: true,
   })
 })
 

@@ -123,6 +123,26 @@ def test_asks_for_model_and_effort_when_settings_name_them(tmp_path: Path) -> No
     assert call["arguments"][call["arguments"].index("--effort") + 1] == "high"
 
 
+def test_tells_claude_to_keep_trolley_when_starting_from_current_trolley(tmp_path: Path) -> None:
+    agent = ShoppingAgent(tmp_path, claude_command=create_fake_claude(tmp_path, [FINISHED_WITH_MILK_REPORT]))
+
+    agent.shop([MILK], ClaudeSettings(starts_from_current_trolley=True), NO_PURCHASE_HISTORY, lambda event: None)
+
+    [call] = read_fake_claude_calls(tmp_path)
+    instructions = call["arguments"][call["arguments"].index("--append-system-prompt") + 1]
+    assert "must keep it" in instructions
+    assert "has been emptied" not in instructions
+
+
+def test_tells_claude_trolley_is_empty_when_not_starting_from_current_trolley(tmp_path: Path) -> None:
+    shop_with_fake_claude(tmp_path, [FINISHED_WITH_MILK_REPORT])
+
+    [call] = read_fake_claude_calls(tmp_path)
+    instructions = call["arguments"][call["arguments"].index("--append-system-prompt") + 1]
+    assert "has been emptied" in instructions
+    assert "must keep it" not in instructions
+
+
 def test_gives_claude_preferences_after_shopping_list_when_settings_have_them(tmp_path: Path) -> None:
     agent = ShoppingAgent(tmp_path, claude_command=create_fake_claude(tmp_path, [FINISHED_WITH_MILK_REPORT]))
 

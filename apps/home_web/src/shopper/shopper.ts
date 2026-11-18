@@ -27,7 +27,18 @@ export interface ShopperSettings {
    * bought before, such as the usual cheese. Zero for none. Only a logged-in account has orders.
    */
   pastOrderCount: number
+  /**
+   * Whether Claude keeps what the Morrisons trolley already holds and only adds what is missing, rather than the
+   * trolley being emptied first.
+   */
+  startsFromCurrentTrolley: boolean
 }
+
+/** Where a shop starts from, with the name to show for each. The value is what `startsFromCurrentTrolley` is when chosen. */
+export const TROLLEY_START_CHOICES = [
+  { value: 'empty', label: 'Empty trolley' },
+  { value: 'current', label: 'Current trolley' },
+]
 
 /**
  * The numbers of past orders that Claude can learn from, with the name to show for each. The shopper API reads at most

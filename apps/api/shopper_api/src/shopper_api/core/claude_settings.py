@@ -41,9 +41,13 @@ class ClaudeSettings:
         past_order_count:
             How many of the household's latest Morrisons orders Claude learns from, to choose the products it has
             bought before. Zero for none. Only a logged-in account has orders.
+        starts_from_current_trolley:
+            Whether Claude keeps what the trolley already holds and only adds what is missing, rather than the trolley
+            being emptied first.
     """
 
     model: ClaudeModel = ClaudeModel.SONNET
     effort: ClaudeEffort = ClaudeEffort.MEDIUM
     preferences: str = ""
     past_order_count: int = DEFAULT_PAST_ORDER_COUNT
+    starts_from_current_trolley: bool = False

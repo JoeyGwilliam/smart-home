@@ -17,9 +17,19 @@ from .progress_event import ProgressEvent, ProgressKind
 from .shopping_failed_error import ShoppingFailedError
 from .shopping_list_item import ShoppingListItem
 
+_EMPTY_TROLLEY_INSTRUCTIONS = "The trolley has been emptied for you."
+
+_KEPT_TROLLEY_INSTRUCTIONS = """
+The trolley already holds some of this shop from an earlier go, and must keep it. Begin with `view_trolley`, and count
+what is in it towards the list: for each item, add only what is still missing, and add nothing if the trolley already
+covers it. Never remove anything or empty the trolley, even if you would have chosen differently. In an item's note, say
+when the trolley already held some or all of it, and list in its products everything in the trolley that counts towards
+it, not just what you added.
+""".strip().replace("\n", " ")
+
 _INSTRUCTIONS = """
 You are doing a household's grocery shop at Morrisons online, with the Morrisons tools, which are the only tools you
-have. The trolley has been emptied for you. A person will check the trolley afterwards and order it themselves, so
+have. {trolley_instructions} A person will check the trolley afterwards and order it themselves, so
 never try to check out, book a delivery slot or pay; you can't.
 
 Shop for exactly the shopping list you are given, and nothing else:
@@ -42,7 +52,7 @@ Shop for exactly the shopping list you are given, and nothing else:
 
 # A shop with many items takes many tool calls, each of which is a few seconds of browsing. This is far longer than one
 # should take, so that only a shop that has gone wrong is cut short.
-_TIME_LIMIT_SECONDS = 30 * 60
+_TIME_LIMIT_SECONDS = 2 * 60 * 60
 
 # The most that one shop may cost in Claude usage, in US dollars, so that a shop that goes round in circles stops.
 _MAXIMUM_COST_IN_DOLLARS = 5
@@ -203,7 +213,7 @@ class ShoppingAgent:
             "--mcp-config", json.dumps({"mcpServers": {_MORRISONS_SERVER_NAME: morrisons_server}}),
             "--tools", "",
             "--allowedTools", f"mcp__{_MORRISONS_SERVER_NAME}",
-            "--append-system-prompt", _INSTRUCTIONS,
+            "--append-system-prompt", _write_instructions(settings.starts_from_current_trolley),
             "--json-schema", json.dumps(_ShoppingReportJson.model_json_schema()),
             "--max-budget-usd", str(_MAXIMUM_COST_IN_DOLLARS),
             "--model", settings.model,
@@ -237,6 +247,12 @@ class ShoppingAgent:
         if final_record.get("is_error"):
             raise ShoppingFailedError(final_record.get("result") or "Claude could not finish.")
         return _read_report(final_record)
+
+
+def _write_instructions(starts_from_current_trolley: bool) -> str:
+    """ Writes Claude's instructions, which differ in what they say the trolley holds when it starts. """
+    trolley_instructions = _KEPT_TROLLEY_INSTRUCTIONS if starts_from_current_trolley else _EMPTY_TROLLEY_INSTRUCTIONS
+    return _INSTRUCTIONS.format(trolley_instructions=trolley_instructions)
 
 
 def _describe_shop(shopping_list: Sequence[ShoppingListItem], preferences: str, purchase_history: PurchaseHistory) -> str:

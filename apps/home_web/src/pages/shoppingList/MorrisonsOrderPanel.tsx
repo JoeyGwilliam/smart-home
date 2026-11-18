@@ -12,6 +12,7 @@ import {
   PAST_ORDER_COUNT_CHOICES,
   SHOPPER_EFFORT_CHOICES,
   SHOPPER_MODEL_CHOICES,
+  TROLLEY_START_CHOICES,
   type ShopperEffort,
   type ShopperModel,
   type ShopperStatus,
@@ -101,6 +102,13 @@ export function MorrisonsOrderPanel({ hasThingsToBuy }: MorrisonsOrderPanelProps
               onChange={(pastOrderCount) => changeSettings({ shopperPastOrderCount: Number(pastOrderCount) })}
               disabled={isShopperBusy(status.state)}
             />
+            <ChoiceField
+              label="Start from"
+              choices={TROLLEY_START_CHOICES}
+              value={settings.shopperStartsFromCurrentTrolley ? 'current' : 'empty'}
+              onChange={(start) => changeSettings({ shopperStartsFromCurrentTrolley: start === 'current' })}
+              disabled={isShopperBusy(status.state)}
+            />
             {status.state === 'shopping' ? (
               <Button variant="outline" onClick={shopper.stopGeneratingOrder} className="ml-auto h-11 rounded-full px-5 text-base font-bold">
                 <CircleStop />
@@ -113,6 +121,7 @@ export function MorrisonsOrderPanel({ hasThingsToBuy }: MorrisonsOrderPanelProps
                     effort: settings.shopperEffort,
                     preferences: settings.shopperPreferences,
                     pastOrderCount: settings.shopperPastOrderCount,
+                    startsFromCurrentTrolley: settings.shopperStartsFromCurrentTrolley,
                   })}
                 disabled={isShopperBusy(status.state) || !hasThingsToBuy}
                 className="ml-auto h-11 rounded-full px-5 text-base font-bold shadow-md shadow-shade"
@@ -124,7 +133,9 @@ export function MorrisonsOrderPanel({ hasThingsToBuy }: MorrisonsOrderPanelProps
           </div>
           <p className="text-sm text-muted-foreground">
             {hasThingsToBuy
-              ? 'Claude fills the Morrisons trolley with everything the basket adds up to buying, replacing whatever is in it, and prefers what you bought in your past orders, such as your usual cheese. Nothing is ordered until you check out yourself.'
+              ? (settings.shopperStartsFromCurrentTrolley
+                ? 'Claude keeps what is already in the Morrisons trolley and adds only what the basket still needs, and prefers'
+                : 'Claude fills the Morrisons trolley with everything the basket adds up to buying, replacing whatever is in it, and prefers') + ' what you bought in your past orders, such as your usual cheese. Nothing is ordered until you check out yourself.'
               : 'Add something to the basket first, and Claude can fill a Morrisons trolley with it.'}
           </p>
         </div>

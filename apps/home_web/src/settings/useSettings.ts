@@ -30,6 +30,8 @@ export interface Settings {
   shopperPreferences: string
   /** How many of the household's latest Morrisons orders Claude learns from for the orders this device generates. */
   shopperPastOrderCount: number
+  /** Whether the Morrisons orders this device generates keep what the trolley already holds, instead of emptying it. */
+  shopperStartsFromCurrentTrolley: boolean
 }
 
 const DEFAULT_SETTINGS: Settings = {
@@ -42,6 +44,7 @@ const DEFAULT_SETTINGS: Settings = {
   shopperEffort: 'medium',
   shopperPreferences: '',
   shopperPastOrderCount: 5,
+  shopperStartsFromCurrentTrolley: false,
 }
 
 const STORAGE_KEY = 'kiosk-viewer-settings'

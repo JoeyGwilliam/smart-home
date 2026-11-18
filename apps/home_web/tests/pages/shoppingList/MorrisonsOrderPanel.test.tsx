@@ -60,6 +60,7 @@ afterEach(() => {
     shopperEffort: 'medium',
     shopperPreferences: '',
     shopperPastOrderCount: 5,
+    shopperStartsFromCurrentTrolley: false,
   }))
   localStorage.clear()
 })
@@ -72,7 +73,23 @@ test('generates the order with Sonnet at medium effort learning from the last 5 
 
   const [url, request] = findPost(fetch)!
   expect(url).toBe('/api/shopper/trip')
-  expect(JSON.parse(request.body)).toEqual({ model: 'sonnet', effort: 'medium', preferences: '', past_order_count: 5 })
+  expect(JSON.parse(request.body)).toEqual({
+    model: 'sonnet',
+    effort: 'medium',
+    preferences: '',
+    past_order_count: 5,
+    starts_from_current_trolley: false,
+  })
+})
+
+test('generates the order starting from the current trolley when Current trolley has been chosen', async () => {
+  const fetch = stubApi(NEVER_SHOPPED)
+  renderPanel()
+
+  await userEvent.selectOptions(await screen.findByLabelText('Start from'), 'Current trolley')
+  await userEvent.click(screen.getByRole('button', { name: 'Generate order' }))
+
+  expect(JSON.parse(findPost(fetch)![1].body)).toMatchObject({ starts_from_current_trolley: true })
 })
 
 test('generates the order with the chosen model and effort when they have been changed', async () => {
