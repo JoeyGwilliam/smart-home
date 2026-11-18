@@ -361,8 +361,8 @@ class MorrisonsShop:
     async def _read_trolley(self, page: Page) -> Trolley:
         await self._open_trolley_page(page)
 
-        minimum_spend = parse_price(await page.locator('[data-test="checkout-threshold"]').first.inner_text())
-        minimum_spend = minimum_spend or Decimal(0)
+        # The minimum spend notice is only shown while the trolley is under the minimum, so its absence means none is due.
+        minimum_spend = await _read_optional_amount(page, "checkout-threshold")
         lines = tuple(parse_trolley_line(card) for card in await self._read_cards(page))
         if not lines:
             return Trolley((), 0, Decimal(0), Decimal(0), Decimal(0), minimum_spend, minimum_spend)
