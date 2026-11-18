@@ -1,9 +1,10 @@
 import asyncio
 import re
 from decimal import Decimal
-from urllib.parse import quote_plus
+from typing import Any
+from urllib.parse import quote_plus, urlsplit
 
-from playwright.async_api import Locator, Page
+from playwright.async_api import Locator, Page, Request
 from playwright.async_api import TimeoutError as PlaywrightTimeoutError
 
 from .morrisons_browser import DELIVERY_BUTTON, SHOP_URL, MorrisonsBrowser
@@ -16,6 +17,14 @@ from .product_card import (
     parse_price,
     parse_product,
     parse_trolley_line,
+)
+from .purchase_history import (
+    COMPLETED_ORDERS_QUERY,
+    MAXIMUM_ORDER_COUNT,
+    ORDER_LINES_QUERY,
+    PurchaseHistory,
+    combine_orders,
+    read_order_ids,
 )
 from .trolley import Trolley
 
@@ -36,11 +45,36 @@ _LAYOUT_SWITCH_TIMEOUT_MILLISECONDS = 3_000
 # More lines than any trolley will have, so that emptying one can't go on forever if a removal doesn't take.
 _MAXIMUM_TROLLEY_LINES = 200
 
+# Headers of the website's own requests that the browser works out for itself, and won't let a script set.
+_HEADERS_THE_BROWSER_SETS = frozenset({
+    "accept-encoding", "accept-language", "connection", "content-length", "cookie", "host", "origin", "referer",
+    "user-agent",
+})
+
+# Runs in the page, so that the request carries the page's login like the website's own requests do. Gives the HTTP
+# status and the answer, which is null if it wasn't JSON.
+_ASK_GRAPHQL_SCRIPT = """
+async ([query, variables, headers]) => {
+    const response = await fetch('/graphql', {
+        method: 'POST',
+        headers,
+        credentials: 'same-origin',
+        body: JSON.stringify({ query, variables }),
+    });
+    const text = await response.text();
+    try {
+        return [response.status, JSON.parse(text)];
+    } catch {
+        return [response.status, null];
+    }
+}
+"""
+
 
 class MorrisonsShop:
     """ Everything that can be done at the Morrisons online grocery shop short of ordering: finding products and offers,
-    and filling or emptying a trolley. There is deliberately no way to check out or pay, from here or from the browser
-    underneath it.
+    filling or emptying a trolley, and reading what a logged-in account has bought before. There is deliberately no way
+    to check out or pay, from here or from the browser underneath it.
 
     Each method drives a real browser page, so each takes a few seconds, and only one runs at a time.
     """
@@ -181,6 +215,42 @@ class MorrisonsShop:
             await page.locator(DELIVERY_BUTTON).wait_for()
             log_in_button = page.locator('[data-test="login-dropdown-button"]', has_text=_LOG_IN_PATTERN)
             return await log_in_button.count() == 0
+
+    async def read_purchase_history(self, order_count: int) -> PurchaseHistory:
+        """ Reads what the account bought in its latest completed orders. Only reads: nothing about any order changes.
+
+        Args:
+            order_count:
+                How many of the latest orders to read. Anything above `MAXIMUM_ORDER_COUNT` reads that many, and zero or
+                less reads none.
+
+        Returns:
+            What was bought in them. It covers fewer orders if the account has fewer, and none for a guest.
+
+        Raises:
+            MorrisonsError: If the website doesn't give the orders as expected, because it has changed.
+        """
+        order_count = min(order_count, MAXIMUM_ORDER_COUNT)
+        if order_count <= 0 or not await self.is_logged_in():
+            return PurchaseHistory(0, ())
+
+        async with self._page_in_use:
+            page = await self._browser.open_page()
+            # The website only answers GraphQL that is sent with the headers that its own pages send, which include a
+            # token for the session, so they are copied from the first request that the shop's home page makes.
+            async with page.expect_request(_is_graphql_request) as website_request:
+                await page.goto(SHOP_URL, wait_until="domcontentloaded")
+            headers = {
+                name: value for name, value in (await website_request.value).headers.items()
+                if name not in _HEADERS_THE_BROWSER_SETS and not name.startswith("sec-")
+            }
+
+            completed_orders = await _ask_graphql(page, headers, COMPLETED_ORDERS_QUERY, {"first": order_count})
+            order_details = [
+                await _ask_graphql(page, headers, ORDER_LINES_QUERY, {"orderId": order_id})
+                for order_id in read_order_ids(completed_orders)
+            ]
+            return combine_orders(order_details)
 
     async def _list_products_on(self, url: str, limit: int) -> tuple[Product, ...]:
         async with self._page_in_use:
@@ -331,6 +401,23 @@ class MorrisonsShop:
 
 def _is_trolley_update(response) -> bool:
     return response.request.method == "POST" and "/api/cart/v1/carts/active/apply-quantity" in response.url
+
+
+def _is_graphql_request(request: Request) -> bool:
+    return request.method == "POST" and urlsplit(request.url).path == "/graphql"
+
+
+async def _ask_graphql(page: Page, headers: dict[str, str], query: str, variables: dict[str, Any]) -> dict[str, Any]:
+    """ Sends a GraphQL query from the page, as its own scripts would, and gives the website's answer. It goes through
+    the browser's guard like everything else, which only lets queries through, never changes.
+
+    Raises:
+        MorrisonsError: If the website refuses it.
+    """
+    status, answer = await page.evaluate(_ASK_GRAPHQL_SCRIPT, [query, variables, headers])
+    if status != 200 or answer is None:
+        raise MorrisonsError(f"Morrisons refused to give the past orders (HTTP {status}). The website may have changed.")
+    return answer
 
 
 async def _read_quantity(card: Locator) -> int:

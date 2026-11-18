@@ -9,6 +9,7 @@ import { useSettings } from '@/settings/useSettings'
 import {
   isShopperBusy,
   MAXIMUM_SHOPPER_PREFERENCES_LENGTH,
+  PAST_ORDER_COUNT_CHOICES,
   SHOPPER_EFFORT_CHOICES,
   SHOPPER_MODEL_CHOICES,
   type ShopperEffort,
@@ -27,8 +28,9 @@ interface MorrisonsOrderPanelProps {
 }
 
 /**
- * Has Claude fill the Morrisons trolley from everything the basket adds up to buying, with the choice of model and
- * effort and the household's preferences, which are remembered, and shows how it is going and then what it chose. Nothing is ordered: a person checks out at Morrisons.
+ * Has Claude fill the Morrisons trolley from everything the basket adds up to buying, with the choice of model,
+ * effort and how many past orders it learns from, and the household's preferences, all of which are remembered, and
+ * shows how it is going and then what it chose. Nothing is ordered: a person checks out at Morrisons.
  * Also logs in to Morrisons, so that the trolley is the household's own rather than a guest's on the home server.
  */
 export function MorrisonsOrderPanel({ hasThingsToBuy }: MorrisonsOrderPanelProps) {
@@ -92,6 +94,13 @@ export function MorrisonsOrderPanel({ hasThingsToBuy }: MorrisonsOrderPanelProps
               onChange={(shopperEffort: ShopperEffort) => changeSettings({ shopperEffort })}
               disabled={isShopperBusy(status.state)}
             />
+            <ChoiceField
+              label="Past orders"
+              choices={PAST_ORDER_COUNT_CHOICES}
+              value={String(settings.shopperPastOrderCount)}
+              onChange={(pastOrderCount) => changeSettings({ shopperPastOrderCount: Number(pastOrderCount) })}
+              disabled={isShopperBusy(status.state)}
+            />
             {status.state === 'shopping' ? (
               <Button variant="outline" onClick={shopper.stopGeneratingOrder} className="ml-auto h-11 rounded-full px-5 text-base font-bold">
                 <CircleStop />
@@ -103,6 +112,7 @@ export function MorrisonsOrderPanel({ hasThingsToBuy }: MorrisonsOrderPanelProps
                     model: settings.shopperModel,
                     effort: settings.shopperEffort,
                     preferences: settings.shopperPreferences,
+                    pastOrderCount: settings.shopperPastOrderCount,
                   })}
                 disabled={isShopperBusy(status.state) || !hasThingsToBuy}
                 className="ml-auto h-11 rounded-full px-5 text-base font-bold shadow-md shadow-shade"
@@ -114,7 +124,7 @@ export function MorrisonsOrderPanel({ hasThingsToBuy }: MorrisonsOrderPanelProps
           </div>
           <p className="text-sm text-muted-foreground">
             {hasThingsToBuy
-              ? 'Claude fills the Morrisons trolley with everything the basket adds up to buying, replacing whatever is in it. Nothing is ordered until you check out yourself.'
+              ? 'Claude fills the Morrisons trolley with everything the basket adds up to buying, replacing whatever is in it, and prefers what you bought in your past orders, such as your usual cheese. Nothing is ordered until you check out yourself.'
               : 'Add something to the basket first, and Claude can fill a Morrisons trolley with it.'}
           </p>
         </div>

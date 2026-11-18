@@ -1,6 +1,7 @@
+from morrisons_mcp.core.purchase_history import MAXIMUM_ORDER_COUNT
 from pydantic import BaseModel, ConfigDict, Field
 
-from shopper_api.core.claude_settings import ClaudeEffort, ClaudeModel, ClaudeSettings
+from shopper_api.core.claude_settings import DEFAULT_PAST_ORDER_COUNT, ClaudeEffort, ClaudeModel, ClaudeSettings
 
 # Long enough for any list of likes and dislikes, and short enough that it can't crowd out the shopping list. The
 # page allows the same.
@@ -18,12 +19,15 @@ class TripRequestSchema(BaseModel):
         preferences:
             How the household likes to shop, in its own words, for Claude to follow when choosing products. Empty if
             it has none.
+        past_order_count:
+            How many of the household's latest Morrisons orders Claude should learn from. Zero for none.
     """
     model_config = ConfigDict(extra="forbid")
 
     model: ClaudeModel = ClaudeModel.SONNET
     effort: ClaudeEffort = ClaudeEffort.MEDIUM
     preferences: str = Field(default="", max_length=_MAXIMUM_PREFERENCES_LENGTH)
+    past_order_count: int = Field(default=DEFAULT_PAST_ORDER_COUNT, ge=0, le=MAXIMUM_ORDER_COUNT)
 
     def to_claude_settings(self) -> ClaudeSettings:
         """ Gathers how Claude should shop.
@@ -31,4 +35,9 @@ class TripRequestSchema(BaseModel):
         Returns:
             The settings.
         """
-        return ClaudeSettings(model=self.model, effort=self.effort, preferences=self.preferences.strip())
+        return ClaudeSettings(
+            model=self.model,
+            effort=self.effort,
+            preferences=self.preferences.strip(),
+            past_order_count=self.past_order_count,
+        )

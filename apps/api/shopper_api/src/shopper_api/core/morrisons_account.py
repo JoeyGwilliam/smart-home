@@ -4,6 +4,7 @@ from dataclasses import dataclass
 
 from morrisons_mcp.core.morrisons_browser import MorrisonsBrowser
 from morrisons_mcp.core.morrisons_shop import MorrisonsShop
+from morrisons_mcp.core.purchase_history import PurchaseHistory
 from morrisons_mcp.core.shop_settings import ShopSettings
 from morrisons_mcp.core.trolley import Trolley
 
@@ -60,6 +61,21 @@ class MorrisonsAccount:
             return AccountView(is_logged_in=await shop.is_logged_in(), trolley=await shop.view_trolley())
 
         return self._use_shop(read_account)
+
+    def read_purchase_history(self, order_count: int) -> PurchaseHistory:
+        """ Reads what the account bought in its latest completed orders. Nothing about any order changes.
+
+        Args:
+            order_count:
+                How many of the latest orders to read, up to `MAXIMUM_ORDER_COUNT`. Zero reads none.
+
+        Returns:
+            What was bought in them. It covers fewer orders if the account has fewer, and none for a guest.
+
+        Raises:
+            MorrisonsError: If Morrisons doesn't give the orders as expected, because its website has changed.
+        """
+        return self._use_shop(lambda shop, browser: shop.read_purchase_history(order_count))
 
     def let_person_log_in(self) -> bool:
         """ Opens a window on this machine's screen at Morrisons' login page, for a person to log in to their account,

@@ -71,7 +71,13 @@ export async function getShopperStatus(): Promise<ShopperStatus> {
  * @throws ApiUnavailableError If the API is unavailable.
  */
 export async function generateOrder(settings: ShopperSettings): Promise<void> {
-  await sendToHomeApi('shopper', 'POST', `${SHOPPER_URL}/trip`, settings)
+  const tripRequest = {
+    model: settings.model,
+    effort: settings.effort,
+    preferences: settings.preferences,
+    past_order_count: settings.pastOrderCount,
+  }
+  await sendToHomeApi('shopper', 'POST', `${SHOPPER_URL}/trip`, tripRequest)
 }
 
 /**

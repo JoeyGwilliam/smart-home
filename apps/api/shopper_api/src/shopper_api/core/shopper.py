@@ -5,6 +5,8 @@ from dataclasses import dataclass, replace
 from enum import StrEnum
 from pathlib import Path
 
+from morrisons_mcp.core.morrisons_error import MorrisonsError
+from morrisons_mcp.core.purchase_history import PurchaseHistory
 from pydantic import TypeAdapter
 
 from .claude_settings import ClaudeSettings
@@ -89,8 +91,9 @@ class Shopper:
     """ Fills the home's Morrisons trolley from its shopping list, by having Claude shop, so that a person only has to
     check it and order. Nothing here can order anything.
 
-    A shop empties the trolley, has Claude fill it, and then reads the trolley back, so that what is shown is what
-    Morrisons holds rather than what Claude says it did. Shops fill a guest's trolley unless a person logs in.
+    A shop reads what the household bought in its latest Morrisons orders, for Claude to learn its tastes from, empties
+    the trolley, has Claude fill it, and then reads the trolley back, so that what is shown is what Morrisons holds
+    rather than what Claude says it did. Shops fill a guest's trolley, which has no past orders, unless a person logs in.
 
     Actions return straight away and do their work in the background; `get_status` shows how far it has got. The
     status survives a restart of this process.
@@ -205,11 +208,13 @@ class Shopper:
         with self._lock:
             self._update(trip=replace(self._status.trip, shopping_list=shopping_list))
 
+        purchase_history = self._read_purchase_history(claude_settings.past_order_count)
+
         self._record_unless_stopped("Emptying the Morrisons trolley")
         self._account.empty_trolley()
 
         self._record_unless_stopped("Claude is shopping")
-        report = self._agent.shop(shopping_list, claude_settings, self._record)
+        report = self._agent.shop(shopping_list, claude_settings, purchase_history, self._record)
 
         self._record_unless_stopped("Reading the trolley back from Morrisons")
         account_view = self._account.view()
@@ -218,6 +223,31 @@ class Shopper:
             self._record(ProgressEvent(ProgressKind.ACTIVITY, "The order is ready to check. Nothing has been ordered."))
             trip = replace(self._status.trip, draft_order=DraftOrder(report, account_view.trolley))
             self._update(state=ShopperState.IDLE, is_logged_in=account_view.is_logged_in, trip=trip)
+
+    def _read_purchase_history(self, order_count: int) -> PurchaseHistory:
+        """ Reads what the household bought in its latest Morrisons orders, for Claude to learn from, and records how
+        that went. A shop goes ahead without them if they can't be read, as they only help Claude choose.
+        """
+        if order_count == 0:
+            return PurchaseHistory(0, ())
+
+        self._record_unless_stopped(f"Reading your last {_count_orders(order_count)} from Morrisons")
+        try:
+            purchase_history = self._account.read_purchase_history(order_count)
+        except MorrisonsError as error:
+            # Past orders only help Claude choose, so a change to the website that stops them being read shouldn't
+            # stop the shop. The person is told, so that they know why Claude may choose differently.
+            self._record(ProgressEvent(
+                ProgressKind.ACTIVITY, f"Couldn't read your past Morrisons orders, so Claude is shopping without them. {error}",
+            ))
+            return PurchaseHistory(0, ())
+
+        if purchase_history.order_count == 0:
+            self._record(ProgressEvent(ProgressKind.ACTIVITY, "There are no past Morrisons orders to learn from"))
+        else:
+            past_orders = _count_orders(purchase_history.order_count)
+            self._record(ProgressEvent(ProgressKind.ACTIVITY, f"Claude will choose with your last {past_orders} in mind"))
+        return purchase_history
 
     def _record_unless_stopped(self, activity: str) -> None:
         """ Records the next step of a shop, unless the shop has been stopped, in which case it ends here. """
@@ -276,3 +306,8 @@ class Shopper:
             self._end_trip_with_failure("The shopper restarted part of the way through, so the shop didn't finish.")
         elif self._status.state is ShopperState.LOGGING_IN:
             self._update(state=ShopperState.IDLE, login_failure="The shopper restarted while the login window was open.")
+
+
+def _count_orders(order_count: int) -> str:
+    """ Words a number of orders, such as "order" for one or "3 orders". """
+    return "order" if order_count == 1 else f"{order_count} orders"

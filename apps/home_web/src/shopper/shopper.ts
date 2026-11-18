@@ -22,7 +22,25 @@ export interface ShopperSettings {
    * chooses products. Empty if it has none.
    */
   preferences: string
+  /**
+   * How many of the household's latest Morrisons orders Claude learns from, so that it chooses the brands and kinds
+   * bought before, such as the usual cheese. Zero for none. Only a logged-in account has orders.
+   */
+  pastOrderCount: number
 }
+
+/**
+ * The numbers of past orders that Claude can learn from, with the name to show for each. The shopper API reads at most
+ * 20, which is as many as Morrisons gives at once.
+ */
+export const PAST_ORDER_COUNT_CHOICES = [
+  { value: '0', label: 'None' },
+  { value: '1', label: 'Last 1' },
+  { value: '3', label: 'Last 3' },
+  { value: '5', label: 'Last 5' },
+  { value: '10', label: 'Last 10' },
+  { value: '20', label: 'Last 20' },
+]
 
 /** Every model that can shop, most capable first, with the name to show for it. */
 export const SHOPPER_MODEL_CHOICES = CLAUDE_MODEL_CHOICES.filter(

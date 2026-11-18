@@ -5,6 +5,7 @@ import pytest
 
 from morrisons_mcp.core.morrisons_browser import MorrisonsBrowser
 from morrisons_mcp.core.morrisons_shop import MorrisonsShop
+from morrisons_mcp.core.purchase_history import PurchaseHistory
 from morrisons_mcp.core.shop_settings import ShopSettings
 
 # These use the real Morrisons website, so they only run when asked to, with `MORRISONS_LIVE_TESTS=1` and the address
@@ -46,3 +47,9 @@ async def test_trolley_holds_the_product_when_adding_then_is_empty_after_emptyin
 
 async def test_is_not_logged_in_when_nobody_has_logged_in(shop: MorrisonsShop) -> None:
     assert not await shop.is_logged_in()
+
+
+async def test_has_no_purchase_history_when_nobody_has_logged_in(shop: MorrisonsShop) -> None:
+    history = await shop.read_purchase_history(5)
+
+    assert history == PurchaseHistory(order_count=0, purchases=())

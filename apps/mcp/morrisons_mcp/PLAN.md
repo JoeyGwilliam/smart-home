@@ -18,8 +18,12 @@ built differs from this plan in a few ways, each for simplicity:
 - There is no time limit set by the page, and no ceiling on the trolley's total yet: the shopper stops a run after 30
   minutes or $5 of Claude usage.
 
-Still to do: the read-only tools for favourites and past orders, preferences, M4, and trying the login and a logged-in
-shop for real.
+Preferences are written on the page, and the shopper reads the account's latest completed orders itself before Claude
+starts (as many as the page asks for, up to 20), and gives Claude what was bought in them, rather than giving Claude a
+tool to look them up: that way every shop uses them, at no cost in tool calls. They are read with the website's own
+read-only GraphQL queries, which the guard already allows, so it is unchanged.
+
+Still to do: M4, and trying a logged-in shop with past orders for real (the account had none when this was built).
 
 ## The flow, end to end
 

@@ -52,16 +52,21 @@ test('converts the status from the API format, with amounts as numbers of pounds
   })
 })
 
-test('posts the chosen model, effort and preferences when generating an order', async () => {
+test('posts the chosen model, effort, preferences and number of past orders when generating an order', async () => {
   const fetch = vi.fn().mockResolvedValue(Response.json(null, { status: 202 }))
   vi.stubGlobal('fetch', fetch)
 
-  await generateOrder({ model: 'opus', effort: 'high', preferences: 'Organic milk' })
+  await generateOrder({ model: 'opus', effort: 'high', preferences: 'Organic milk', pastOrderCount: 10 })
 
   const [url, request] = fetch.mock.calls[0]
   expect(url).toBe('/api/shopper/trip')
   expect(request.method).toBe('POST')
-  expect(JSON.parse(request.body)).toEqual({ model: 'opus', effort: 'high', preferences: 'Organic milk' })
+  expect(JSON.parse(request.body)).toEqual({
+    model: 'opus',
+    effort: 'high',
+    preferences: 'Organic milk',
+    past_order_count: 10,
+  })
 })
 
 test('posts to the stop address when stopping an order being generated', async () => {

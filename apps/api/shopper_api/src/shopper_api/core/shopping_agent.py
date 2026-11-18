@@ -8,6 +8,7 @@ from collections.abc import Callable, Iterator, Sequence
 from pathlib import Path
 from typing import Any
 
+from morrisons_mcp.core.purchase_history import PurchaseHistory
 from pydantic import BaseModel, ConfigDict, Field, ValidationError
 
 from .claude_settings import ClaudeSettings
@@ -29,6 +30,10 @@ Shop for exactly the shopping list you are given, and nothing else:
 - The household may give its preferences, such as brands it likes or things it avoids. Follow them when choosing, ahead
   of the rules above, and say in an item's note when one decided what you chose. They never add anything to the list
   or take anything off it.
+- You may also be given what the household bought in its latest Morrisons orders, which shows the brands and kinds it
+  likes. When a product it has bought before is a fair match for an item, choose it, or the same brand and kind in a
+  pack size that suits the amount better, ahead of price per unit and offers, and say in the item's note that it was
+  bought before. The household's preferences come first. Past orders never add anything to the list either.
 - If nothing is a fair match, add nothing for that item and say so, rather than guessing. If what was asked for is out
   of stock, choose a close substitute and say that it is one. Skip only what a shop doesn't sell, such as water.
 - Finish by checking the trolley with `view_trolley`, then give your report: one entry for each item on the list, in
@@ -110,6 +115,7 @@ class ShoppingAgent:
             self,
             shopping_list: Sequence[ShoppingListItem],
             settings: ClaudeSettings,
+            purchase_history: PurchaseHistory,
             record_progress: Callable[[ProgressEvent], None],
     ) -> ShoppingReport:
         """ Has Claude fill the Morrisons trolley from a shopping list, and returns once it has finished.
@@ -121,6 +127,9 @@ class ShoppingAgent:
                 What to buy. Must not be empty.
             settings:
                 How Claude should work.
+            purchase_history:
+                What the household bought in its latest Morrisons orders, which Claude prefers when it fits. Empty if
+                it has none to learn from.
             record_progress:
                 Called with each step that Claude takes, and each thing it says, as it happens.
 
@@ -153,7 +162,7 @@ class ShoppingAgent:
         time_limit.start()
         try:
             # The list goes in through stdin rather than as an argument, so that no quoting rules can mangle it.
-            process.stdin.write(_describe_shop(shopping_list, settings.preferences))
+            process.stdin.write(_describe_shop(shopping_list, settings.preferences, purchase_history))
             process.stdin.close()
             return self._follow_claude(process, record_progress)
         finally:
@@ -230,8 +239,10 @@ class ShoppingAgent:
         return _read_report(final_record)
 
 
-def _describe_shop(shopping_list: Sequence[ShoppingListItem], preferences: str) -> str:
-    """ Writes the message that tells Claude what to buy, followed by how the household likes to shop, if it has said. """
+def _describe_shop(shopping_list: Sequence[ShoppingListItem], preferences: str, purchase_history: PurchaseHistory) -> str:
+    """ Writes the message that tells Claude what to buy, followed by how the household likes to shop, if it has said,
+    and what it bought in its latest orders, if it has any.
+    """
     lines = []
     for item in shopping_list:
         recipes = f" (for {', '.join(item.needed_for)})" if item.needed_for else ""
@@ -239,6 +250,15 @@ def _describe_shop(shopping_list: Sequence[ShoppingListItem], preferences: str) 
     message = "Shop for this shopping list:\n" + "\n".join(lines)
     if preferences:
         message += f"\n\nThe household's preferences:\n{preferences}"
+    if purchase_history.purchases:
+        order_count = purchase_history.order_count
+        purchases = "\n".join(
+            f"- {purchase.name} (in {purchase.order_count} of {order_count})" for purchase in purchase_history.purchases
+        )
+        past_orders = "Morrisons order" if order_count == 1 else f"{order_count} Morrisons orders"
+        message += (
+            f"\n\nWhat the household bought in its last {past_orders}, with how many of them each was in:\n{purchases}"
+        )
     return message
 
 

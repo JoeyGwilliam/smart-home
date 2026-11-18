@@ -69,6 +69,36 @@ def test_returns_422_when_preferences_are_too_long(tmp_path: Path) -> None:
     assert response.status_code == 422
 
 
+def test_reads_number_of_past_orders_asked_for_when_starting_trip(tmp_path: Path) -> None:
+    account = FakeAccount()
+    shopper = Shopper(lambda: (MILK,), account, FakeAgent(account), tmp_path / "status.json")
+    client = TestClient(create_app(shopper))
+
+    client.post("/trip", json={"past_order_count": 8})
+
+    wait_until_idle(client)
+    assert account.calls[0] == "read_purchase_history(8)"
+
+
+def test_reads_five_past_orders_when_trip_names_no_number(tmp_path: Path) -> None:
+    account = FakeAccount()
+    shopper = Shopper(lambda: (MILK,), account, FakeAgent(account), tmp_path / "status.json")
+    client = TestClient(create_app(shopper))
+
+    client.post("/trip", json={})
+
+    wait_until_idle(client)
+    assert account.calls[0] == "read_purchase_history(5)"
+
+
+def test_returns_422_when_past_order_count_is_more_than_twenty(tmp_path: Path) -> None:
+    client = create_client(tmp_path)
+
+    response = client.post("/trip", json={"past_order_count": 21})
+
+    assert response.status_code == 422
+
+
 def test_returns_422_when_model_is_unknown(tmp_path: Path) -> None:
     client = create_client(tmp_path)
 

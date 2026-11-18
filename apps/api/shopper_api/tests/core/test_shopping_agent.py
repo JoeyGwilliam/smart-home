@@ -2,6 +2,7 @@ import json
 from pathlib import Path
 
 import pytest
+from morrisons_mcp.core.purchase_history import PastPurchase, PurchaseHistory
 
 from shopper_api.core.claude_settings import ClaudeEffort, ClaudeModel, ClaudeSettings
 from shopper_api.core.draft_order import ItemChoice, ShoppingReport
@@ -12,6 +13,7 @@ from shopper_api.core.shopping_list_item import ShoppingListItem
 from tests.fake_claude import create_fake_claude, read_fake_claude_calls
 
 MILK = ShoppingListItem("Milk", 1, ())
+NO_PURCHASE_HISTORY = PurchaseHistory(0, ())
 LAMB_MINCE = ShoppingListItem("500g lamb mince", 2, ("Shepherd's pie", "Lasagne"))
 
 MILK_REPORT_JSON = {
@@ -25,7 +27,7 @@ def shop_with_fake_claude(tmp_path: Path, records: list[dict], shopping_list=(MI
     """ Has an agent whose Claude prints `records` shop for `shopping_list`, and returns its report and progress. """
     agent = ShoppingAgent(tmp_path, claude_command=create_fake_claude(tmp_path, records))
     events = []
-    report = agent.shop(shopping_list, ClaudeSettings(), events.append)
+    report = agent.shop(shopping_list, ClaudeSettings(), NO_PURCHASE_HISTORY, events.append)
     return report, events
 
 
@@ -75,7 +77,7 @@ def test_raises_with_other_output_when_claude_exits_without_result(tmp_path: Pat
     agent = ShoppingAgent(tmp_path, claude_command=create_fake_claude(tmp_path, [], other_output=["Error: not logged in"]))
 
     with pytest.raises(ShoppingFailedError, match="Error: not logged in"):
-        agent.shop([MILK], ClaudeSettings(), lambda event: None)
+        agent.shop([MILK], ClaudeSettings(), NO_PURCHASE_HISTORY, lambda event: None)
 
 
 def test_raises_saying_it_was_stopped_when_stopped(tmp_path: Path) -> None:
@@ -83,14 +85,14 @@ def test_raises_saying_it_was_stopped_when_stopped(tmp_path: Path) -> None:
     agent = ShoppingAgent(tmp_path, claude_command=create_fake_claude(tmp_path, records, hangs=True))
 
     with pytest.raises(ShoppingFailedError, match="Stopped"):
-        agent.shop([MILK], ClaudeSettings(), lambda event: agent.stop())
+        agent.shop([MILK], ClaudeSettings(), NO_PURCHASE_HISTORY, lambda event: agent.stop())
 
 
 def test_raises_saying_it_took_too_long_when_time_limit_passes(tmp_path: Path) -> None:
     agent = ShoppingAgent(tmp_path, claude_command=create_fake_claude(tmp_path, [], hangs=True), time_limit_seconds=0.5)
 
     with pytest.raises(ShoppingFailedError, match="took longer than"):
-        agent.shop([MILK], ClaudeSettings(), lambda event: None)
+        agent.shop([MILK], ClaudeSettings(), NO_PURCHASE_HISTORY, lambda event: None)
 
 
 def test_gives_claude_shopping_list_with_quantities_and_recipes_when_shopping(tmp_path: Path) -> None:
@@ -114,7 +116,7 @@ def test_gives_claude_only_morrisons_tools_when_shopping(tmp_path: Path) -> None
 def test_asks_for_model_and_effort_when_settings_name_them(tmp_path: Path) -> None:
     agent = ShoppingAgent(tmp_path, claude_command=create_fake_claude(tmp_path, [FINISHED_WITH_MILK_REPORT]))
 
-    agent.shop([MILK], ClaudeSettings(ClaudeModel.OPUS, ClaudeEffort.HIGH), lambda event: None)
+    agent.shop([MILK], ClaudeSettings(ClaudeModel.OPUS, ClaudeEffort.HIGH), NO_PURCHASE_HISTORY, lambda event: None)
 
     [call] = read_fake_claude_calls(tmp_path)
     assert call["arguments"][call["arguments"].index("--model") + 1] == "opus"
@@ -124,7 +126,34 @@ def test_asks_for_model_and_effort_when_settings_name_them(tmp_path: Path) -> No
 def test_gives_claude_preferences_after_shopping_list_when_settings_have_them(tmp_path: Path) -> None:
     agent = ShoppingAgent(tmp_path, claude_command=create_fake_claude(tmp_path, [FINISHED_WITH_MILK_REPORT]))
 
-    agent.shop([MILK], ClaudeSettings(preferences="Organic milk only."), lambda event: None)
+    agent.shop([MILK], ClaudeSettings(preferences="Organic milk only."), NO_PURCHASE_HISTORY, lambda event: None)
 
     [call] = read_fake_claude_calls(tmp_path)
     assert call["message"].endswith("- 1 × Milk\n\nThe household's preferences:\nOrganic milk only.")
+
+
+def test_gives_claude_past_purchases_after_shopping_list_when_household_has_some(tmp_path: Path) -> None:
+    agent = ShoppingAgent(tmp_path, claude_command=create_fake_claude(tmp_path, [FINISHED_WITH_MILK_REPORT]))
+    purchase_history = PurchaseHistory(
+        order_count=2,
+        purchases=(PastPurchase("Cravendale Semi Skimmed Milk 2L", 2), PastPurchase("Heinz Baked Beans 4x415g", 1)),
+    )
+
+    agent.shop([MILK], ClaudeSettings(), purchase_history, lambda event: None)
+
+    [call] = read_fake_claude_calls(tmp_path)
+    assert call["message"].endswith(
+        "- 1 × Milk\n\n"
+        "What the household bought in its last 2 Morrisons orders, with how many of them each was in:\n"
+        "- Cravendale Semi Skimmed Milk 2L (in 2 of 2)\n"
+        "- Heinz Baked Beans 4x415g (in 1 of 2)"
+    )
+
+
+def test_says_nothing_of_past_purchases_when_household_has_none(tmp_path: Path) -> None:
+    agent = ShoppingAgent(tmp_path, claude_command=create_fake_claude(tmp_path, [FINISHED_WITH_MILK_REPORT]))
+
+    agent.shop([MILK], ClaudeSettings(), NO_PURCHASE_HISTORY, lambda event: None)
+
+    [call] = read_fake_claude_calls(tmp_path)
+    assert "bought" not in call["message"]

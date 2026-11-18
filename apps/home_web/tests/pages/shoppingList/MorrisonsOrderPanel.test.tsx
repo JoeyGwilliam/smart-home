@@ -53,13 +53,18 @@ function findPost(fetch: ReturnType<typeof stubApi>) {
 
 afterEach(() => {
   vi.unstubAllGlobals()
-  // The chosen model, effort and preferences are remembered between tests, by the settings module and by the browser.
+  // The chosen model, effort, preferences and past orders are remembered between tests, by the settings module and by the browser.
   const { result } = renderHook(() => useSettings())
-  act(() => result.current[1]({ shopperModel: 'sonnet', shopperEffort: 'medium', shopperPreferences: '' }))
+  act(() => result.current[1]({
+    shopperModel: 'sonnet',
+    shopperEffort: 'medium',
+    shopperPreferences: '',
+    shopperPastOrderCount: 5,
+  }))
   localStorage.clear()
 })
 
-test('generates the order with Sonnet at medium effort when nothing else has been chosen', async () => {
+test('generates the order with Sonnet at medium effort learning from the last 5 orders when nothing else has been chosen', async () => {
   const fetch = stubApi(NEVER_SHOPPED)
   renderPanel()
 
@@ -67,7 +72,7 @@ test('generates the order with Sonnet at medium effort when nothing else has bee
 
   const [url, request] = findPost(fetch)!
   expect(url).toBe('/api/shopper/trip')
-  expect(JSON.parse(request.body)).toEqual({ model: 'sonnet', effort: 'medium', preferences: '' })
+  expect(JSON.parse(request.body)).toEqual({ model: 'sonnet', effort: 'medium', preferences: '', past_order_count: 5 })
 })
 
 test('generates the order with the chosen model and effort when they have been changed', async () => {
@@ -78,7 +83,7 @@ test('generates the order with the chosen model and effort when they have been c
   await userEvent.selectOptions(screen.getByLabelText('Effort'), 'High')
   await userEvent.click(screen.getByRole('button', { name: 'Generate order' }))
 
-  expect(JSON.parse(findPost(fetch)![1].body)).toEqual({ model: 'opus', effort: 'high', preferences: '' })
+  expect(JSON.parse(findPost(fetch)![1].body)).toMatchObject({ model: 'opus', effort: 'high' })
 })
 
 test('generates the order with the preferences that were written when there are some', async () => {
@@ -100,6 +105,37 @@ test('remembers the preferences when the page is opened again', async () => {
   renderPanel()
 
   expect(await screen.findByLabelText('Preferences')).toHaveValue('No own-brand cereal')
+})
+
+test('generates the order learning from the chosen number of past orders when one has been chosen', async () => {
+  const fetch = stubApi(NEVER_SHOPPED)
+  renderPanel()
+
+  await userEvent.selectOptions(await screen.findByLabelText('Past orders'), 'Last 10')
+  await userEvent.click(screen.getByRole('button', { name: 'Generate order' }))
+
+  expect(JSON.parse(findPost(fetch)![1].body)).toMatchObject({ past_order_count: 10 })
+})
+
+test('generates the order without past orders when None has been chosen', async () => {
+  const fetch = stubApi(NEVER_SHOPPED)
+  renderPanel()
+
+  await userEvent.selectOptions(await screen.findByLabelText('Past orders'), 'None')
+  await userEvent.click(screen.getByRole('button', { name: 'Generate order' }))
+
+  expect(JSON.parse(findPost(fetch)![1].body)).toMatchObject({ past_order_count: 0 })
+})
+
+test('remembers the number of past orders when the page is opened again', async () => {
+  stubApi(NEVER_SHOPPED)
+  renderPanel()
+  await userEvent.selectOptions(await screen.findByLabelText('Past orders'), 'Last 3')
+  cleanup()
+
+  renderPanel()
+
+  expect(await screen.findByLabelText('Past orders')).toHaveDisplayValue('Last 3')
 })
 
 test('cannot generate an order when the basket has nothing to buy', async () => {

@@ -28,6 +28,8 @@ export interface Settings {
   shopperEffort: ShopperEffort
   /** How the household likes to shop, which Claude follows for the Morrisons orders this device generates. */
   shopperPreferences: string
+  /** How many of the household's latest Morrisons orders Claude learns from for the orders this device generates. */
+  shopperPastOrderCount: number
 }
 
 const DEFAULT_SETTINGS: Settings = {
@@ -39,6 +41,7 @@ const DEFAULT_SETTINGS: Settings = {
   shopperModel: 'sonnet',
   shopperEffort: 'medium',
   shopperPreferences: '',
+  shopperPastOrderCount: 5,
 }
 
 const STORAGE_KEY = 'kiosk-viewer-settings'
